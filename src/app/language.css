@@ -1,0 +1,55 @@
+/* The language toggle on the map (language.ts) and the machine-translation
+   note in a card. Only the theme's tokens, as the basemap toggle beside it. */
+
+.maplibregl-ctrl.lang-switch {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+}
+.lang-switch button {
+  height: 32px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 16px;
+  background: none;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.lang-switch button[aria-pressed="true"] {
+  background: var(--accent-dark);
+  color: #fff;
+}
+.lang-switch button[aria-pressed="false"]:hover {
+  background: var(--wash);
+}
+
+.mt-note {
+  margin: 14px 0;
+  padding: 8px 12px;
+  border-left: 4px solid var(--line);
+  border-radius: 4px;
+  background: var(--wash);
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.mt-original {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent-dark);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* The map's top-left controls stay above the station markers, so a marker
+   never hides a language. */
+.maplibregl-ctrl-top-left {
+  z-index: 5;
+}

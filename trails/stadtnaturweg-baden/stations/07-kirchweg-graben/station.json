@@ -1,0 +1,47 @@
+{
+  "title": {
+    "de": "Leben zwischen Kalksteinen",
+    "en": "Life Among the Limestone",
+    "fr": "La vie entre les blocs de calcaire"
+  },
+  "position": [
+    8.308105,
+    47.472062
+  ],
+  "fields": {
+    "standort": {
+      "de": "Kirchweg/Graben",
+      "en": "Kirchweg/Graben",
+      "fr": "Kirchweg/Graben"
+    },
+    "gegenstand": {
+      "de": "Ökologische Vernetzung",
+      "en": "Ecological connectivity",
+      "fr": "Réseau écologique"
+    }
+  },
+  "images": [
+    {
+      "file": "waermeliebende-vegetation.jpg",
+      "caption": {
+        "de": "Wärmeliebende Vegetation",
+        "en": "Heat-loving vegetation",
+        "fr": "Végétation thermophile"
+      },
+      "credit": "Barbara Finkenbrink",
+      "width": 645,
+      "height": 903
+    },
+    {
+      "file": "natternkopf.jpg",
+      "caption": {
+        "de": "Natternkopf",
+        "en": "Viper’s bugloss",
+        "fr": "Vipérine commune"
+      },
+      "credit": "Barbara Finkenbrink",
+      "width": 447,
+      "height": 447
+    }
+  ]
+}

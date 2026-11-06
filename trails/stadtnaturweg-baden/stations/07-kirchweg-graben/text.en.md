@@ -1,0 +1,3 @@
+When the district heating pipes were laid in 2025, the embankment “Im Graben” was redesigned to be more natural. It used to be overgrown with non-native species such as cherry laurel and snowberry. Today the embankment is a habitat for more than 50 native plant species adapted to dry conditions, such as **viper’s bugloss**.
+
+The rough limestone blocks recall natural rock faces like those at Schartenfels or at the Stein ruins. In between, deadwood and open patches of sand create small, sheltered niches for wild bees and other insects. In this way a piece of limestone landscape, linking different habitats, has come into being in the middle of the city.

@@ -1,0 +1,47 @@
+{
+  "title": {
+    "de": "Ein Hauch von Tessin",
+    "en": "A Touch of Ticino",
+    "fr": "Un souffle du Tessin"
+  },
+  "position": [
+    8.307892,
+    47.472019
+  ],
+  "fields": {
+    "standort": {
+      "de": "Kirchweg",
+      "en": "Kirchweg (church path)",
+      "fr": "Kirchweg (chemin de l’église)"
+    },
+    "gegenstand": {
+      "de": "Edelkastanie",
+      "en": "Sweet chestnut",
+      "fr": "Châtaignier"
+    }
+  },
+  "images": [
+    {
+      "file": "edelkastanie.jpg",
+      "caption": {
+        "de": "Edelkastanie",
+        "en": "Sweet chestnut",
+        "fr": "Châtaignier"
+      },
+      "credit": "Benjamin Gimmel",
+      "width": 710,
+      "height": 997
+    },
+    {
+      "file": "rosskastanie.jpg",
+      "caption": {
+        "de": "Rosskastanie",
+        "en": "Horse chestnut",
+        "fr": "Marronnier d’Inde"
+      },
+      "credit": "Andrew Dunn",
+      "width": 650,
+      "height": 651
+    }
+  ]
+}

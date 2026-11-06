@@ -1,0 +1,47 @@
+{
+  "title": {
+    "de": "Natur auf höchster Ebene",
+    "en": "Nature at the Top",
+    "fr": "La nature tout en haut"
+  },
+  "position": [
+    8.309620,
+    47.471251
+  ],
+  "fields": {
+    "standort": {
+      "de": "Schulhaus Pfaffechappe",
+      "en": "Pfaffechappe school",
+      "fr": "École de la Pfaffechappe"
+    },
+    "gegenstand": {
+      "de": "Dachbegrünung und Solarpanels",
+      "en": "Green roof and solar panels",
+      "fr": "Toiture végétalisée et panneaux solaires"
+    }
+  },
+  "images": [
+    {
+      "file": "solardach.jpg",
+      "caption": {
+        "de": "Solardach",
+        "en": "Solar roof",
+        "fr": "Toit solaire"
+      },
+      "credit": "Barbara Finkenbrink",
+      "width": 972,
+      "height": 1364
+    },
+    {
+      "file": "mauerpfeffer.jpg",
+      "caption": {
+        "de": "Mauerpfeffer",
+        "en": "Biting stonecrop",
+        "fr": "Orpin âcre"
+      },
+      "credit": "Heinz Häusler",
+      "width": 362,
+      "height": 362
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "title": {
+    "de": "Die neuen «Schlossherren»",
+    "en": "The New “Lords of the Castle”",
+    "fr": "Les nouveaux « seigneurs du château »"
+  },
+  "position": [
+    8.310979,
+    47.472847
+  ],
+  "fields": {
+    "standort": {
+      "de": "Landvogteischloss",
+      "en": "Landvogteischloss (bailiffs’ castle)",
+      "fr": "Landvogteischloss (château des baillis)"
+    },
+    "gegenstand": {
+      "de": "Alpensegler",
+      "en": "Alpine swift",
+      "fr": "Martinet à ventre blanc"
+    }
+  },
+  "images": [
+    {
+      "file": "alpensegler-im-flug.jpg",
+      "caption": {
+        "de": "Alpensegler im Flug",
+        "en": "Alpine swift in flight",
+        "fr": "Martinet à ventre blanc en vol"
+      },
+      "credit": "Daniele Occhiato",
+      "width": 710,
+      "height": 994
+    },
+    {
+      "file": "jungtiere.jpg",
+      "caption": {
+        "de": "Jungtiere",
+        "en": "Chicks",
+        "fr": "Poussins"
+      },
+      "credit": "Silvia Volpi",
+      "width": 447,
+      "height": 447
+    }
+  ]
+}

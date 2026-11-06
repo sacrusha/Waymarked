@@ -1,0 +1,58 @@
+{
+  "title": {
+    "de": "Kinder der Sonnenstube",
+    "en": "Children of the Sun",
+    "fr": "Enfants du soleil"
+  },
+  "position": [
+    8.312897,
+    47.4736
+  ],
+  "fields": {
+    "standort": {
+      "de": "Schartenfels",
+      "en": "Schartenfels",
+      "fr": "Schartenfels"
+    },
+    "gegenstand": {
+      "de": "Flaumeiche, Bergaster und Bläulinge",
+      "en": "Downy oak, Michaelmas daisy and blue butterflies",
+      "fr": "Chêne pubescent, aster amelle et azurés"
+    }
+  },
+  "images": [
+    {
+      "file": "berg-astern.jpg",
+      "caption": {
+        "de": "Berg-Astern",
+        "en": "European Michaelmas daisies",
+        "fr": "Asters amelles"
+      },
+      "credit": "Thomas Burger",
+      "width": 1317,
+      "height": 937
+    },
+    {
+      "file": "berg-lauch.jpg",
+      "caption": {
+        "de": "Berg-Lauch",
+        "en": "Mountain chives",
+        "fr": "Ail des montagnes"
+      },
+      "credit": "Thomas Burger",
+      "width": 447,
+      "height": 447
+    },
+    {
+      "file": "schlingnatter.jpg",
+      "caption": {
+        "de": "Schlingnatter",
+        "en": "Smooth snake",
+        "fr": "Coronelle lisse"
+      },
+      "credit": "Goran Dusej",
+      "width": 359,
+      "height": 359
+    }
+  ]
+}

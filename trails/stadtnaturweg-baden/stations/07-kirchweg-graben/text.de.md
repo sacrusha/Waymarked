@@ -1,0 +1,3 @@
+Bei der Verlegung der Fernwärmeleitungen im Jahr 2025 wurde die Böschung «Im Graben» naturnaher gestaltet. Früher wucherten hier gebietsfremde Arten wie Kirschlorbeer oder Schneebeere. Heute ist die Böschung ein Lebensraum für mehr als 50 einheimische Pflanzenarten wie etwa den **Natternkopf**, die an Trockenheit angepasst sind.
+
+Die rauen Kalksteinblöcke erinnern an natürliche Felsen, wie sie am Schartenfels oder bei der Ruine Stein vorkommen. Dazwischen schaffen Totholz und offene Sandstellen kleine, geschützte Nischen für Wildbienen und andere Insekten. So entstand mitten in der Stadt ein Stück Kalklandschaft, die verschiedene Lebensräume miteinander verbindet.

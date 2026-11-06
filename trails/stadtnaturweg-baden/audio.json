@@ -1,0 +1,436 @@
+{
+  "files": {
+    "audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "4560b6914fa82117b2e51eeedf516c89ca10cc7f73316113553cbf626c26e4b6",
+      "voice": "de-CH-LeniNeural"
+    },
+    "audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "eb05b8c912cfc2ac5458615a6364695cc359c8a0920020ace326c17c2383152f",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "725b5bcfcf4f7d724e275b2de33f1b3f4724fe13320af4c19639aa96c6b8fc5e",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/01-stadtturm/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "55657bcf458b5196f36808e04afb114a19f89d72ef87e987a0b6667639cd42df",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/01-stadtturm/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "cfd5e4a8432d0317efed6d91852ddb57e35f54d6a2501fde11d1d452208d0d97",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/01-stadtturm/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "4d7015ee1bbee7a5da75ba0ef2d58c6af6cd2d542b0166d5a139dd3be797804c",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/02-schlossberg-ruine-stein/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "31b2618f0d51777e5aa9b4d999eb31fd53ea29a6a8db46f46a259256b59b90e4",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/02-schlossberg-ruine-stein/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "5952b9b52c504c830e545103243802c09964ef9e8b818039507677a7dec2d7cb",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/02-schlossberg-ruine-stein/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "06518e3537b58dc3f6e2ccef12574e89dbea65744fbee65fa855e2942cf3f6f8",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/03-bezirksgebaeude/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "8a34d99da40bbb9862177d6cc8434b10b40bb13154ab31e014c7faf3d154fa08",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/03-bezirksgebaeude/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "bfe5365b1f2662862dc7968ab28033cb04a42eb359322d712b31661cb8f6ac5f",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/03-bezirksgebaeude/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "fc0af7c7ad2630d270fe270a64a60e13dcd01c5b320ec9b32de83e3071adbf03",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/04-schulhausplatz-tannegg/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "26da3659a9c485a0a2e2f10a9a861c93d23d77fcca6824e9812297d98f18f011",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/04-schulhausplatz-tannegg/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "8ea3e67a637e62344fa6862ba3e655f580d876fa82927baf77bcbb113339da69",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/04-schulhausplatz-tannegg/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "b7c76297bdf60355d7df1d8296557567a926a210814723b8b24a1ad10d2b3a0f",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/05-schulhaus-pfaffechappe/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "97578f6454cf322667208d1e009197b3a4e8ad16ae1209c4a54aa7b7c0a70ef8",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/05-schulhaus-pfaffechappe/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "aa6b39c8d6f19fa65455635c35285d7f291d79131af94362150de12b3a50a949",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/05-schulhaus-pfaffechappe/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "5eb5b5ec757a954b7e300601038801de1c95e8b2caf43a07ed92633edbe3f57d",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/06-kirchweg/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "0cf7f8911eedd406bd7d2b32623140a700be99c3647b8ade5af7d09ef46f94a1",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/06-kirchweg/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "b8a02c8de879b15545e90f7e236280f1cb34947e4e14e243926121d69eb004a1",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/06-kirchweg/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "3e55ba3f20758c4a3682ad85d17998ecea6dcea8a7da9f6604102a4e3a9512a0",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/07-kirchweg-graben/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "0c2201a7db9f139c52ac981348e29222db1e63ca677561cea7f972170cc7210f",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/07-kirchweg-graben/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "1a33ba6be9d04a6011a0a7e3e20b6b321471fc3a346e8a34a6c6849d5be998c1",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/07-kirchweg-graben/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "76cfcc2b792fee2f2ed18c1871d40942590c2380d3dd52c970783ad229c0fd96",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/08-landvogteischloss/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "492d66f47bf900cf464a1af4af5cb6245d995fd294894d161c2b6d08568fdc11",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/08-landvogteischloss/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "906ed58897d9a0415f63b6d05673871bfe5195e91a497d2abd13c9d9aabf308d",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/08-landvogteischloss/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "b535bcbc956784dcf8d1a73de62d1ab6531b2fa9b6f6014952de8fc79ee853ff",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/09-schartenfels/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "a283d37ef8ab3b9df6dd84eec49a2fd252c8368dbc44300e624597c2a32e0015",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/09-schartenfels/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "2a5a682e5c0c616f45625e14adb46fe840e3638527b6edc7e7dd1e4135ed56b6",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/09-schartenfels/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "b75c59dc86f0cdbba8680ffad07b4713bf6a8760886af9963afbd9eaf22b6c3f",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/10-limmat/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "1a5207e15982bfc8edbdd8941ffcd7092ac3817a634da41daa7c7e307272e49c",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/10-limmat/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "659c623a33475d22204f90e97b5c4f8cdf3ee8a6a014b468df9429ca0f7dbb7d",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/10-limmat/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "65cbd13eedf8e3165b6ff4024841bca0f72fe86cd97b4358e1260ae38f804010",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/11-limmatuferweg/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "15a9cacc1d4202c4b1c66cd0d619ba97cc6906b911fd5ed7ad557c80f002dc1d",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/11-limmatuferweg/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "e4696bba89aee783a270ccb14031adf5ddf790ec16c9eab62499f3b5a4dc4f41",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/11-limmatuferweg/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "fcf912397416f5926f4d614af7b8bc4e6194396e7dc675b47661a7b44c2e10d1",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/12-limmathalde/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "19dc61ba56d6d033bd5e6d8844c0ba7cbfdf606736eea5c005a9ac914fa4232c",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/12-limmathalde/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "a11a9951d41ef7663a260de0a38209fa21ce5cecec4c8f56a0a700ab5842cbc8",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/12-limmathalde/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "d64a9b47251dbe10f5a0d1d0888237e4f9bbd9d1d9c1c77d92c757ac5fb43dad",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/13-limmatpromenade/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "abc1f0cbd26b8350acd25073c977c5c8da9eefb2c1042e02a17eed44541c71a3",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/13-limmatpromenade/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "a06e60a38600c19765339d38807695a7817e0b1d56ce9b2fdfb4a43dd75508d1",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/13-limmatpromenade/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "60101af178516ca6229b2bc66996896dce822b842a3bf01bc0130302baa5112b",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/14-limmat/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "ee1fbe30b37df0f5292cd011ecdf4949d4e9196d98ca5a4dea426ec0c43f8054",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/14-limmat/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "b7e8bc8fa043fd8db5ee4829c3bef7b94cf050677d85927078774f4cb99c14fa",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/14-limmat/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "0cd3a678b8b7cf5579fbe36afc67e3f11ef19b2981a6f084f1a3d15355d6abe0",
+      "voice": "fr-CH-ArianeNeural"
+    },
+    "stations/15-kurpark/audio.de.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden und Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "c45f3993fd96dd2454fbc489f74e37b097a52d0c771c9aefe053a64b762284b1",
+      "voice": "de-CH-LeniNeural"
+    },
+    "stations/15-kurpark/audio.en.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden and Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "bc3d9c4cd80956042673a6e196b1247bfb6922c65fa98a406c827c03fa27a91e",
+      "voice": "en-GB-SoniaNeural"
+    },
+    "stations/15-kurpark/audio.fr.mp3": {
+      "rate": "-5%",
+      "say": {
+        "Baden/Ennetbaden": "Baden et Ennetbaden",
+        "NAVO": "Navo"
+      },
+      "source": "ca66eb79edbb45fc5986eae54616bc625684e5cc28ea31bc5554d6a0baa9b4ab",
+      "voice": "fr-CH-ArianeNeural"
+    }
+  }
+}

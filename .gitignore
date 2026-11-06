@@ -1,0 +1,14 @@
+.tmp/
+node_modules/
+# build output and wrangler local state
+src/dist/
+.wrangler/
+# agent worktrees
+.worktrees/
+
+# local deploy credentials (secrets/README.md explains)
+secrets/*
+!secrets/README.md
+
+# route-trail.py downloads (OSM, map tiles)
+.cache/

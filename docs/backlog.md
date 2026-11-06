@@ -1,0 +1,171 @@
+# Backlog
+
+## Purpose
+
+A trail's website that strangers use, untrained, for two to four hours in
+their lives: planning at home, walking between stations, reading at a
+station, browsing afterwards, arriving mid-trail from a sign. One fluid
+surface serves all of these; nothing the visitor has built up (where am I,
+what is around, where was I reading) is thrown away by a page change. The
+map lets the half of people who are weak at reading maps navigate
+physically, with GPS. The engine is generic; a trail is a folder of content,
+so another trail is a fork with its folder replaced.
+
+## Situation
+
+- Engine in `src/`, trails in `trails/<id>/`; `src/` never names a trail.
+  The trail folder is the fork interface; its layout is documented in
+  docs/design/trail-content.md by whoever builds the content pipeline.
+- First trail: Stadtnaturweg Baden (AG), 15 placards by NAVO (Natur- und
+  Vogelschutzverein Baden/Ennetbaden), supported by the city of Baden.
+  Source PDFs and their extraction: `.tmp/BadenDrafts/` (git-ignored).
+  The trail folder holds the placard texts and photos with credits, the
+  leaflet's intro and station list, generated audio, and a route of 3.25 km
+  routed leg by leg over OSM footways with `src/build/route-trail.py`
+  (docs/design/trail-content.md); the leaflet's hand-drawn line is kept as
+  intent (`route-trace.geojson`), confirmed corrections in `legspec.json`.
+  Station dots sit on the objects they name where those could be told from
+  the Landeskarte and Luftbild (1–5, 8, 11, 14), else at the leaflet's pin.
+  Nothing has been checked on the ground yet; the placards' own positions
+  are not known.
+- Rights: our partner acquired the rights to publish the Baden content. The
+  framework starts with a real trail rather than a mock one because a real
+  trail gives access to real user feedback. When Waymarked becomes a generic
+  framework used by others, the Baden trail is replaced with a mock trail
+  and purged from the GitHub history; it lives in one folder so the purge is
+  one path. Photo credits are per image (including CC BY-NC-SA 4.0 from
+  Infoflora on placards 11 and 12) and travel with the content; the leaflet
+  names no photographers.
+- Map: swisstopo, free, no key, attribution required, fair use (their
+  example: 20,000 users a day). Raster WMTS in EPSG:3857 (pixelkarte-farbe,
+  -grau, swissimage) is the classic look; vector styles (basemap,
+  lightbasemap, imagerybasemap at vectortiles.geo.admin.ch) keep labels
+  upright when the map rotates. Baden defaults to the Landeskarte
+  (docs/design/surface.md, Basemap). Generic trails default to an OSM-based
+  basemap.
+- Between stations 12 and 13, down at the river, a lift leads up to the
+  railway station in a few minutes; worst-case timings are available from
+  the user when needed. swisstopo serves height data, so walking times can
+  be derived from distance and ascent.
+- Stack: Vite, TypeScript, MapLibre GL (needs WebGL2: iOS 15+), static
+  build, GitHub Pages via Actions; development mostly on local previews.
+  UI framework is the implementer's call, within forkability.
+- Content is German; the site toggles languages; machine translations
+  (English and French, by Claude, unreviewed) demonstrate the function.
+- The placards and leaflet print www.navobaden.ch/stadtnaturweg with a QR
+  code and info/map/headphones icons: an existing offering, not yet looked
+  at.
+- First audience: NAVO members, who receive the demo and give feedback.
+  The impressive deliverable for them comes before everything generic.
+- Forkers have an environment like ours (Claude Code, Opus or better), so
+  fork instructions address an AI with the person beside it. The
+  generic/specific separation is architecture from version 1 on; the
+  framework version is a check, not a build.
+- Design of the one screen: docs/design/surface.md; the trail's look:
+  docs/design/brand.md.
+
+## Versions
+
+Each ends with a working site more useful than the last. Items state the
+purpose they serve; how is the implementer's.
+
+State: 1–5 are built; `npm run check` and `npm run build` pass. Verified in
+headless browsers, version 1 also on desktop and Android (Samsung
+browser). Not yet: a ground test in Baden, iOS, a deploy (the Pages
+workflow exists, no GitHub repository does), git.
+
+### 1. Walkable surface — the interaction model can be tested on phones in Baden
+
+- Map (swisstopo) with the 15 numbered stations and the route; selected,
+  previous and next distinguishable.
+- The sheet: item 0 (the trail) and one card per station with title and the
+  leaflet's Standort/Gegenstand/Thema; prev/next; a marker tap selects;
+  "Next" at a card's end collapses the sheet.
+- Portrait: scroll-driven sheet over a fixed map. Landscape and desktop:
+  side by side with a draggable divider. One DOM.
+- Selected station in the URL, so screen-lock and reload land where the
+  visitor was, and a sign's QR code can deep-link.
+- Deployed to GitHub Pages; `npm run dev` for local previews.
+
+### 2. The placards in the sheet — the site replaces carrying the leaflet
+
+- Full placard texts, photos with captions and credits, item 0 from the
+  leaflet's intro.
+- The city's design as the trail's brand; Waymarked's own mark a footer line.
+
+### 3. Audio — a station can be listened to instead of read
+
+- Per-station audio in the card, usable while walking (plays on, screen
+  locked). Demonstration with pre-generated speech files from the placard
+  texts, Swiss Standard German voice; the easy, keyless path is Microsoft's
+  neural voices via edge-tts (unofficial endpoint, fine for a demo; the
+  official Azure service has the same voices for production). Real
+  recordings would replace the files, same slot.
+
+### 4. Walking help — the map-weak half can walk it
+
+- You-are-here with heading cone; follow mode; heading-up rotation.
+- Arrow and distance to the next station in the sheet's peek state.
+- Compass permission flow (iOS needs a gesture) and GPS-course fallback.
+
+### 5. Languages — a visitor who doesn't read German can use it
+
+- Language toggle; the content model carries languages per field from
+  version 1 on.
+- Machine translations (Sonnet) as the demonstration.
+
+### 6. Framework check — someone else can fork it for their trail
+
+- Mock trail, README with fork instructions for an AI, docs/ as CLAUDE.md
+  lays out.
+- Baden purged from the GitHub history (Situation: rights).
+
+### 7. Offline — tiles and content survive dead spots
+
+### 8. QR codes — printable per-station codes for the signs
+
+## Later, unordered
+
+- Wildlife integration: bird watching, sightings, species information.
+- Seasonal content: what is to be seen now (Alpensegler from April,
+  Lerchensporn in early spring).
+- Easy wins in content: more on the Stadtturm and similar additions beyond
+  the placards.
+- Walking time in item 0 derived from distance and swisstopo height data,
+  where the publisher states none.
+- Getting away: from the current location directly to 12 or 13 and the
+  lift to the railway station; "the next train I can reasonably catch".
+
+## Open
+
+- Image licensing for the public site beyond the demo (CC BY-NC-SA items,
+  individual photographers): with the partner.
+- The leaflet's cover photo, item 0's cover on the site, has no credit.
+- Placard 3's small photo carries two credits in the source (Hugo Bischof /
+  BirdLife Schweiz); the site shows none for it until settled.
+- Placard 15's large photo is Infoflora's (Christophe Bornand) without a
+  printed licence; 11 and 12 print CC BY-NC-SA 4.0 for theirs.
+- Station 9: the leaflet's list says Schartenfels, its photo caption "Der
+  westliche Lägernkopf (9)". The intro promises two viewpoints; only 9 is
+  named as one.
+- The route is routed over OSM paths and unchecked on the ground; the
+  router's own doubts per leg: the out-and-back at the ruin (1→2, 2→3),
+  the passage between the Pfaffechappe wings (4→5), the riverside
+  walkway's public stretch (10→11), the Kurpark's north entrance (14→15).
+- A station's dot marks the object (what you look at) where it could be
+  identified, else the leaflet's pin; the placard (where you stand) is
+  what "arrived" wants. One position per station so far.
+- Whether the trail is signposted on the ground, which decides how much
+  navigation the site carries between stations.
+- Walking help, untested on the ground: compass steadiness, "Hier: n" at
+  25 m with the 6/7 pair 17 m apart, whether the locate button's first
+  tap should only follow rather than also turn the map, and whether a
+  walker with the sheet raised minds lowering it to reach the locate
+  button (the controls slide out as the map strip shrinks).
+- Translations (en, fr) are unreviewed; the English and French voices
+  mispronounce German names. The machine-translation note opens every card
+  in a marked language, possibly more than a visitor needs.
+- The "STADT BADEN" administrative logo sits in item 0's footer on the
+  reading that the partner's okay for "Baden ist." covers it.
+- Item 0 links to www.navobaden.ch/stadtnaturweg, the printed address,
+  which does not exist yet. The leaflet's NAVO box text is not in item 0.

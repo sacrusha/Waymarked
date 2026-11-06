@@ -1,0 +1,178 @@
+/* Walking help on the map (walking.ts): the visitor, the edge arrow, the
+   buttons above the sheet, the message line. Tokens: --you, --you-tint. */
+
+/* The buttons ride above the sheet's top edge (main.ts sets --card-top) and
+   slide down under the card as the strip above a raised sheet becomes the
+   map's (--tools-out, main.ts); side by side, the map's corner. */
+.map-tools {
+  position: absolute;
+  right: 12px;
+  top: calc(var(--card-top, 100%) - 14px + var(--tools-out, 0px));
+  transform: translateY(-100%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+.surface[data-layout="side"] .map-tools {
+  top: auto;
+  bottom: calc(22px + var(--safe-bottom));
+  right: 16px;
+  transform: none;
+}
+.tool {
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 2px 8px rgb(0 0 0 / 0.2);
+}
+.tool[hidden] {
+  display: none;
+}
+.tool svg {
+  width: 26px;
+  height: 26px;
+}
+.tool:active {
+  filter: brightness(0.94);
+}
+.north {
+  width: 40px;
+  height: 40px;
+}
+.north .north-n {
+  fill: #d93025;
+}
+.north .north-s {
+  fill: var(--muted);
+}
+.locate .locate-heading {
+  display: none;
+}
+.locate[data-mode="follow"] {
+  color: var(--you);
+}
+.locate[data-mode="heading"] {
+  background: var(--you);
+  color: #fff;
+}
+.locate[data-mode="heading"] .locate-free {
+  display: none;
+}
+.locate[data-mode="heading"] .locate-heading {
+  display: block;
+}
+.locate[data-state="asking"] svg {
+  animation: locate-wait 1.2s ease-in-out infinite;
+}
+@keyframes locate-wait {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* The visitor: a dot in a white ring, and the cone of where they face. */
+.you {
+  width: 140px;
+  height: 140px;
+  pointer-events: none;
+}
+.you-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  background: var(--you);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+}
+.you[data-coarse="true"] .you-dot {
+  opacity: 0.6;
+}
+.you-cone {
+  --spread: 25deg;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from calc(var(--spread) * -1), rgb(31 111 224 / 0.5) 0 calc(var(--spread) * 2), transparent 0);
+  -webkit-mask: radial-gradient(circle closest-side, #000 12%, transparent 100%);
+  mask: radial-gradient(circle closest-side, #000 12%, transparent 100%);
+  display: none;
+}
+.you[data-heading="compass"] .you-cone,
+.you[data-heading="course"] .you-cone {
+  display: block;
+}
+.you[data-heading="course"] .you-cone {
+  opacity: 0.7;
+}
+
+/* The visitor out of view: at the map's edge, toward them, with the distance. */
+.you-edge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 12px 0 6px;
+  border: 2px solid #fff;
+  border-radius: 18px;
+  background: var(--you);
+  color: #fff;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  box-shadow: 0 1px 6px rgb(0 0 0 / 0.3);
+}
+.you-edge[hidden] {
+  display: none;
+}
+.you-edge-arrow {
+  width: 22px;
+  height: 22px;
+}
+
+/* One line of news from walking help: location blocked, no fix yet, far away. */
+.map-toast {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--safe-top) + 56px);
+  transform: translateX(-50%);
+  z-index: 3;
+  width: max-content;
+  max-width: min(420px, calc(100% - 32px));
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgb(23 35 30 / 0.92);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.3);
+}
+.map-toast[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .locate[data-state="asking"] svg {
+    animation: none;
+  }
+}

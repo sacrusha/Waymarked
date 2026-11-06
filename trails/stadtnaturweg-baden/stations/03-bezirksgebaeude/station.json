@@ -1,0 +1,46 @@
+{
+  "title": {
+    "de": "Akrobaten der Lüfte",
+    "en": "Acrobats of the Air",
+    "fr": "Acrobates des airs"
+  },
+  "position": [
+    8.306888,
+    47.471148
+  ],
+  "fields": {
+    "standort": {
+      "de": "Bezirksgebäude",
+      "en": "Bezirksgebäude (district building)",
+      "fr": "Bezirksgebäude (bâtiment du district)"
+    },
+    "gegenstand": {
+      "de": "Mauersegler",
+      "en": "Common swift",
+      "fr": "Martinet noir"
+    }
+  },
+  "images": [
+    {
+      "file": "mauersegler.jpg",
+      "caption": {
+        "de": "Mauersegler",
+        "en": "Common swift",
+        "fr": "Martinet noir"
+      },
+      "credit": "BirdLife Schweiz",
+      "width": 859,
+      "height": 1200
+    },
+    {
+      "file": "mauersegler-nistkasten.jpg",
+      "alt": {
+        "de": "Mauersegler am Einflugloch eines Nistkastens",
+        "en": "Common swift at the entrance hole of a nest box",
+        "fr": "Martinet noir à l’entrée d’un nichoir"
+      },
+      "width": 448,
+      "height": 448
+    }
+  ]
+}

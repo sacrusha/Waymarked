@@ -1,0 +1,47 @@
+{
+  "title": {
+    "de": "Schräge Baumgiganten",
+    "en": "Leaning Tree Giants",
+    "fr": "Géants penchés"
+  },
+  "position": [
+    8.309875,
+    47.476661
+  ],
+  "fields": {
+    "standort": {
+      "de": "Limmatpromenade",
+      "en": "Limmatpromenade",
+      "fr": "Limmatpromenade"
+    },
+    "gegenstand": {
+      "de": "Badener Platanenallee",
+      "en": "Baden’s plane-tree avenue",
+      "fr": "Allée de platanes de Baden"
+    }
+  },
+  "images": [
+    {
+      "file": "platanen.jpg",
+      "caption": {
+        "de": "Platanen",
+        "en": "Plane trees",
+        "fr": "Platanes"
+      },
+      "credit": "Thomas Burger",
+      "width": 710,
+      "height": 993
+    },
+    {
+      "file": "fruechte.jpg",
+      "caption": {
+        "de": "Früchte",
+        "en": "Fruits",
+        "fr": "Fruits"
+      },
+      "credit": "Thomas Burger",
+      "width": 537,
+      "height": 536
+    }
+  ]
+}

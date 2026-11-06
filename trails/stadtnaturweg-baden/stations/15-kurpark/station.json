@@ -1,0 +1,47 @@
+{
+  "title": {
+    "de": "Weit gereiste «Kurgäste»",
+    "en": "Far-Travelled “Spa Guests”",
+    "fr": "« Curistes » venus de loin"
+  },
+  "position": [
+    8.310776,
+    47.479749
+  ],
+  "fields": {
+    "standort": {
+      "de": "Kurpark",
+      "en": "Kurpark (spa park)",
+      "fr": "Kurpark (parc thermal)"
+    },
+    "gegenstand": {
+      "de": "Schwarznuss und Ginkgo",
+      "en": "Black walnut and ginkgo",
+      "fr": "Noyer noir et ginkgo"
+    }
+  },
+  "images": [
+    {
+      "file": "schwarznuss.jpg",
+      "caption": {
+        "de": "Schwarznuss",
+        "en": "Black walnut",
+        "fr": "Noyer noir"
+      },
+      "credit": "Christophe Bornand, Infoflora",
+      "width": 707,
+      "height": 997
+    },
+    {
+      "file": "ginkgo.jpg",
+      "caption": {
+        "de": "Ginkgo",
+        "en": "Ginkgo",
+        "fr": "Ginkgo"
+      },
+      "credit": "Juhushund",
+      "width": 376,
+      "height": 376
+    }
+  ]
+}

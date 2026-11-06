@@ -1,0 +1,852 @@
+/* The surface. Tokens first; a trail sets --accent and --accent-dark
+   (trail.json "theme") and anything else in its own theme.css, which loads
+   after this file. Outdoors, in sun: high contrast, large type. */
+
+:root {
+  --ink: #17231e;
+  --muted: #4f5d56;
+  --paper: #ffffff;
+  --wash: #eff3f0;
+  --line: #d6ded9;
+  --accent: #3d8fc4;
+  --accent-dark: #17507a;
+  /* Set from the trail's accent by main.ts (color-mix needs Safari 16.2; the floor is iOS 15). */
+  --accent-tint: #c9e0f0;
+  /* The visitor on the map and the way from them (walking help): the blue every map app uses for "you". */
+  --you: #1f6fe0;
+  --you-tint: #dde8fb;
+  /* Titles and headings. */
+  --heading: var(--ink);
+  --font: "Public Sans Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --peek: 120px;
+  /* Map strip that stays visible above the sheet at full extent. */
+  --strip: 15vh;
+  --strip: 15dvh;
+  --side-w: clamp(320px, 34vw, 460px);
+  --radius: 18px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--wash);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent-dark);
+  outline-offset: 2px;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- layout: portrait (sheet over map) ------------------------------------ */
+
+.surface {
+  position: fixed;
+  inset: 0;
+}
+
+/* .surface > .map outranks MapLibre's own .maplibregl-map { position: relative }. */
+.surface > .map {
+  position: absolute;
+  inset: 0;
+  /* Its own stacking context: marker z-indexes stay below the sheet. */
+  z-index: 0;
+}
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--strip);
+  bottom: 0;
+  z-index: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  /* Touches on the transparent part reach the map; the card takes its own. */
+  pointer-events: none;
+}
+.sheet::-webkit-scrollbar {
+  display: none;
+}
+
+.sheet-spacer {
+  height: calc(100% - var(--peek) - var(--safe-bottom));
+}
+
+.card {
+  pointer-events: auto;
+  position: relative;
+  min-height: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  background: var(--paper);
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 -1px 0 rgb(23 35 30 / 0.08), 0 -6px 24px rgb(23 35 30 / 0.16);
+  touch-action: pan-y;
+  padding-bottom: calc(24px + var(--safe-bottom));
+}
+
+.divider {
+  display: none;
+}
+
+/* --- layout: side by side (landscape, desktop) ---------------------------- */
+
+@media (min-aspect-ratio: 1/1) {
+  .surface {
+    display: grid;
+    grid-template-columns: var(--side-w) 10px 1fr;
+    grid-template-rows: 100%;
+  }
+  .surface > .map {
+    position: relative;
+    grid-column: 3;
+    grid-row: 1;
+    inset: auto;
+  }
+  .sheet {
+    position: relative;
+    grid-column: 1;
+    grid-row: 1;
+    inset: auto;
+    pointer-events: auto;
+    background: var(--paper);
+    scrollbar-width: thin;
+  }
+  .sheet::-webkit-scrollbar {
+    display: initial;
+  }
+  .sheet-spacer {
+    display: none;
+  }
+  .card {
+    box-shadow: none;
+    border-radius: 0;
+    max-width: none;
+  }
+  .grabber {
+    visibility: hidden;
+    height: 6px !important;
+  }
+  /* A classic splitter: a full-height bar with a grip, a wider grab zone than it draws. */
+  .divider {
+    display: block;
+    grid-column: 2;
+    grid-row: 1;
+    position: relative;
+    z-index: 2;
+    cursor: col-resize;
+    touch-action: none;
+    background: var(--wash);
+    border-inline: 1px solid var(--line);
+  }
+  .divider::before {
+    content: "";
+    position: absolute;
+    inset: 0 -7px;
+  }
+  /* A finger needs a wider grab zone: 44 px, centred on the bar. */
+  @media (any-pointer: coarse) {
+    .divider::before {
+      inset: 0 -17px;
+    }
+  }
+  .divider::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 56px;
+    margin: -28px 0 0 -2px;
+    border-radius: 2px;
+    background: var(--muted);
+    opacity: 0.55;
+  }
+  .divider:hover,
+  .resizing .divider {
+    background: var(--accent-tint);
+  }
+  .divider:hover::after,
+  .resizing .divider::after {
+    opacity: 1;
+    background: var(--accent-dark);
+  }
+  .resizing {
+    cursor: col-resize;
+    user-select: none;
+  }
+  .resizing .map {
+    pointer-events: none;
+  }
+}
+
+/* --- card head: the peek ---------------------------------------------------- */
+
+.card-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--paper);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* The handle: dragged, it moves the sheet as scrolling does (main.ts gives a mouse the grip). */
+@media (pointer: fine) and (max-aspect-ratio: 1/1) {
+  .card-head {
+    cursor: grab;
+  }
+  .card-head button {
+    cursor: pointer;
+  }
+}
+.dragging-sheet,
+.dragging-sheet .card-head {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.grabber {
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.grabber::before {
+  content: "";
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+/* The title, and beside it the way to the station, the station the visitor is at, or Listen. */
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+.title-slot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.title-slot:empty {
+  display: none;
+}
+.title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 1.24rem;
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: -0.005em;
+  color: var(--heading);
+}
+.title-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.badge {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent-dark);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 3px var(--accent-tint);
+}
+.badge-trail {
+  background: var(--accent);
+  color: var(--ink);
+}
+.badge-small {
+  width: 30px;
+  height: 30px;
+  font-size: 0.9rem;
+  box-shadow: none;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2.5px solid var(--accent-dark);
+}
+
+.orient {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+.orient-info {
+  flex: 1;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+.go {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  border-radius: 22px;
+  border: 0;
+  padding: 0 14px;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+.go-prev {
+  background: var(--wash);
+  color: var(--muted);
+  padding: 0 12px 0 8px;
+}
+/* The overview: the trail's glyph, its word added where the row has room. */
+.go-overview {
+  background: var(--wash);
+  color: var(--accent-dark);
+  padding: 0 11px;
+}
+.go-overview svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+.go-overview-label {
+  display: none;
+  color: var(--muted);
+}
+.card-head {
+  container-type: inline-size;
+}
+@container (min-width: 430px) {
+  .go-overview-label {
+    display: inline;
+  }
+}
+.go-next {
+  margin-left: auto;
+  background: var(--accent-tint);
+  color: var(--ink);
+  padding: 0 10px 0 16px;
+}
+.go-next b {
+  font-weight: 800;
+}
+.go:active {
+  filter: brightness(0.94);
+}
+.chev {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+/* Walking help in the head (guide.ts): the way, in the visitor's blue. */
+.way-arrow {
+  width: 1.05em;
+  height: 1.05em;
+  flex: none;
+  vertical-align: -0.16em;
+  color: var(--you);
+}
+.guide {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px 0 10px;
+  border-radius: 22px;
+  background: var(--you-tint);
+  color: var(--ink);
+  font-weight: 750;
+  font-size: 1.06rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.guide .way-arrow {
+  width: 26px;
+  height: 26px;
+}
+.guide[hidden],
+.here-chip[hidden] {
+  display: none;
+}
+.here-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 8px 0 14px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--you-tint);
+  color: var(--ink);
+  font-weight: 650;
+  white-space: nowrap;
+}
+.here-chip .badge-small {
+  width: 28px;
+  height: 28px;
+}
+.go-way {
+  display: none;
+  font-variant-numeric: tabular-nums;
+}
+.go-next[data-live="on"] .go-way {
+  display: inline;
+}
+.go-next[data-live="on"] .go-leg {
+  display: none;
+}
+/* Listen, from the peek. While walking to the station the way takes its place; playing, it stays. */
+.peek-play {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent-dark);
+  color: #fff;
+}
+.peek-play svg {
+  width: 20px;
+  height: 20px;
+}
+.peek-play .player-icon-pause,
+.peek-play[data-state="playing"] .player-icon-play {
+  display: none;
+}
+.peek-play[data-state="playing"] .player-icon-pause {
+  display: block;
+}
+.card-head[data-guide="approach"] .peek-play:not([data-state="playing"]),
+.card-head[data-guide="elsewhere"] .peek-play:not([data-state="playing"]) {
+  display: none;
+}
+@media (max-width: 380px) {
+  .guide {
+    padding: 0 11px 0 8px;
+    font-size: 1rem;
+  }
+}
+
+/* --- card body -------------------------------------------------------------------- */
+
+.card-body {
+  padding: 4px 16px 8px;
+}
+.card-body > :first-child {
+  margin-top: 14px;
+}
+
+.fields {
+  margin: 14px 0;
+  display: grid;
+  gap: 12px;
+}
+.field dt {
+  font-size: 0.84rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.field dd {
+  margin: 0;
+  font-size: 1.06rem;
+}
+
+.lead {
+  font-size: 1.12rem;
+  font-weight: 600;
+  margin: 14px 0 8px;
+}
+.prose {
+  max-width: 62ch;
+}
+.prose p {
+  margin: 0 0 0.8em;
+}
+
+.card-body h2 {
+  font-size: 1rem;
+  font-weight: 750;
+  margin: 26px 0 8px;
+  color: var(--heading);
+}
+
+.station-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.station-list li {
+  border-bottom: 1px solid var(--line);
+}
+.station-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 2px;
+  border: 0;
+  background: none;
+  text-align: left;
+  line-height: 1.25;
+}
+.station-link:active {
+  background: var(--wash);
+}
+.station-link-title {
+  display: block;
+  font-weight: 650;
+}
+.station-link-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 2px;
+}
+
+.links {
+  margin: 0;
+  padding-left: 1.1em;
+}
+.links a {
+  color: var(--accent-dark);
+  text-underline-offset: 3px;
+}
+.links li {
+  margin: 6px 0;
+}
+
+.publisher {
+  margin: 26px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.publisher span {
+  display: block;
+  font-weight: 650;
+}
+
+/* Photos: the lead photo, its insets, one credits line. */
+.photos {
+  margin: 22px 0 8px;
+}
+.photo {
+  margin: 0;
+}
+.photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  background: var(--wash);
+}
+.photo figcaption {
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+.photo-insets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 12px;
+  margin-top: 14px;
+}
+.photo-credits {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+/* Item 0 opens with the trail's cover photo, edge to edge. */
+.card-body > .cover:first-child {
+  margin: 0 -16px 4px;
+}
+.cover > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: var(--wash);
+}
+.cover .photo-credits {
+  margin: 6px 16px 0;
+}
+
+/* How the station's sign names it, beside the trail's mark. */
+.sign-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 16px 0 4px;
+}
+.sign-label {
+  margin: 0;
+  color: var(--accent-dark);
+  font-size: 0.95rem;
+}
+.trail-mark img {
+  display: block;
+  height: 28px;
+  width: auto;
+}
+.cover {
+  position: relative;
+}
+.cover .trail-mark {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+}
+.cover .trail-mark img {
+  height: 32px;
+}
+
+/* Who stands behind the trail, and the engine's one line. */
+.trail-footer {
+  margin: 26px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.trail-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+  margin-bottom: 12px;
+}
+.trail-logos img {
+  display: block;
+  height: 56px;
+  width: auto;
+}
+.trail-footer-text p {
+  margin: 0 0 0.5em;
+}
+.trail-footer a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+.made-with {
+  margin: 28px 0 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.waymarked {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 650;
+}
+.waymarked svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* --- card end: walk on ---------------------------------------------------------------- */
+
+.card-end {
+  padding: 20px 16px 0;
+}
+.walk {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent-dark);
+  color: #fff;
+  text-align: left;
+}
+.walk-label {
+  grid-column: 1;
+  font-size: 0.88rem;
+  opacity: 0.86;
+}
+.walk-target {
+  grid-column: 1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.walk-n {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6em;
+  height: 1.6em;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--accent-dark);
+  font-size: 0.86em;
+  font-weight: 800;
+}
+.walk-arrow {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 1.5rem;
+  padding-left: 12px;
+}
+.walk-quiet {
+  background: var(--wash);
+  color: var(--ink);
+}
+
+/* --- map: markers and controls -------------------------------------------------------------- */
+
+.marker {
+  --size: 28px;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  padding: 0;
+  border-radius: 50%;
+  border: 2.5px solid var(--accent-dark);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  transition: width 0.18s, height 0.18s, background-color 0.18s;
+  /* A larger touch target than the drawn circle. */
+  position: relative;
+}
+.marker::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+}
+.marker[data-state="prev"] {
+  --size: 30px;
+  background: var(--accent-tint);
+}
+.marker[data-state="next"] {
+  --size: 34px;
+  background: var(--accent);
+  font-size: 15px;
+}
+.marker[data-state="selected"] {
+  --size: 44px;
+  background: var(--accent-dark);
+  color: #fff;
+  border: 3px solid #fff;
+  font-size: 18px;
+  box-shadow: 0 0 0 3px var(--accent-dark), 0 3px 10px rgb(0 0 0 / 0.35);
+}
+
+.maplibregl-ctrl-top-left,
+.maplibregl-ctrl-top-right {
+  top: var(--safe-top);
+}
+/* Over a raised sheet the basemap and language choices slide up off the
+   screen, following the sheet (main.ts, MAP_STRIP); gone, they leave the tab order. */
+.maplibregl-ctrl-top-left {
+  transform: translateY(calc(-1 * var(--top-controls-out, 0px)));
+}
+.surface[data-controls="out"] .maplibregl-ctrl-top-left,
+.surface[data-controls="out"] .map-tools {
+  visibility: hidden;
+}
+.maplibregl-ctrl-attrib {
+  font-family: var(--font);
+  font-size: 11px;
+  background: rgb(255 255 255 / 0.85);
+}
+/* The basemaps side by side, the current one filled. */
+.maplibregl-ctrl.basemap-switch {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+}
+.basemap-switch button {
+  height: 32px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 16px;
+  background: none;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.basemap-switch button[aria-checked="true"] {
+  background: var(--accent-dark);
+  color: #fff;
+}
+.basemap-switch button[aria-checked="false"]:hover {
+  background: var(--wash);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker {
+    transition: none;
+  }
+}

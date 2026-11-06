@@ -1,0 +1,48 @@
+{
+  "title": {
+    "de": "Vorfrühling am Steilhang",
+    "en": "Early Spring on the Steep Slope",
+    "fr": "Avant-printemps sur le versant abrupt"
+  },
+  "position": [
+    8.309372,
+    47.475029
+  ],
+  "fields": {
+    "standort": {
+      "de": "Limmathalde",
+      "en": "Limmathalde",
+      "fr": "Limmathalde"
+    },
+    "gegenstand": {
+      "de": "Lerchensporn und Bärlauch",
+      "en": "Corydalis and wild garlic",
+      "fr": "Corydale et ail des ours"
+    }
+  },
+  "images": [
+    {
+      "file": "hohlknolliger-lerchensporn.jpg",
+      "caption": {
+        "de": "Hohlknolliger Lerchensporn",
+        "en": "Hollow-root corydalis",
+        "fr": "Corydale creuse"
+      },
+      "credit": "Françoise Alsaker, Infoflora",
+      "license": "CC BY-NC-SA 4.0",
+      "width": 1059,
+      "height": 1449
+    },
+    {
+      "file": "maerzengloeckchen.jpg",
+      "caption": {
+        "de": "Märzenglöckchen",
+        "en": "Spring snowflake",
+        "fr": "Nivéole de printemps"
+      },
+      "credit": "Florence Rüegger",
+      "width": 447,
+      "height": 447
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "languages": [
+    "de",
+    "en",
+    "fr"
+  ],
+  "machineTranslated": [
+    "en",
+    "fr"
+  ],
+  "title": {
+    "de": "Stadt-Naturweg",
+    "en": "Urban Nature Trail",
+    "fr": "Sentier nature urbain"
+  },
+  "subtitle": {
+    "de": "15 Entdeckungen im urbanen Raum",
+    "en": "15 discoveries in an urban setting",
+    "fr": "15 découvertes en milieu urbain"
+  },
+  "publisher": {
+    "de": "Stadt Baden, Klima und Umwelt, und Natur- und Vogelschutzverein Baden/Ennetbaden (NAVO)",
+    "en": "City of Baden, Climate and Environment, and the Natur- und Vogelschutzverein Baden/Ennetbaden (NAVO), a nature and bird protection society",
+    "fr": "Ville de Baden, Climat et environnement, et Natur- und Vogelschutzverein Baden/Ennetbaden (NAVO), société de protection de la nature et des oiseaux"
+  },
+  "links": [
+    {
+      "label": {
+        "de": "NAVO: Stadtnaturweg",
+        "en": "NAVO: Stadtnaturweg (in German)",
+        "fr": "NAVO : Stadtnaturweg (en allemand)"
+      },
+      "url": "https://www.navobaden.ch/stadtnaturweg"
+    },
+    {
+      "label": {
+        "de": "Umwelt-Cockpit der Stadt Baden",
+        "en": "City of Baden environment dashboard (in German)",
+        "fr": "Tableau de bord environnemental de la Ville de Baden (en allemand)"
+      },
+      "url": "https://www.umwelt-cockpit.baden.ch"
+    }
+  ],
+  "stationFields": [
+    {
+      "key": "standort",
+      "label": {
+        "de": "Standort",
+        "en": "Location",
+        "fr": "Emplacement"
+      }
+    },
+    {
+      "key": "gegenstand",
+      "label": {
+        "de": "Gegenstand",
+        "en": "Subject",
+        "fr": "Sujet"
+      }
+    }
+  ],
+  "theme": {
+    "accent": "#68BD45",
+    "accentDark": "#357A1F"
+  },
+  "signLabel": {
+    "de": "Stadtnaturweg **Tafel {n}**"
+  },
+  "mark": {
+    "file": "baden-ist.svg",
+    "alt": {
+      "de": "Baden ist."
+    },
+    "width": 161,
+    "height": 41
+  },
+  "cover": {
+    "file": "cover.jpg",
+    "alt": {
+      "de": "Die Limmat in Baden, am Ufer die Häuser der Altstadt und ein Kirchturm",
+      "en": "The Limmat in Baden, with the houses of the old town and a church tower on the bank",
+      "fr": "La Limmat à Baden, avec sur la rive les maisons de la vieille ville et un clocher"
+    },
+    "width": 1200,
+    "height": 1118
+  },
+  "footer": {
+    "logos": [
+      {
+        "file": "stadt-baden.svg",
+        "alt": {
+          "de": "Stadt Baden"
+        },
+        "width": 88,
+        "height": 38
+      },
+      {
+        "file": "navo.png",
+        "alt": {
+          "de": "NAVO Baden/Ennetbaden"
+        },
+        "url": "https://www.navobaden.ch",
+        "width": 237,
+        "height": 186
+      }
+    ],
+    "text": {
+      "de": "Natur- und Vogelschutzverein Baden/Ennetbaden\n\nMit Unterstützung von [umwelt-cockpit.baden.ch](https://www.umwelt-cockpit.baden.ch)",
+      "en": "Natur- und Vogelschutzverein Baden/Ennetbaden (nature and bird protection society)\n\nWith the support of [umwelt-cockpit.baden.ch](https://www.umwelt-cockpit.baden.ch)",
+      "fr": "Natur- und Vogelschutzverein Baden/Ennetbaden (société de protection de la nature et des oiseaux)\n\nAvec le soutien de [umwelt-cockpit.baden.ch](https://www.umwelt-cockpit.baden.ch)"
+    }
+  },
+  "audio": {
+    "voices": {
+      "de": "de-CH-LeniNeural"
+    },
+    "say": {
+      "NAVO": "Navo",
+      "Baden/Ennetbaden": {
+        "de": "Baden und Ennetbaden",
+        "en": "Baden and Ennetbaden",
+        "fr": "Baden et Ennetbaden"
+      }
+    }
+  },
+  "map": {
+    "basemaps": [
+      {
+        "label": {
+          "de": "Landeskarte",
+          "en": "National map",
+          "fr": "Carte nationale"
+        },
+        "tiles": [
+          "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg"
+        ],
+        "tileSize": 256,
+        "maxzoom": 19,
+        "attribution": "<a href=\"https://www.swisstopo.admin.ch/\" target=\"_blank\" rel=\"noopener\">© swisstopo</a>"
+      },
+      {
+        "label": {
+          "de": "Karte hell",
+          "en": "Light map",
+          "fr": "Carte claire"
+        },
+        "style": "https://vectortiles.geo.admin.ch/styles/ch.swisstopo.lightbasemap.vt/style.json"
+      },
+      {
+        "label": {
+          "de": "Luftbild",
+          "en": "Aerial photo",
+          "fr": "Photo aérienne"
+        },
+        "tiles": [
+          "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg"
+        ],
+        "tileSize": 256,
+        "maxzoom": 20,
+        "attribution": "<a href=\"https://www.swisstopo.admin.ch/\" target=\"_blank\" rel=\"noopener\">© swisstopo</a>"
+      }
+    ]
+  }
+}

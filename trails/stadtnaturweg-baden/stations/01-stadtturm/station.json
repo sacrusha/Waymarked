@@ -1,0 +1,69 @@
+{
+  "title": {
+    "de": "Treffpunkt der Stadtvögel",
+    "en": "Meeting Place of the City Birds",
+    "fr": "Rendez-vous des oiseaux de la ville"
+  },
+  "position": [
+    8.307886,
+    47.473236
+  ],
+  "fields": {
+    "standort": {
+      "de": "Stadtturm",
+      "en": "Stadtturm (town tower)",
+      "fr": "Stadtturm (tour de ville)"
+    },
+    "gegenstand": {
+      "de": "Turmfalke, Alpensegler, Gänsesäger, Dohle",
+      "en": "Common kestrel, alpine swift, goosander, jackdaw",
+      "fr": "Faucon crécerelle, martinet à ventre blanc, harle bièvre, choucas des tours"
+    }
+  },
+  "images": [
+    {
+      "file": "turmfalke.jpg",
+      "caption": {
+        "de": "Turmfalke",
+        "en": "Common kestrel",
+        "fr": "Faucon crécerelle"
+      },
+      "credit": "Michael Gerber, birds-online.ch",
+      "width": 569,
+      "height": 798
+    },
+    {
+      "file": "alpensegler.jpg",
+      "caption": {
+        "de": "Alpensegler",
+        "en": "Alpine swift",
+        "fr": "Martinet à ventre blanc"
+      },
+      "credit": "Michael Gerber, birds-online.ch",
+      "width": 621,
+      "height": 621
+    },
+    {
+      "file": "dohle.jpg",
+      "caption": {
+        "de": "Dohle",
+        "en": "Jackdaw",
+        "fr": "Choucas des tours"
+      },
+      "credit": "Michael Gerber, birds-online.ch",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "file": "gaensesaeger.jpg",
+      "caption": {
+        "de": "Gänsesäger",
+        "en": "Goosander",
+        "fr": "Harle bièvre"
+      },
+      "credit": "Michael Gerber, birds-online.ch",
+      "width": 299,
+      "height": 299
+    }
+  ]
+}

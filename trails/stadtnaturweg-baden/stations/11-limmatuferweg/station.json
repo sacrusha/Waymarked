@@ -1,0 +1,59 @@
+{
+  "title": {
+    "de": "Leben in Zwischenräumen",
+    "en": "Life in the Gaps",
+    "fr": "La vie dans les interstices"
+  },
+  "position": [
+    8.309769,
+    47.474064
+  ],
+  "fields": {
+    "standort": {
+      "de": "Limmatuferweg",
+      "en": "Limmatuferweg (Limmat riverside path)",
+      "fr": "Limmatuferweg (chemin des rives de la Limmat)"
+    },
+    "gegenstand": {
+      "de": "Zimbelkraut und Mauerraute",
+      "en": "Ivy-leaved toadflax and wall-rue",
+      "fr": "Cymbalaire des murailles et doradille rue-des-murailles"
+    }
+  },
+  "images": [
+    {
+      "file": "mauerbewuchs.jpg",
+      "caption": {
+        "de": "Mauerbewuchs",
+        "en": "Plants growing on a wall",
+        "fr": "Végétation sur un mur"
+      },
+      "credit": "Thomas Burger",
+      "width": 663,
+      "height": 933
+    },
+    {
+      "file": "zimbelkraut.jpg",
+      "caption": {
+        "de": "Zimbelkraut",
+        "en": "Ivy-leaved toadflax",
+        "fr": "Cymbalaire des murailles"
+      },
+      "credit": "François Clot",
+      "width": 447,
+      "height": 447
+    },
+    {
+      "file": "mauerraute.jpg",
+      "caption": {
+        "de": "Mauerraute",
+        "en": "Wall-rue",
+        "fr": "Doradille rue-des-murailles"
+      },
+      "credit": "Françoise Alsaker, Infoflora",
+      "license": "CC BY-NC-SA 4.0",
+      "width": 359,
+      "height": 359
+    }
+  ]
+}
