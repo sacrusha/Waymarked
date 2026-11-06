@@ -31,7 +31,7 @@ trails/<id>/
   text.<lang>.md         item 0's text (optional)
   audio.<lang>.mp3       item 0's text spoken (optional)
   audio.json             what build/make-audio.py made, and from which text
-  route.geojson          the route as drawn (optional)
+  route.geojson          the route as drawn, with heights for walking times (optional)
   route-trace.geojson    the route as traced from the printed map; input of build/route-trail.py (optional)
   legspec.json           corrections to the routing: via points, hints (optional)
   theme.css              the trail's look beyond its colours (optional)
@@ -247,6 +247,26 @@ at its nearest point on it, and takes the shortest path. Where no path
 exists, the leg is a straight line and the check says so. The trail's length
 is the sum of its legs, from station 1 to the last.
 
+Where every point carries a height (a third coordinate, metres), each leg
+also gets a walking time, and the trail its total: item 0 shows the total
+where `trail.json` states no `duration`, each station the time from it to
+the last, and "Next" the leg's. A visitor who knows their pace against it
+scales it themselves, and one who joins mid-trail or walks the other way
+derives their own time from the total and the time left; the site offers
+the figures to derive from and adapts to no one. The pace is the Swiss
+yellow signposts' (`build/walk-time.ts`: 4.2 km/h on the level, slowed by
+slope), because walkers here already know their ratio to those times;
+without stops. Totals are rounded to 5 minutes as signposts are, a single
+leg to the minute. `build/route-trail.py heights` adds the heights from
+swisstopo's terrain model (swissALTI3D, through its profile service) with a
+point at least every 10 m, and runs after every `route`; terrain is the
+ground below a bridge and the hill above a tunnel, so where OSM tags the
+path as either, the height runs straight across. The service covers
+Switzerland and some way beyond (Munich answers, Paris doesn't); where it
+has no height, `heights` stops, the route keeps none, and the site shows no
+walking times. A fork elsewhere can bring heights from another source as
+the third coordinate.
+
 #### Routing the legs over real paths
 
 A printed map's route is intent: hand-drawn, schematic, and a traced copy of it
@@ -325,6 +345,15 @@ variable of the same name.
   Baden's are unchecked at branches (backlog, Open). Routed over OSM paths
   (above) the legs follow what pedestrians walk, but only a person who knows
   the ground can say so: the pictures from `render` are for that.
+- How close the walking times come to the signposts the visitor passes:
+  the constants are those swisstopo's map viewer uses (the Schweizmobil
+  variant of the Wanderwege formula: slope over 10 m steps, its polynomial
+  within ±40 %, linear beyond), the official ones are not published; and
+  the terrain model at 2 m can make a wall or an embankment beside the
+  path into a climb. Baden's heights are unchecked against the ground
+  (the ruin's stairs, the climb to the Schartenfels). Beyond the border the
+  conversion to Swiss coordinates (swisstopo's approximate formulas) grows
+  less exact, and so may the heights.
 - Where OSM lacks a path that exists (a riverside walkway, a track under
   canopy), the router cannot take it; the leg then follows the paths that are
   mapped.

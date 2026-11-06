@@ -474,6 +474,17 @@ button {
 .go-next b {
   font-weight: 800;
 }
+/* "Next 9" over the leg's length and walking time. */
+.go-label {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+.go-leg {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
 .go:active {
   filter: var(--press);
 }
@@ -537,9 +548,6 @@ button {
 .go-next[data-live="on"] .go-way {
   display: inline;
 }
-.go-next[data-live="on"] .go-leg {
-  display: none;
-}
 /* Listen, from the peek. While walking to the station the way takes its place; playing, it stays. */
 /* While the slot shows the way or the station the visitor is at, the
    languages give it room. */
@@ -576,6 +584,12 @@ button {
 .field dd {
   margin: 0;
   font-size: 1.06rem;
+}
+.field-note {
+  display: block;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: var(--muted);
 }
 
 .lead {

@@ -15,6 +15,9 @@ const strings = {
     lastStation: "Letzte Station",
     length: "Weglänge",
     duration: "Dauer",
+    walkTime: "Gehzeit",
+    walkTimeHow: "ohne Halte, gerechnet wie auf den gelben Wanderwegweisern",
+    walkTimeTo: "Gehzeit bis {n}",
     gettingThere: "Anreise",
     start: "Start",
     links: "Weiterführende Informationen",
@@ -64,6 +67,9 @@ const strings = {
     lastStation: "Last station",
     length: "Length",
     duration: "Duration",
+    walkTime: "Walking time",
+    walkTimeHow: "without stops, reckoned as on Swiss yellow trail signposts",
+    walkTimeTo: "Walking time to {n}",
     gettingThere: "Getting there",
     start: "Start",
     links: "More information",
@@ -113,6 +119,9 @@ const strings = {
     lastStation: "Dernière station",
     length: "Longueur",
     duration: "Durée",
+    walkTime: "Temps de marche",
+    walkTimeHow: "sans arrêts, calculé comme sur les panneaux jaunes de randonnée",
+    walkTimeTo: "Temps de marche jusqu’à {n}",
     gettingThere: "Accès",
     start: "Départ",
     links: "Pour en savoir plus",
@@ -163,6 +172,16 @@ export function formatDistance(m: number, lang: string, s: Strings): string {
   if (m < 50) return `${s.lessThan} 50 m`;
   if (m < 1000) return `${Math.round(m / 10) * 10} m`;
   return `${new Intl.NumberFormat(lang, { maximumFractionDigits: 1 }).format(m / 1000)} km`;
+}
+
+/**
+ * A walking time rounded to `step` minutes and never below it: 5 for times
+ * that add up legs, as signposts round, 1 for a single short leg.
+ */
+export function formatMinutes(minutes: number, step: number): string {
+  const r = Math.max(step, Math.round(minutes / step) * step);
+  const h = Math.floor(r / 60), m = r % 60;
+  return h ? `${h} h${m ? ` ${String(m).padStart(2, "0")} min` : ""}` : `${m} min`;
 }
 
 /** Distance from where the visitor is: to the ten metres nearby, to the kilometre far away. */

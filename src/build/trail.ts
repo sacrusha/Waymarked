@@ -210,6 +210,9 @@ export function loadTrail(dir: string): SourceTrail {
   const positions = stations.map((s) => s.position!);
   const { legs, report } = computeLegs(route, positions);
   const length = legs.reduce((sum, l) => sum + l.length, 0);
+  const minutes = legs.length && legs.every((l) => l.minutes !== undefined)
+    ? Math.round(legs.reduce((sum, l) => sum + l.minutes!, 0) * 10) / 10
+    : undefined;
   const all = [...positions, ...routeLines(route).flat()];
   const extent: [LngLat, LngLat] = [
     [Math.min(...all.map((c) => c[0])), Math.min(...all.map((c) => c[1]))],
@@ -243,6 +246,7 @@ export function loadTrail(dir: string): SourceTrail {
     route,
     legs,
     length,
+    ...(minutes === undefined ? {} : { minutes }),
     extent,
     report,
     warnings,

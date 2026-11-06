@@ -33,7 +33,7 @@ the screen.
 
 Two axes on one surface.
 
-Along the trail (horizontal): item 0 is the trail itself (length, duration,
+Along the trail (horizontal): item 0 is the trail itself (length, walking time,
 start, getting there); items 1..n are the stations in order. Tapping a
 marker, prev/next, or swiping the sheet are the same action: the selection
 changes, the map pans to it. On the map the selected station is highlighted,
@@ -60,7 +60,10 @@ behind a scroll container whose top is a transparent spacer that passes
 touches to the map; the card begins below it. Peek holds a handle, the
 title row ("7 · Title", and beside it the way to the station, the
 station the visitor is at, or else the language choice) and one orientation row (prev as a small button, the
-overview, "Next 8 · 350 m"): about 110–130 px, 15–18 % of a phone
+overview, "Next 8" over the leg's length and walking time, "350 m · 6 min",
+in the button's own height; while walking to it, the live arrow and
+distance join "Next 8" and the leg's line stays, so the peek keeps its
+height): about 110–130 px, 15–18 % of a phone
 viewport; a title on two lines adds one line. At full extent a
 strip of map (about 15 %) remains; with GPS follow mode centring the map on
 the visitor, that strip shows them, their heading and the selected station.
@@ -203,5 +206,6 @@ Attribution: swisstopo's line stays visible over whatever map remains.
   whether heading-up feels steady or nervous at walking pace, the GPS
   course in the old town's lanes, and whether the first tap should turn the
   map or only follow.
+- Whether the leg's line in "Next" (0.8 rem) reads in sunlight.
 - Whether the strip above a raised sheet should keep the selected station
   in view too while following; today the peek's arrow points to it.

@@ -13,6 +13,7 @@ drawn on OpenStreetMap's map, and has no aerial.
     pip install pillow            # only for render and view
     python src/build/route-trail.py fetch
     python src/build/route-trail.py route [--dry]
+    python src/build/route-trail.py heights            (route.geojson's heights, for walking times; `route` runs it)
     python src/build/route-trail.py verify
     python src/build/route-trail.py render [A-B ...] [--aerial] [--osm] [--intended] [--overview] [--out DIR]
     python src/build/route-trail.py view N [radius_m]  (a station over the map | the aerial)
@@ -143,6 +144,16 @@ def metres(a, b) -> float:
     """Distance between two [lon, lat] points, flat (equirectangular): right at a trail's scale, as build/legs.ts."""
     la =math.radians((a[1] + b[1]) / 2)
     return math.hypot((a[0] - b[0]) * 111320 * math.cos(la), (a[1] - b[1]) * 110574)
+
+
+def seg_dist(p, s) -> float:
+    """Distance in metres from point p to segment s = (a, b), all [lon, lat]."""
+    (a, b), la = s, math.cos(math.radians(p[1]))
+    ax, ay, bx, by = (a[0] - p[0]) * la * 111320, (a[1] - p[1]) * 110574, (b[0] - p[0]) * la * 111320, (b[1] - p[1]) * 110574
+    dx, dy = bx - ax, by - ay
+    L = dx * dx + dy * dy
+    t = 0 if L == 0 else max(0, min(1, -(ax * dx + ay * dy) / L))
+    return math.hypot(ax + t * dx, ay + t * dy)
 
 
 def merc(lon, lat, z):
@@ -344,6 +355,102 @@ def cmd_route(tr: Trail, dry: bool) -> None:
     if not dry:
         tr.route.write_text(json.dumps(fc, separators=(",", ":")), encoding="utf8")
         print("wrote", tr.route)
+        try:
+            cmd_heights(tr)
+        except (SystemExit, OSError) as e:  # the route stands; without heights the site shows no walking times
+            print("no heights (%s): route.geojson has none, so no walking times; `heights` tries again" % e)
+
+
+# --- heights ----------------------------------------------------------------
+
+PROFILE = "https://api3.geo.admin.ch/rest/services/profile.json"
+HEIGHT_STEP_M = 10  # route.geojson gets a vertex at least this often, each with its height
+
+
+def lv95(lon: float, lat: float) -> tuple[float, float]:
+    """WGS84 to Swiss LV95, swisstopo's approximate formulas (about 1 m), which the height service needs."""
+    p, l = (lat * 3600 - 169028.66) / 10000, (lon * 3600 - 26782.5) / 10000
+    e = 2600072.37 + 211455.93 * l - 10938.51 * l * p - 0.36 * l * p * p - 44.54 * l ** 3
+    n = 1200147.07 + 308807.95 * p + 3745.25 * l * l + 76.63 * p * p - 194.56 * l * l * p + 119.79 * p ** 3
+    return round(e, 2), round(n, 2)
+
+
+def _profile(points: list[tuple[float, float]]) -> list[float]:
+    """Terrain heights at these LV95 points from swisstopo's profile service (swissALTI3D), cached."""
+    body = urllib.parse.urlencode({"geom": json.dumps({"type": "LineString", "coordinates": points}), "sr": 2056,
+                                   "distinct_points": "true", "nb_points": len(points)}).encode()
+    f = CACHE / ("profile-%s.json" % hashlib.sha1(body).hexdigest()[:12])
+    if not f.exists():
+        f.write_bytes(urllib.request.urlopen(urllib.request.Request(PROFILE, data=body, headers=UA), timeout=60).read())
+    got = {(round(r["easting"], 1), round(r["northing"], 1)): r["alts"]["COMB"] for r in json.loads(f.read_text())}
+    out = []
+    for e, n in points:
+        z = got.get((round(e, 1), round(n, 1)))
+        if z is None:
+            sys.exit("the height service has no height at %.2f, %.2f (outside its coverage?)" % (e, n))
+        out.append(z)
+    return out
+
+
+def cmd_heights(tr: Trail) -> None:
+    """Gives every vertex of route.geojson its height (a third coordinate), with a vertex at least every
+    HEIGHT_STEP_M, so the build can derive walking times. The heights are the terrain's (swissALTI3D), which
+    under a bridge is the ground below it and over a tunnel the hill above: on a stretch OSM tags as bridge or
+    tunnel the height runs straight from one end to the other."""
+    fc = read_json(tr.route)
+    over = []  # the segments of the ways OSM tags as bridge or tunnel
+    for w in osm(tr, "highways"):
+        if w["tags"].get("bridge", "no") != "no" or w["tags"].get("tunnel", "no") != "no":
+            g = [(c["lon"], c["lat"]) for c in w["geometry"]]
+            over += list(zip(g, g[1:]))
+
+    def on_over(a, b) -> bool:
+        """The route's segment a-b lies on a bridge or tunnel (also once densified: both ends on one of its segments)."""
+        return any(seg_dist(a, s) < 0.5 and seg_dist(b, s) < 0.5 for s in over)
+
+    count = 0
+    for feat in fc["features"]:
+        g = feat["geometry"]
+        lines = [g["coordinates"]] if g["type"] == "LineString" else g["coordinates"]
+        new_lines = []
+        for line in lines:
+            pts, flat = [], []  # flat[i]: the segment ending at pts[i] is a bridge or tunnel
+            for i, p in enumerate(line):
+                p = (round(p[0], 6), round(p[1], 6))
+                if pts:
+                    a = pts[-1]
+                    n = max(1, math.ceil(metres(a, p) / HEIGHT_STEP_M))
+                    b = on_over(a, p)
+                    count += b
+                    for k in range(1, n):
+                        pts.append((round(a[0] + (p[0] - a[0]) * k / n, 6), round(a[1] + (p[1] - a[1]) * k / n, 6)))
+                        flat.append(b)
+                    flat.append(b)
+                else:
+                    flat.append(False)
+                pts.append(p)
+            xy = [lv95(*p) for p in pts]
+            z: list[float] = []
+            for i in range(0, len(xy), 400):
+                z += _profile(xy[i:i + 400])
+            i = 1
+            while i < len(pts):  # straight across bridges and tunnels
+                if not flat[i]:
+                    i += 1
+                    continue
+                j = i
+                while j + 1 < len(pts) and flat[j + 1]:
+                    j += 1
+                s = [0.0]
+                for k in range(i, j + 1):
+                    s.append(s[-1] + metres(pts[k - 1], pts[k]))
+                for k in range(i, j):
+                    z[k] = z[i - 1] + (z[j] - z[i - 1]) * s[k - i + 1] / s[-1]
+                i = j + 1
+            new_lines.append([[p[0], p[1], round(h, 1)] for p, h in zip(pts, z)])
+        g["coordinates"] = new_lines[0] if g["type"] == "LineString" else new_lines
+    tr.route.write_text(json.dumps(fc, separators=(",", ":")), encoding="utf8")
+    print("wrote %s: heights every %d m at most; %d segments on bridges or tunnels" % (tr.route, HEIGHT_STEP_M, count))
 
 
 # --- the build's own legs ---------------------------------------------------
@@ -536,7 +643,7 @@ def cmd_view(tr: Trail, n: int, radius: float) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["fetch", "route", "verify", "render", "view", "explain", "place", "legs"])
+    ap.add_argument("command", choices=["fetch", "route", "heights", "verify", "render", "view", "explain", "place", "legs"])
     ap.add_argument("args", nargs="*", help="leg names A-B (render, explain), or N [radius] (view), or N lon lat (place)")
     ap.add_argument("--trail", help="trail folder (name under trails/, or a path)")
     ap.add_argument("--dry", action="store_true", help="route: do not write route.geojson")
@@ -553,6 +660,8 @@ def main() -> None:
         osm(tr, "features", a.refresh)
     elif a.command == "route":
         cmd_route(tr, a.dry)
+    elif a.command == "heights":
+        cmd_heights(tr)
     elif a.command == "verify":
         cmd_verify(tr)
     elif a.command == "legs":

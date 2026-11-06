@@ -6,7 +6,7 @@
 // "walk on" that also collapses the sheet).
 
 import type { Trail } from "./trail-types.ts";
-import { formatDistance, type Strings } from "./strings.ts";
+import { formatDistance, formatMinutes, type Strings } from "./strings.ts";
 import { pickAudio } from "./player.ts";
 import { languageRow, machineNote, textFor } from "./language.ts";
 import { attr, esc } from "./html.ts";
@@ -53,9 +53,16 @@ export function renderCard(trail: Trail, n: number, lang: string, s: Strings, bo
       <button class="go go-prev" data-go="${n - 1}" aria-label="${attr(n - 1 === 0 ? s.toOverview : `${s.prevTo} ${n - 1}: ${tx(prev!.title)}`)}">
         ${chevronLeft}<span>${n - 1 === 0 ? s.overview : n - 1}</span>
       </button>`;
+    // The leg's length and, where the route has heights, its walking time:
+    // a second line under "Next", which stays while the way's live distance
+    // joins the first, so the peek keeps its height.
+    const legDist = leg ? formatDistance(leg.length, lang, s) : "";
+    const legTime = leg?.minutes !== undefined ? formatMinutes(leg.minutes, 1) : "";
+    const legParts = [legDist, legTime].filter(Boolean);
+    const legText = legParts.join(", ");
     const nextBtn = next
-      ? `<button class="go go-next" data-go="${n + 1}" data-live="" aria-label="${attr(`${s.nextTo} ${n + 1}: ${tx(next.title)}${leg ? `, ${formatDistance(leg.length, lang, s)}` : ""}`)}">
-          <span>${s.next} <b>${n + 1}</b>${leg ? `<span class="go-leg"> · ${formatDistance(leg.length, lang, s)}</span>` : ""}<span class="go-way"> · ${wayArrow}<span class="way-dist"></span></span></span>${chevron}
+      ? `<button class="go go-next" data-go="${n + 1}" data-live="" aria-label="${attr(`${s.nextTo} ${n + 1}: ${tx(next.title)}${legText ? `, ${legText}` : ""}`)}">
+          <span class="go-label"><span>${s.next} <b>${n + 1}</b><span class="go-way"> · ${wayArrow}<span class="way-dist"></span></span></span>${legText ? `<span class="go-leg">${legParts.join(" · ")}</span>` : ""}</span>${chevron}
         </button>`
       : `<span class="orient-info">${s.lastStation}</span>
          <button class="go go-next" data-go="0"><span>${s.overview}</span>${chevron}</button>`;

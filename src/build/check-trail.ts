@@ -11,10 +11,14 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 try {
   const t = loadTrail(resolveTrailDir(repoRoot));
   const src = t.languages[0];
-  console.log(`Trail ${t.id} (${t.languages.join(", ")}): ${t.items.length - 1} stations, ${(t.length / 1000).toFixed(2)} km along the route`);
+  console.log(
+    `Trail ${t.id} (${t.languages.join(", ")}): ${t.items.length - 1} stations, ${(t.length / 1000).toFixed(2)} km along the route` +
+      (t.minutes !== undefined ? `, ${Math.round(t.minutes)} min walking at the signposts' pace` : ", no walking times (route.geojson has no heights: build/route-trail.py heights)"),
+  );
   for (const l of t.legs) {
     const s = t.items[l.from];
-    console.log(`  ${String(l.from).padStart(2)}→${String(l.to).padEnd(2)} ${String(l.length).padStart(5)} m${l.straight ? "  STRAIGHT LINE (no path along the route)" : ""}   ${s.title[src]}`);
+    const time = l.minutes !== undefined ? `${l.minutes.toFixed(1).padStart(5)} min` : "";
+    console.log(`  ${String(l.from).padStart(2)}→${String(l.to).padEnd(2)} ${String(l.length).padStart(5)} m${time}${l.straight ? "  STRAIGHT LINE (no path along the route)" : ""}   ${s.title[src]}`);
   }
   const lb = t.limits.bounds;
   console.log(`Map bounded to ${lb[0][1].toFixed(4)},${lb[0][0].toFixed(4)} – ${lb[1][1].toFixed(4)},${lb[1][0].toFixed(4)}, minimum zoom ${t.limits.minZoom}`);

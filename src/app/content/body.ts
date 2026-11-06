@@ -5,7 +5,7 @@
 // links, publisher and footer. A trail's theme.css restyles these classes.
 
 import type { Image, Item, Localized, Logo } from "../trail-types.ts";
-import { formatDistance, type Strings } from "../strings.ts";
+import { formatDistance, formatMinutes, type Strings } from "../strings.ts";
 import { attr, esc } from "../html.ts";
 import type { BodyContext } from "./context.ts";
 import { renderPlayer } from "./player-view.ts";
@@ -21,7 +21,7 @@ function stationBody(ctx: BodyContext, aside: string): string {
   const fields = trail.stationFields
     .filter((f) => tx(item.fields[f.key]))
     .map((f) => `<div class="field"><dt>${esc(tx(f.label))}</dt><dd>${esc(tx(item.fields[f.key]))}</dd></div>`)
-    .join("");
+    .join("") + toEnd(ctx);
   // The station named as its sign names it, so a visitor at the sign sees they have the right card.
   // The trail's mark beside it, as the signs carry it.
   const sign = tx(trail.signLabel);
@@ -34,11 +34,26 @@ function stationBody(ctx: BodyContext, aside: string): string {
     ${figures(item, tx, s)}`;
 }
 
+/**
+ * The walking time from this station to the last, at the pace of item 0's:
+ * a visitor who joins mid-trail, or walks it the other way, derives their own
+ * from it and the total. None at the last station or where legs lack times.
+ */
+function toEnd({ trail, item, s }: BodyContext): string {
+  const last = trail.items.length - 1;
+  const legs = trail.legs.filter((l) => l.from >= item.n);
+  if (item.n >= last || !legs.length || legs.some((l) => l.minutes === undefined)) return "";
+  const minutes = legs.reduce((sum, l) => sum + l.minutes!, 0);
+  return `<div class="field"><dt>${esc(s.walkTimeTo.replace("{n}", String(last)))}</dt><dd>${s.approx} ${formatMinutes(minutes, 5)}</dd></div>`;
+}
+
 function overviewBody(ctx: BodyContext, aside: string): string {
   const { trail, item, lang, tx, s } = ctx;
   const facts: [string, string][] = [];
   if (trail.length) facts.push([s.length, `${s.approx} ${formatDistance(trail.length, lang, s)}`]);
   if (tx(trail.duration)) facts.push([s.duration, esc(tx(trail.duration))]);
+  else if (trail.minutes !== undefined)
+    facts.push([s.walkTime, `${s.approx} ${formatMinutes(trail.minutes, 5)} <span class="field-note">${s.walkTimeHow}</span>`]);
   facts.push([s.start, `1 · ${esc(tx(trail.items[1].title))}`]);
   if (tx(trail.gettingThere)) facts.push([s.gettingThere, esc(tx(trail.gettingThere))]);
 

@@ -5,10 +5,12 @@
 // each line, and each fragment end joined to the nearest vertex of every other
 // fragment within GAP_M. Each station is attached at its nearest point on the
 // route; a leg is the shortest path between two attachments. Where none
-// exists, the leg is a straight line and is marked as such.
+// exists, the leg is a straight line and is marked as such. Where the route's
+// points carry heights (a third coordinate), each leg gets its walking time.
 
 import type { Leg, LngLat } from "../app/trail-types.ts";
 import { routeLines } from "../app/geo.ts";
+import { walkMinutes } from "./walk-time.ts";
 
 /** Largest gap between fragments that is bridged, metres. */
 const GAP_M = 60;
@@ -83,6 +85,8 @@ export function computeLegs(route: GeoJSON.FeatureCollection, stations: LngLat[]
       nodes[a][0] + best.t * (nodes[b][0] - nodes[a][0]),
       nodes[a][1] + best.t * (nodes[b][1] - nodes[a][1]),
     ];
+    const za = (nodes[a] as number[])[2], zb = (nodes[b] as number[])[2];
+    if (typeof za === "number" && typeof zb === "number") (q as number[]).push(za + best.t * (zb - za));
     const id = addNode(q);
     link(id, a);
     link(id, b);
@@ -101,7 +105,11 @@ export function computeLegs(route: GeoJSON.FeatureCollection, stations: LngLat[]
     const coordinates = path.map((n) => nodes[n]);
     let length = 0;
     for (let k = 1; k < coordinates.length; k++) length += dist(coordinates[k - 1], coordinates[k]);
-    legs.push({ from, to, straight: false, length: Math.round(length), coordinates: coordinates.map(round6) });
+    const minutes = walkMinutes(coordinates, dist);
+    legs.push({
+      from, to, straight: false, length: Math.round(length), coordinates: coordinates.map(round6),
+      ...(minutes === undefined ? {} : { minutes: Math.round(minutes * 10) / 10 }),
+    });
   }
   return { legs, report };
 }

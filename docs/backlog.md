@@ -44,9 +44,10 @@ so another trail is a fork with its folder replaced.
   (docs/design/surface.md, Basemap). Generic trails default to an OSM-based
   basemap.
 - Between stations 12 and 13, down at the river, a lift leads up to the
-  railway station in a few minutes; worst-case timings are available from
-  the user when needed. swisstopo serves height data, so walking times can
-  be derived from distance and ascent.
+  railway station, both ways: a quick way off the trail, and a quick way
+  on for visitors arriving by train, who enter at 12 or 13 and may walk
+  the trail backwards. The lift takes about 3 minutes in a normal worst
+  case (no queue).
 - Stack: Vite, TypeScript, MapLibre GL (needs WebGL2: iOS 15+), static
   build, GitHub Pages via Actions; development mostly on local previews.
   UI framework is the implementer's call, within forkability.
@@ -151,8 +152,12 @@ Not yet: a ground test in Baden, iOS.
   docs/notes/wildlife-and-seasons.md.
 - Easy wins in content: more on the Stadtturm and similar additions beyond
   the placards.
-- Walking time in item 0 derived from distance and swisstopo height data,
-  where the publisher states none.
+- Walking time from where the visitor is — what is left to the next
+  station or the trail's end, at the fixed pace of the precomputed times
+  (docs/design/trail-content.md, route.geojson). It belongs near
+  "Next", with the way's arrow and distance. A visitor off the route needs
+  a time from anywhere, which may want a pathing grid precomputed at build
+  time rather than routing on the phone.
 - A static map image generated at build time (tiles over the trail's
   extent, the route and numbered stations, attribution in the image): what
   the map's place shows where a device can't run the map

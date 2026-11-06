@@ -73,6 +73,11 @@ export interface Leg {
   coordinates: LngLat[];
   /** true when no path along the route was found and the leg is a straight line. */
   straight: boolean;
+  /**
+   * Walking time in minutes at the signposts' pace (build/walk-time.ts), not
+   * rounded for display; absent where the route has no heights or the leg is straight.
+   */
+  minutes?: number;
 }
 
 export interface Trail {
@@ -102,6 +107,8 @@ export interface Trail {
   legs: Leg[];
   /** Sum of the legs from station 1 to the last, metres. */
   length: number;
+  /** Sum of the legs' walking times, minutes; absent unless every leg has one. */
+  minutes?: number;
   /** The stations' and the route's extent, [[west, south], [east, north]]. */
   extent: [LngLat, LngLat];
   /** How far the map may go: the trail's extent with its margin, and the matching minimum zoom. */
