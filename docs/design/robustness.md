@@ -25,8 +25,11 @@ their departure is known.
   (a static map: docs/backlog.md, Later).
 - There is no telemetry and no device lab: a Samsung phone (Samsung
   Internet, Chrome), desktop browsers, and headless Chromium/Edge for
-  scripted checks. iOS is known from documentation and model knowledge
-  only.
+  scripted checks. iOS is known from documentation and model knowledge;
+  iPhones are within reach only indirectly, through NAVO members, so an
+  iOS check is a request relayed to them, with what to look at.
+- Visitors may report a problem (the user's decision, in principle); at
+  first the report goes directly to GitHub (docs/backlog.md, Later).
 - Known departures from the specs, and where the site meets them:
   - Samsung Internet lays a fixed page out under its bottom toolbar
     (docs/design/surface.md, Situation).

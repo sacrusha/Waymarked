@@ -140,6 +140,11 @@ Not yet: a ground test in Baden, iOS.
 
 ## Later, unordered
 
+- Report a problem: a link on the site that opens a report with what the
+  visitor saw and the state that explains it (station, language, device and
+  browser, screen size, location on or off); at first it goes directly to
+  GitHub as an issue. A GitHub issue needs an account and is public, which
+  limits who reports and what a report may carry (no position).
 - Wildlife integration: bird watching, sightings, species information.
 - Seasonal content: what is to be seen now (Alpensegler from April,
   Lerchensporn in early spring). Sources, licences and options for both:

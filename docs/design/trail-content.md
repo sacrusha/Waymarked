@@ -128,7 +128,9 @@ name's meaning helps ("Landvogteischloss (bailiffs' castle)").
 The trail's look beyond its two colours: the engine loads it after its own
 stylesheet, and `url()`s in it resolve next to it. It sets the engine's
 tokens on `:root` (`--font`, `--heading` for titles and headings, `--ink`,
-`--muted`, `--paper`, `--wash`, `--line`, `--radius`) and may restyle the
+`--muted`, `--paper`, `--wash`, `--line`, `--radius`; `--prev`, `--next`
+and their text colours `--on-prev`, `--on-next` for the previous and the
+next station, one colour each for the marker and the card's button) and may restyle the
 card's classes. The site follows the device into dark (docs/design/brand.md,
 Dark), and a token set on `:root` holds in both: a colour the theme sets
 needs its dark value too, in `@media (prefers-color-scheme: dark)` after

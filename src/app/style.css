@@ -18,6 +18,13 @@
   --accent-tint: var(--accent-tint-light, #c9e0f0);
   /* Text on an --accent fill. */
   --on-accent: var(--ink);
+  /* The previous and the next station: the map's markers and the card's prev
+     and next buttons, one colour per role so the two always match. The same
+     in both schemes, since the markers sit on the map, which stays light. */
+  --prev: var(--accent-tint-light, #c9e0f0);
+  --on-prev: #17231e;
+  --next: var(--accent);
+  --on-next: #17231e;
   /* The visitor on the map and the way from them (walking help): the blue every map app uses for "you". */
   --you: #1f6fe0;
   /* The same blue as text and icons on paper. */
@@ -429,9 +436,10 @@ button {
   font-size: 1rem;
   white-space: nowrap;
 }
+/* Prev and next in the colours of the previous and the next station's markers. */
 .go-prev {
-  background: var(--wash);
-  color: var(--muted);
+  background: var(--prev);
+  color: var(--on-prev);
   padding: 0 12px 0 8px;
 }
 /* The overview: the trail's glyph, its word added where the row has room. */
@@ -459,8 +467,8 @@ button {
 }
 .go-next {
   margin-left: auto;
-  background: var(--accent-tint);
-  color: var(--ink);
+  background: var(--next);
+  color: var(--on-next);
   padding: 0 10px 0 16px;
 }
 .go-next b {
@@ -850,11 +858,13 @@ button {
 }
 .marker[data-state="prev"] {
   --size: 30px;
-  background: var(--accent-tint);
+  background: var(--prev);
+  color: var(--on-prev);
 }
 .marker[data-state="next"] {
   --size: 34px;
-  background: var(--accent);
+  background: var(--next);
+  color: var(--on-next);
   font-size: 15px;
 }
 .marker[data-state="selected"] {
