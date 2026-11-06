@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -49,3 +49,8 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          # GitHub's processing of the upload has taken from seconds to over
+          # the default 10 minutes; a slow queue should mean a longer wait,
+          # not a failed run.
+          timeout: 1800000
