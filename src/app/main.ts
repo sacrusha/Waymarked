@@ -47,16 +47,51 @@ const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 if (trail.theme.accent) root.style.setProperty("--accent", trail.theme.accent);
 if (trail.theme.accentDark) root.style.setProperty("--accent-dark", trail.theme.accentDark);
-if (trail.theme.accent) root.style.setProperty("--accent-tint", mixWithWhite(trail.theme.accent, 0.28));
-
-/** A hex colour mixed with white (share = the colour's part), for pale fills. */
-function mixWithWhite(hex: string, share: number): string {
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
-  if (!m) return hex;
+// Fills and text derived from the accent, for light and dark paper
+// (docs/design/brand.md, Dark); color-mix needs Safari 16.2, the floor is iOS 15.
+type RGB = [number, number, number];
+const WHITE: RGB = [255, 255, 255];
+/** Any CSS colour as RGB, through a canvas, which normalises opaque colours to #rrggbb. */
+function rgbOf(value: string): RGB | undefined {
+  const ctx = document.createElement("canvas").getContext("2d");
+  if (!ctx || !value.trim()) return undefined;
+  ctx.fillStyle = value.trim();
+  const m = /^#([0-9a-f]{6})$/i.exec(ctx.fillStyle);
+  if (!m) return undefined;
   const v = parseInt(m[1], 16);
-  const ch = (shift: number) => Math.round(((v >> shift) & 255) * share + 255 * (1 - share));
-  return `rgb(${ch(16)} ${ch(8)} ${ch(0)})`;
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
 }
+/** a mixed into b (share = a's part). */
+function mix(a: RGB, b: RGB, share: number): RGB {
+  return a.map((x, i) => Math.round(x * share + b[i] * (1 - share))) as RGB;
+}
+const rgbCss = ([r, g, b]: RGB) => `rgb(${r} ${g} ${b})`;
+/** WCAG contrast ratio. */
+function contrast(a: RGB, b: RGB): number {
+  const lum = (c: RGB) => {
+    const [r, g, bl] = c.map((x) => (x / 255 <= 0.03928 ? x / 255 / 12.92 : ((x / 255 + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  };
+  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+const darkScheme = matchMedia("(prefers-color-scheme: dark)");
+function deriveAccent() {
+  const css = getComputedStyle(root);
+  const accent = rgbOf(css.getPropertyValue("--accent"));
+  if (!accent) return;
+  root.style.setProperty("--accent-tint-light", rgbCss(mix(accent, WHITE, 0.28)));
+  // The dark values need the dark paper, which the stylesheet gives only while dark is on.
+  const paper = darkScheme.matches ? rgbOf(css.getPropertyValue("--paper")) : undefined;
+  if (!paper) return;
+  root.style.setProperty("--accent-tint-dark", rgbCss(mix(accent, paper, 0.3)));
+  // The accent as text on dark paper: lightened toward white until it reads outdoors (6:1).
+  let text = accent;
+  for (let share = 0.95; contrast(text, paper) < 6 && share >= 0; share -= 0.05) text = mix(accent, WHITE, share);
+  root.style.setProperty("--accent-text-dark", rgbCss(text));
+}
+deriveAccent();
+darkScheme.addEventListener("change", deriveAccent);
 sheet.setAttribute("aria-label", s.sheet);
 root.lang = lang;
 divider.setAttribute("aria-label", s.resize);
@@ -76,7 +111,8 @@ interface Saved {
   sheetTop: number;
   /** Scroll offset inside the card once it is at full extent. */
   inner: number;
-  view: View;
+  /** Absent where the device could not show the map. */
+  view?: View;
   /** Walking help's camera mode (walking.ts). */
   mode?: Mode;
 }
@@ -95,20 +131,38 @@ const saved = readSaved();
 const resume = saved && saved.n === hashN ? saved : undefined;
 
 let current = hashN;
-const tmap = new TrailMap(document.getElementById("map")!, trail, lang, s, (n) => select(n), resume?.view);
+const mapEl = document.getElementById("map")!;
+// The map needs WebGL2, which a device can lack or have switched off (an old
+// GPU, a blocked driver, a hardened browser mode): MapLibre then throws. The
+// cards are the leaflet and work without it (docs/design/robustness.md).
+let tmap: TrailMap | undefined;
+try {
+  tmap = new TrailMap(mapEl, trail, lang, s, (n) => select(n), resume?.view);
+} catch (e) {
+  console.error(e);
+  mapEl.replaceChildren();
+  mapEl.classList.add("map-none");
+  surface.dataset.map = "none";
+  const note = document.createElement("p");
+  note.className = "map-none-note";
+  note.textContent = s.noMap;
+  mapEl.append(note);
+}
 // The language toggle (a change reloads; where the visitor is has been saved first).
-mountLanguage(tmap.map, trail, lang, s, () => saveNow());
+mountLanguage(tmap?.map ?? mapEl, trail, lang, s, () => saveNow());
 
 // Walking help (docs/design/surface.md): the visitor's position on the map, and the way in the peek row.
 const here = new Here();
-const walking = new Walking(tmap, here, {
-  tools: document.getElementById("map-tools")!,
-  visible: () => mapPadding(),
-  s,
-  lang,
-  onMode: () => save(),
-});
-const guide = new Guide(trail, here, tmap, head, s, lang);
+const walking = tmap
+  ? new Walking(tmap, here, {
+      tools: document.getElementById("map-tools")!,
+      visible: () => mapPadding(),
+      s,
+      lang,
+      onMode: () => save(),
+    })
+  : undefined;
+const guide = tmap ? new Guide(trail, here, tmap, head, s, lang) : undefined;
 // Location once allowed comes back on the next visit without a tap; the browser asks nothing then.
 here.onChange((what) => {
   if (what !== "state") return;
@@ -117,7 +171,7 @@ here.onChange((what) => {
 });
 
 // Dev servers only: the map and walking help on window, for agents' scripted checks in a headless browser.
-if (import.meta.env.DEV) Object.assign(window, { __map: tmap.map, __here: here, __walking: walking });
+if (import.meta.env.DEV) Object.assign(window, { __map: tmap?.map, __here: here, __walking: walking });
 
 // --- sheet geometry --------------------------------------------------------
 
@@ -209,9 +263,9 @@ function render(n: number) {
   end.innerHTML = parts.end;
   card.dataset.n = String(n);
   setPeek();
-  player.show();
+  player.show(parts.track);
   card.setAttribute("aria-label", parts.label);
-  guide.show(n);
+  guide?.show(n);
   const trailTitle = tx(trail.items[0].title);
   document.title = n === 0 ? trailTitle : `${parts.label} – ${trailTitle}`;
 }
@@ -259,11 +313,11 @@ function select(n: number, opts: { walk?: boolean; from?: number; fromHistory?: 
 
   // Walking on, the sheet is on its way down: the view is the one above the peek.
   const padding = opts.walk && portrait() ? { ...mapPadding(), top: mapTop(), bottom: (peekHeight() || 120) + 16 } : mapPadding();
-  tmap.select(n);
+  tmap?.select(n);
   // Following the visitor, the map keeps them in place and only zooms out to show the station too;
   // the overview is the whole trail, so it ends following.
-  if (n === 0) walking.setMode("free");
-  if (n === 0 || !walking.reveal(trail.items[n].position!, padding)) tmap.reveal(n, padding);
+  if (n === 0) walking?.setMode("free");
+  if (tmap && (n === 0 || !walking?.reveal(trail.items[n].position!, padding))) tmap.reveal(n, padding);
   save();
 }
 
@@ -301,7 +355,8 @@ addEventListener("keydown", (e) => {
   };
   card.addEventListener("pointerdown", (e) => {
     if (e.pointerType === "mouse" || !e.isPrimary) return;
-    if ((e.target as Element).closest("input[type=range]")) return; // the audio position slider drags sideways
+    // Content that takes a sideways drag of its own says so (content/context.ts); a slider always does.
+    if ((e.target as Element).closest("[data-no-swipe], input[type=range]")) return;
     g = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: e.timeStamp, dx: 0 };
   });
   card.addEventListener("pointermove", (e) => {
@@ -374,7 +429,7 @@ addEventListener("keydown", (e) => {
   addEventListener("resize", apply);
   sideBySide.addEventListener("change", () => {
     layout();
-    requestAnimationFrame(() => tmap.reveal(current, mapPadding()));
+    requestAnimationFrame(() => tmap?.reveal(current, mapPadding()));
   });
 
   let dragging = false;
@@ -449,8 +504,8 @@ function saveNow() {
     n: current,
     sheetTop: portrait() ? Math.max(0, cardTop()) / viewH() : 0,
     inner: Math.max(0, sheet.scrollTop - (portrait() ? fullExtent() : 0)),
-    view: tmap.view(),
-    mode: walking.mode,
+    view: tmap?.view(),
+    mode: walking?.mode,
   };
   session.set(SAVE_KEY, JSON.stringify(data));
 }
@@ -465,13 +520,13 @@ function placeTools() {
   root.style.setProperty("--top-controls-out", `${Math.round(out * (topControlsHeight() + 8))}px`);
   root.style.setProperty("--tools-out", `${Math.round(out * (tools.offsetHeight + 22))}px`);
   surface.dataset.controls = out >= 1 ? "out" : "";
-  tmap.setCovered(covered());
-  walking.nudge();
+  tmap?.setCovered(covered());
+  walking?.nudge();
 }
 sheet.addEventListener("scroll", placeTools, { passive: true });
 addEventListener("resize", placeTools);
 new ResizeObserver(placeTools).observe(head);
-tmap.map.on("moveend", save);
+tmap?.map.on("moveend", save);
 // Phones discard tabs after screen-lock; hidden is the last reliable moment.
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") (clearTimeout(saveTimer), saveNow());
@@ -482,7 +537,7 @@ document.addEventListener("visibilitychange", () => {
 // Walking help resumes where it was (a tab discarded after screen-lock), and
 // location comes back on a later visit, both only where the browser has
 // already allowed it: no prompt without a tap.
-if (store.get("here") === "on" || (resume?.mode && resume.mode !== "free")) {
+if (walking && (store.get("here") === "on" || (resume?.mode && resume.mode !== "free"))) {
   void Here.granted().then((ok) => {
     if (!ok) return;
     here.start(false);
@@ -498,14 +553,17 @@ requestAnimationFrame(() => {
       if (resume.inner > 0) sheet.scrollTop = fullExtent() + resume.inner;
       else setCardTop(resume.sheetTop * viewH());
     } else sheet.scrollTop = resume.inner;
-    tmap.select(current); // the camera is where it was
+    tmap?.select(current); // the camera is where it was
   } else {
-    // Arriving (QR code, link, first visit): the sheet half open.
-    setCardTop(viewH() * 0.5);
-    tmap.select(current);
+    // Arriving (QR code, link, first visit): the sheet at its peek, where the
+    // cut-off line says it scrolls (docs/design/surface.md, Depth). Without a
+    // map there is only the card to show: half open.
+    if (tmap) sheet.scrollTop = 0;
+    else setCardTop(viewH() * 0.5);
+    tmap?.select(current);
   }
   // The bounds once the sheet is in place: the saved view was inside them, and stays as it was.
-  tmap.setCovered(covered());
-  if (!resume) tmap.frame(current, mapPadding());
+  tmap?.setCovered(covered());
+  if (!resume) tmap?.frame(current, mapPadding());
   requestAnimationFrame(placeTools);
 });

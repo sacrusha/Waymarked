@@ -24,7 +24,8 @@ the screen.
   at home. Mobile browsers discard tabs after screen-lock, and some
   (Samsung Internet) lay a fixed page out under their bottom toolbar: the
   surface takes the window's inner height, the one height the sheet's
-  bounds and the visible map are measured from.
+  bounds and the visible map are measured from. Browsers and devices that
+  fail the map, the location or the audio: docs/design/robustness.md.
 - The map is MapLibre GL. The basemap may rotate (heading-up), which keeps
   labels readable only on vector tiles.
 
@@ -66,7 +67,9 @@ the visitor, that strip shows them, their heading and the selected station.
 Same map, less of it. Untrained visitors did not discover that the
 minimised sheet scrolls, so peek shows the first half-line of the text, cut
 off, and the sheet bounces briefly when a different station is selected
-while minimised: both say there is more.
+while minimised: both say there is more. A visitor arriving (first visit,
+link, QR code) finds the sheet at peek, where the cut-off line is seen;
+higher, it is not.
 
 Transitions the site initiates: exactly one. "Next: 8 Title →" at a card's
 end moves along the trail and collapses the sheet to peek; the visitor is
@@ -157,7 +160,7 @@ turned the way they face, so that ahead on the map is ahead on the ground.
   than that (Baden's 6 and 7, 17 m apart), the selected one wins.
 
 State: the selected station in the URL (`#7`), so reload, share and QR
-deep-links land on a station with the sheet half open; the sheet's
+deep-links land on a station with the sheet at peek; the sheet's
 position, the view and follow mode survive a reload in the tab. Each station change
 is a history entry, so Back steps back through the cards; leaving the site
 on Back would surprise.

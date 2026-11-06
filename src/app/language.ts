@@ -100,9 +100,12 @@ class LanguageSwitch implements IControl {
  * whatever the sheet shows), and the "read the original" buttons in cards.
  * `before` runs just ahead of the reload: main.ts saves where the visitor is.
  */
-export function mountLanguage(map: MLMap, trail: Trail, lang: string, s: Strings, before: () => void) {
+export function mountLanguage(on: MLMap | HTMLElement, trail: Trail, lang: string, s: Strings, before: () => void) {
   if (trail.languages.length < 2) return;
-  map.addControl(new LanguageSwitch(trail, lang, s, before), "top-left");
+  const sw = new LanguageSwitch(trail, lang, s, before);
+  // Where the device shows no map, the toggle sits in the map's place on its own.
+  if (on instanceof HTMLElement) on.append(sw.onAdd());
+  else on.addControl(sw, "top-left");
   document.addEventListener("click", (e) => {
     const b = (e.target as Element).closest<HTMLElement>("[data-lang]");
     if (b?.dataset.lang && b.dataset.lang !== lang) choose(b.dataset.lang, before);

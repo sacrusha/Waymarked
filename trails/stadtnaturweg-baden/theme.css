@@ -15,7 +15,8 @@
 }
 
 /* "STADTNATURWEG TAFEL 5", the placard's header line. The print green is too
-   light for small text outdoors (2.3:1 on white), so it is the dark green. */
+   light for small text outdoors (2.3:1 on white), so it is the dark green;
+   on dark paper it is the print green (--accent-text). */
 .sign-label {
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -121,4 +122,21 @@
 }
 .trail-footer-text p:last-child {
   margin-bottom: 0;
+}
+
+/* Dark (docs/design/brand.md, Dark): the leaflet's blue lightened for
+   headings, its black turned to a light neutral. On dark paper the print
+   green itself carries text (the engine derives --accent-text from it). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --heading: #86c0e6;
+    --ink: #e8e8e5;
+  }
+  /* The photo band in the darker green, so it doesn't glare beside dark paper. */
+  .photos {
+    background: var(--accent-dark);
+  }
+  .photos .photo-credits {
+    color: #fff;
+  }
 }

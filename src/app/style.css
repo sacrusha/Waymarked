@@ -1,6 +1,8 @@
 /* The surface. Tokens first; a trail sets --accent and --accent-dark
    (trail.json "theme") and anything else in its own theme.css, which loads
-   after this file. Outdoors, in sun: high contrast, large type. */
+   after this file. Outdoors, in sun: high contrast, large type. Light or
+   dark follows the device (docs/design/brand.md, Dark): the dark tokens
+   follow the light ones. */
 
 :root {
   --ink: #17231e;
@@ -10,11 +12,22 @@
   --line: #d6ded9;
   --accent: #3d8fc4;
   --accent-dark: #17507a;
-  /* Set from the trail's accent by main.ts (color-mix needs Safari 16.2; the floor is iOS 15). */
-  --accent-tint: #c9e0f0;
+  /* The accent as text, lines and focus on paper. Light: the dark accent; dark: main.ts derives one. */
+  --accent-text: var(--accent-dark);
+  /* Pale fills of the accent, set from the trail's accent by main.ts (color-mix needs Safari 16.2; the floor is iOS 15). */
+  --accent-tint: var(--accent-tint-light, #c9e0f0);
+  /* Text on an --accent fill. */
+  --on-accent: var(--ink);
   /* The visitor on the map and the way from them (walking help): the blue every map app uses for "you". */
   --you: #1f6fe0;
+  /* The same blue as text and icons on paper. */
+  --you-ui: var(--you);
   --you-tint: #dde8fb;
+  /* The controls floating over the map. */
+  --glass: rgb(255 255 255 / 0.94);
+  --glass-thin: rgb(255 255 255 / 0.85);
+  /* A pressed button: darker on light paper, lighter on dark. */
+  --press: brightness(0.94);
   /* Titles and headings. */
   --heading: var(--ink);
   --font: "Public Sans Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -27,9 +40,47 @@
   --radius: 18px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  color-scheme: light;
+  /* Both declared: browsers that darken pages themselves (Chrome's auto dark, Samsung Internet) leave this one to its own dark. */
+  color-scheme: light dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+/* Dark: the sheet and the controls turn; the map stays the map, and what is
+   drawn on it keeps its light colours. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e4ebe7;
+    --muted: #a2afa8;
+    --paper: #141b18;
+    --wash: #202925;
+    --line: #34403a;
+    --accent-text: var(--accent-text-dark, #6fb0dc);
+    --accent-tint: var(--accent-tint-dark, #1f3a4c);
+    --on-accent: #101713;
+    --you-ui: #6ea8ff;
+    --you-tint: #173454;
+    --glass: rgb(20 27 24 / 0.92);
+    --glass-thin: rgb(20 27 24 / 0.78);
+    --press: brightness(1.18);
+  }
+  /* Station markers sit on the map, which stays light. */
+  .marker {
+    --paper: #ffffff;
+    --ink: #17231e;
+    --accent-tint: var(--accent-tint-light, #c9e0f0);
+  }
+  /* Logos are drawn for paper: each sits on its own white plate, around its full height. */
+  .trail-logos img {
+    box-sizing: content-box;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: #ffffff;
+  }
+  .map .maplibregl-ctrl.maplibregl-ctrl-attrib,
+  .map .maplibregl-ctrl.maplibregl-ctrl-attrib a {
+    color: var(--muted);
+  }
 }
 
 *,
@@ -58,7 +109,7 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--accent-dark);
+  outline: 3px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -123,6 +174,40 @@ button {
 }
 
 .divider {
+  display: none;
+}
+
+/* The map's place where the device can't show a map (main.ts), and the
+   notice of a map style that hasn't loaded (map.ts). */
+.map-none {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: calc(var(--safe-top) + 24px) 24px 0;
+}
+.map-none-note,
+.map-notice {
+  margin: 0;
+  max-width: 420px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgb(23 35 30 / 0.92);
+  color: #fff;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  text-align: center;
+}
+.map-notice {
+  position: absolute;
+  left: 50%;
+  top: 35%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(420px, calc(100% - 32px));
+  z-index: 3;
+}
+.map-notice[hidden] {
   display: none;
 }
 
@@ -206,7 +291,7 @@ button {
   .divider:hover::after,
   .resizing .divider::after {
     opacity: 1;
-    background: var(--accent-dark);
+    background: var(--accent-text);
   }
   .resizing {
     cursor: col-resize;
@@ -310,7 +395,7 @@ button {
 }
 .badge-trail {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
 }
 .badge-small {
   width: 30px;
@@ -319,7 +404,7 @@ button {
   box-shadow: none;
   background: var(--paper);
   color: var(--ink);
-  border: 2.5px solid var(--accent-dark);
+  border: 2.5px solid var(--accent-text);
 }
 
 .orient {
@@ -352,7 +437,7 @@ button {
 /* The overview: the trail's glyph, its word added where the row has room. */
 .go-overview {
   background: var(--wash);
-  color: var(--accent-dark);
+  color: var(--accent-text);
   padding: 0 11px;
 }
 .go-overview svg {
@@ -382,7 +467,7 @@ button {
   font-weight: 800;
 }
 .go:active {
-  filter: brightness(0.94);
+  filter: var(--press);
 }
 .chev {
   width: 16px;
@@ -396,7 +481,7 @@ button {
   height: 1.05em;
   flex: none;
   vertical-align: -0.16em;
-  color: var(--you);
+  color: var(--you-ui);
 }
 .guide {
   display: inline-flex;
@@ -565,7 +650,7 @@ button {
   padding-left: 1.1em;
 }
 .links a {
-  color: var(--accent-dark);
+  color: var(--accent-text);
   text-underline-offset: 3px;
 }
 .links li {
@@ -640,7 +725,7 @@ button {
 }
 .sign-label {
   margin: 0;
-  color: var(--accent-dark);
+  color: var(--accent-text);
   font-size: 0.95rem;
 }
 .trail-mark img {
@@ -815,10 +900,11 @@ button {
 .surface[data-controls="out"] .map-tools {
   visibility: hidden;
 }
-.maplibregl-ctrl-attrib {
+/* Three classes: MapLibre's stylesheet loads after this one and uses two. */
+.map .maplibregl-ctrl.maplibregl-ctrl-attrib {
   font-family: var(--font);
   font-size: 11px;
-  background: rgb(255 255 255 / 0.85);
+  background: var(--glass-thin);
 }
 /* The basemaps side by side, the current one filled. */
 .maplibregl-ctrl.basemap-switch {
@@ -826,7 +912,7 @@ button {
   padding: 3px;
   gap: 2px;
   border-radius: 20px;
-  background: rgb(255 255 255 / 0.94);
+  background: var(--glass);
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
 }
 .basemap-switch button {
@@ -840,7 +926,9 @@ button {
   font-weight: 600;
   white-space: nowrap;
 }
-.basemap-switch button[aria-checked="true"] {
+/* Hovered too: MapLibre's own control hover would otherwise empty the filled one. */
+.basemap-switch button[aria-checked="true"],
+.maplibregl-ctrl.basemap-switch button[aria-checked="true"]:hover {
   background: var(--accent-dark);
   color: #fff;
 }

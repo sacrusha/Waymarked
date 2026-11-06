@@ -62,7 +62,9 @@ so another trail is a fork with its folder replaced.
   generic/specific separation is architecture from version 1 on; the
   framework version is a check, not a build.
 - Design of the one screen: docs/design/surface.md; the trail's look:
-  docs/design/brand.md.
+  docs/design/brand.md; browsers and devices out of spec, and what the
+  site does when a capability fails: docs/design/robustness.md; shell,
+  content framework and content: docs/design/layers.md.
 
 ## Versions
 
@@ -146,6 +148,11 @@ Not yet: a ground test in Baden, iOS.
   the placards.
 - Walking time in item 0 derived from distance and swisstopo height data,
   where the publisher states none.
+- A static map image generated at build time (tiles over the trail's
+  extent, the route and numbered stations, attribution in the image): what
+  the map's place shows where a device can't run the map
+  (docs/design/robustness.md), the preview image of a shared link, the page
+  without JavaScript, a print view, perhaps a last resort offline.
 - Getting away: from the current location directly to 12 or 13 and the
   lift to the railway station; "the next train I can reasonably catch".
 

@@ -6,7 +6,7 @@
   padding: 3px;
   gap: 2px;
   border-radius: 20px;
-  background: rgb(255 255 255 / 0.94);
+  background: var(--glass);
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
 }
 .lang-switch button {
@@ -20,7 +20,9 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.lang-switch button[aria-pressed="true"] {
+/* Hovered too: MapLibre's own control hover would otherwise empty the filled one. */
+.lang-switch button[aria-pressed="true"],
+.maplibregl-ctrl.lang-switch button[aria-pressed="true"]:hover {
   background: var(--accent-dark);
   color: #fff;
 }
@@ -43,7 +45,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--accent-dark);
+  color: var(--accent-text);
   font-weight: 600;
   text-decoration: underline;
 }

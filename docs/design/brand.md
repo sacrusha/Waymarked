@@ -29,6 +29,11 @@ trail's look can use.
   installed; Android and Windows don't.
 - NAVO is the trail's author. The partner confirms that the city's "Baden
   ist." CI and the NAVO logo may appear on the site.
+- Phones are set to dark by their owners, always or from sunset, and some
+  browsers darken pages by their own rules (docs/design/robustness.md).
+  The print has no dark version. The trail's basemaps are light: the
+  Landeskarte and the aerial photo as raster tiles, the vector "Karte
+  hell" by name.
 
 ## How the site meets it
 
@@ -63,9 +68,44 @@ Baden's folder uses them so:
   the placards (`baden-ist.svg`), "STADT BADEN" from the leaflet
   (`stadt-baden.svg`); the NAVO logo is the placards' raster (`navo.png`).
 
+### Dark
+
+Purpose: the site follows the visitor's preference; set to dark, they get
+a dark site that is still the trail's, not one a browser has darkened by
+its own rules.
+
+The site follows the device's setting, and changes with it while open;
+there is no switch, which would be one more thing to learn
+(docs/design/surface.md).
+
+- The sheet and the controls over the map turn: a green-black paper, light
+  text, the same layout and sizes.
+- The map stays the map, at full strength: outdoors, in sun, its contrast
+  matters most, and the phone's brightness already follows the light
+  around it. The route, the markers and the visitor's dot keep their light
+  colours on it.
+- The trail's two colours: `accentDark` carries white text on buttons in
+  both. Where the accent is text or a line on paper (the sign label,
+  links, focus), dark uses `accent` itself if it reads at 6:1 on the dark
+  paper, else `accent` lightened until it does; the engine derives it, so
+  a trail gives no third colour. The visitor's blue, an engine colour,
+  is a lighter blue where it is text or an icon in the sheet.
+- Logos are drawn for paper: in the footer each sits on its own white
+  plate. The trail's mark is not plated: it already has to stand on the
+  cover photo.
+
+Baden's folder: on dark paper the print green reads at 7.5:1, so the
+placard's own green, too light for text on white, is the sign label's and
+the links' colour. Headings take the leaflet's blue lightened (`#86c0e6`),
+running text a light neutral for the print's black; the photo band is the
+dark green with the credits in white, as the light green would glare.
+
 ## Not known
 
 - Who took the leaflet's cover photo; the site shows it without a credit, as
   the leaflet does.
 - How the look holds in sun on real phones, Android especially, where it
-  falls back to Public Sans.
+  falls back to Public Sans; and the dark look in daylight, for a phone set
+  to dark all day.
+- Whether swisstopo offers a dark style of its vector basemap; the site
+  would need a basemap field for a dark variant to use one.

@@ -2,7 +2,8 @@
 // highlight (selected, previous, next, and the leg to the next).
 
 import { AttributionControl, LngLat as MLLngLat, Map as MLMap, Marker, MercatorCoordinate, setWorkerUrl, type IControl, type StyleSpecification } from "maplibre-gl";
-import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
+// Bundled by Vite (?worker&url), so the build target lowers its syntax too (vite.config.ts).
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Basemap, Localized, Trail } from "./trail-types.ts";
 import type { Strings } from "./strings.ts";
@@ -92,6 +93,7 @@ export class TrailMap {
     }
 
     this.map.on("style.load", () => this.addTrailLayers());
+    this.watchStyle(container);
     this.map.on("moveend", () => this.keepInside());
   }
 
@@ -111,6 +113,7 @@ export class TrailMap {
   setBasemap(i: number) {
     if (i === this.basemapIndex || i < 0 || i >= this.basemaps.length) return;
     this.basemapIndex = i;
+    this.styleReady = false;
     store.set(`${this.trail.id}:basemap-label`, this.basemaps[i].label[this.trail.languages[0]] ?? "");
     // diff: false reloads the whole style, so style.load fires and the trail's layers are added again.
     this.map.setStyle(this.styleFor(this.basemaps[i]), { diff: false });
@@ -295,6 +298,46 @@ export class TrailMap {
     const [left, right] = axis(c.clientWidth, p.left, p.right);
     return { top, bottom, left, right };
   }
+
+  /**
+   * A basemap given as a style URL (vector) is one fetch: lost, the map stays
+   * blank for the rest of the visit, though the page itself loaded. Until the
+   * style arrives, an error that names no source is the style's; the map says
+   * so and tries again, sooner when the browser reports a connection.
+   * Tiles that fail are MapLibre's to retry, and dead spots are offline's
+   * (docs/backlog.md, version 7).
+   */
+  private watchStyle(container: HTMLElement) {
+    let tries = 0;
+    let timer = 0;
+    const note = document.createElement("p");
+    note.className = "map-notice";
+    note.setAttribute("role", "status");
+    note.hidden = true;
+    note.textContent = this.s.mapRetry;
+    container.append(note);
+    this.retryStyle = () => {
+      clearTimeout(timer);
+      timer = 0;
+      this.styleReady = false;
+      this.map.setStyle(this.styleFor(this.basemaps[this.basemapIndex]), { diff: false });
+    };
+    this.map.on("style.load", () => {
+      this.styleReady = true;
+      tries = 0;
+      clearTimeout(timer);
+      timer = 0;
+      note.hidden = true;
+    });
+    this.map.on("error", (e) => {
+      if (this.styleReady || "sourceId" in e || timer) return;
+      note.hidden = false;
+      timer = window.setTimeout(() => this.retryStyle(), Math.min(60, 5 * 2 ** tries++) * 1000);
+    });
+    addEventListener("online", () => timer && this.retryStyle());
+  }
+  private styleReady = false;
+  private retryStyle = () => {};
 
   private styleFor(b: Basemap): string | StyleSpecification {
     if (b.style) return b.style;

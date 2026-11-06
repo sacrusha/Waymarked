@@ -43,7 +43,7 @@
   height: 26px;
 }
 .tool:active {
-  filter: brightness(0.94);
+  filter: var(--press);
 }
 .north {
   width: 40px;
@@ -59,7 +59,7 @@
   display: none;
 }
 .locate[data-mode="follow"] {
-  color: var(--you);
+  color: var(--you-ui);
 }
 .locate[data-mode="heading"] {
   background: var(--you);

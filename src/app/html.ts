@@ -1,4 +1,4 @@
-// Text into HTML: the cards are built as strings (card.ts, player.ts, language.ts), and the build names the page (vite.config.ts).
+// Text into HTML: the cards are built as strings (card.ts, content/, player.ts, language.ts), and the build names the page (vite.config.ts).
 
 /** Text as HTML content. */
 export function esc(s: string): string {

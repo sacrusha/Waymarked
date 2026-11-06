@@ -92,5 +92,9 @@ export default defineConfig(({ mode }) => ({
     fs: { allow: [repoRoot, trailDir] },
   },
   preview: { host: true, port: 4173 },
-  build: { outDir: "dist", emptyOutDir: true, chunkSizeWarningLimit: 1500 },
+  // Syntax lowered to the oldest browsers the map runs in (WebGL2: iOS 15,
+  // docs/backlog.md, Stack); the default, baseline-widely-available, keeps
+  // syntax (class static blocks) that Safari parses only from 16.4.
+  worker: { format: "es" },
+  build: { outDir: "dist", emptyOutDir: true, chunkSizeWarningLimit: 1500, target: ["safari15", "chrome100", "firefox100"] },
 }));
