@@ -1,7 +1,7 @@
 {
   "files": {
     "audio.de.mp3": {
-      "bytes": 156816,
+      "bytes": 157104,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -31,7 +31,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/01-stadtturm/audio.de.mp3": {
-      "bytes": 291600,
+      "bytes": 294912,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -61,7 +61,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/02-schlossberg-ruine-stein/audio.de.mp3": {
-      "bytes": 275184,
+      "bytes": 275616,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -91,7 +91,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/03-bezirksgebaeude/audio.de.mp3": {
-      "bytes": 292032,
+      "bytes": 291456,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -121,7 +121,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/04-schulhausplatz-tannegg/audio.de.mp3": {
-      "bytes": 296208,
+      "bytes": 299664,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -151,7 +151,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/05-schulhaus-pfaffechappe/audio.de.mp3": {
-      "bytes": 303984,
+      "bytes": 309024,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -181,7 +181,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/06-kirchweg/audio.de.mp3": {
-      "bytes": 311616,
+      "bytes": 313920,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -211,7 +211,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/07-kirchweg-graben/audio.de.mp3": {
-      "bytes": 259200,
+      "bytes": 263376,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -241,7 +241,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/08-landvogteischloss/audio.de.mp3": {
-      "bytes": 283824,
+      "bytes": 285552,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -271,7 +271,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/09-schartenfels/audio.de.mp3": {
-      "bytes": 281664,
+      "bytes": 286272,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -301,7 +301,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/10-limmat/audio.de.mp3": {
-      "bytes": 268416,
+      "bytes": 265104,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -331,7 +331,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/11-limmatuferweg/audio.de.mp3": {
-      "bytes": 266112,
+      "bytes": 264672,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -361,7 +361,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/12-limmathalde/audio.de.mp3": {
-      "bytes": 233136,
+      "bytes": 234720,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -391,7 +391,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/13-limmatpromenade/audio.de.mp3": {
-      "bytes": 343728,
+      "bytes": 346032,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -421,7 +421,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/14-limmat/audio.de.mp3": {
-      "bytes": 328320,
+      "bytes": 331200,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",
@@ -451,7 +451,7 @@
       "voice": "fr-CH-ArianeNeural"
     },
     "stations/15-kurpark/audio.de.mp3": {
-      "bytes": 356976,
+      "bytes": 357264,
       "rate": "+8%",
       "say": {
         "Baden/Ennetbaden": "Baden und Ennetbaden",

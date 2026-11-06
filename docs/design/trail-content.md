@@ -181,10 +181,36 @@ and the script never overwrites a file it did not make
 (`--overwrite-recordings` says otherwise).
 
 **Making the speech.** The script speaks, per `text.<lang>.md`, the item's
-title ("Station 7. Title." for a station, so the listener can match the sign)
+title ("Station <number>. Title." for a station, so the listener can match the sign;
+item 0 gets its title only)
 and the text with its Markdown removed, through Microsoft's neural voices via
 `edge-tts` (an unofficial endpoint, no key: right for a demonstration; the
-official Azure service has the same voices for production). Reproduce:
+official Azure service has the same voices for production).
+
+German needs three provisions, all in `spoken()` and `synth()`, because the
+Baden German voice (Seraphina) is a multilingual voice, which picks its
+language itself, sentence by sentence, and a short sentence without German
+words in it can be read in English (a title such as "Urtümliche
+Sonnenanbeter", or "Gänsesäger brüten in Höhlen." opening a paragraph; found
+by running a speech recognizer's language detection over the generated audio,
+not by ear). The endpoint accepts no
+SSML language element (`lang`, `s`, `p` get no audio back) and edge-tts escapes
+the text, so the language can only be steered through the text:
+
+- The intro is one sentence with German words before the title and the number
+  spelled out: "Hier ist Station sieben: Title." The number is a word because
+  German reads a digit followed by a full stop as an ordinal ("siebter"). The
+  other languages keep "Station 7. Title."
+- A paragraph's first sentence of four words or fewer is joined to the next
+  with a comma instead of a full stop (the text on screen is untouched).
+- The request for a multilingual voice declares that voice's own locale
+  (`de-DE`), where edge-tts declares `en-US` on every request. Voices that are
+  not multilingual are left as edge-tts has them.
+
+Where a German voice still gets a short sentence wrong, a change of wording in
+`audio.say` or a voice that is not multilingual is the remaining lever.
+
+Reproduce:
 
 ```
 pip install edge-tts
