@@ -76,6 +76,8 @@ button {
 .surface {
   position: fixed;
   inset: 0;
+  /* The window's inner height (main.ts), not the browser's layout of a fixed box. */
+  height: var(--view-h, auto);
 }
 
 /* .surface > .map outranks MapLibre's own .maplibregl-map { position: relative }. */

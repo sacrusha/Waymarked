@@ -30,6 +30,14 @@ const last = trail.items.length - 1;
 
 const root = document.documentElement;
 const surface = document.getElementById("app")!;
+// The surface is as tall as the window the visitor sees: a browser can lay a
+// fixed page out under its own toolbar (Samsung Internet), and the sheet's
+// bounds and the visible map are both measured from this one height (viewH).
+const fitSurface = () => root.style.setProperty("--view-h", `${innerHeight}px`);
+fitSurface();
+addEventListener("resize", fitSurface);
+/** The surface's height: the screen the sheet and the map share. */
+const viewH = () => surface.clientHeight;
 const sheet = document.getElementById("sheet")!;
 const spacer = sheet.querySelector<HTMLElement>(".sheet-spacer")!;
 const card = document.getElementById("card")!;
@@ -164,12 +172,12 @@ function mapPadding() {
   if (!portrait()) return { top: mapTop(), bottom: 24, left: 24, right: 24 };
   const bottom = mapBottom();
   const top = Math.max(8, Math.round(mapTop() * (1 - controlsOut())));
-  return { top, bottom: innerHeight - bottom + 16, left: 24, right: 24 };
+  return { top, bottom: viewH() - bottom + 16, left: 24, right: 24 };
 }
 
 /** What the sheet covers of the map (portrait), for the bounds (docs/design/surface.md, Bounds). */
 function covered() {
-  return { top: 0, bottom: portrait() ? Math.max(0, Math.round(innerHeight - mapBottom())) : 0, left: 0, right: 0 };
+  return { top: 0, bottom: portrait() ? Math.max(0, Math.round(viewH() - mapBottom())) : 0, left: 0, right: 0 };
 }
 
 /**
@@ -439,7 +447,7 @@ function save() {
 function saveNow() {
   const data: Saved = {
     n: current,
-    sheetTop: portrait() ? Math.max(0, cardTop()) / innerHeight : 0,
+    sheetTop: portrait() ? Math.max(0, cardTop()) / viewH() : 0,
     inner: Math.max(0, sheet.scrollTop - (portrait() ? fullExtent() : 0)),
     view: tmap.view(),
     mode: walking.mode,
@@ -452,7 +460,7 @@ sheet.addEventListener("scroll", save, { passive: true });
 // The bounds follow the sheet too: they hold for the map it leaves visible;
 // and the controls give the strip above a raised sheet to the map (MAP_STRIP).
 function placeTools() {
-  root.style.setProperty("--card-top", `${Math.round(portrait() ? cardTop() : innerHeight)}px`);
+  root.style.setProperty("--card-top", `${Math.round(portrait() ? cardTop() : viewH())}px`);
   const out = controlsOut();
   root.style.setProperty("--top-controls-out", `${Math.round(out * (topControlsHeight() + 8))}px`);
   root.style.setProperty("--tools-out", `${Math.round(out * (tools.offsetHeight + 22))}px`);
@@ -488,12 +496,12 @@ requestAnimationFrame(() => {
   if (resume) {
     if (portrait()) {
       if (resume.inner > 0) sheet.scrollTop = fullExtent() + resume.inner;
-      else setCardTop(resume.sheetTop * innerHeight);
+      else setCardTop(resume.sheetTop * viewH());
     } else sheet.scrollTop = resume.inner;
     tmap.select(current); // the camera is where it was
   } else {
     // Arriving (QR code, link, first visit): the sheet half open.
-    setCardTop(innerHeight * 0.5);
+    setCardTop(viewH() * 0.5);
     tmap.select(current);
   }
   // The bounds once the sheet is in place: the saved view was inside them, and stays as it was.

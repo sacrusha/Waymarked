@@ -21,7 +21,10 @@ the screen.
 - Half of the visitors read maps poorly; they need a direction and a
   distance more than a better map.
 - Phones in portrait, outdoors, in sun, one-handed; desktops and landscape
-  at home. Mobile browsers discard tabs after screen-lock.
+  at home. Mobile browsers discard tabs after screen-lock, and some
+  (Samsung Internet) lay a fixed page out under their bottom toolbar: the
+  surface takes the window's inner height, the one height the sheet's
+  bounds and the visible map are measured from.
 - The map is MapLibre GL. The basemap may rotate (heading-up), which keeps
   labels readable only on vector tiles.
 
