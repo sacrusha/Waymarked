@@ -15,7 +15,7 @@
       "fr": "Schartenfels"
     },
     "gegenstand": {
-      "de": "Flaumeiche, Bergaster und Bläulinge",
+      "de": "Flaumeiche, Berg-Aster und Bläulinge",
       "en": "Downy oak, Michaelmas daisy and blue butterflies",
       "fr": "Chêne pubescent, aster amelle et azurés"
     }
@@ -28,9 +28,7 @@
         "en": "European Michaelmas daisies",
         "fr": "Asters amelles"
       },
-      "credit": "Thomas Burger",
-      "width": 1317,
-      "height": 937
+      "credit": "Thomas Burger"
     },
     {
       "file": "berg-lauch.jpg",
@@ -39,9 +37,7 @@
         "en": "Mountain chives",
         "fr": "Ail des montagnes"
       },
-      "credit": "Thomas Burger",
-      "width": 447,
-      "height": 447
+      "credit": "Thomas Burger"
     },
     {
       "file": "schlingnatter.jpg",
@@ -50,9 +46,7 @@
         "en": "Smooth snake",
         "fr": "Coronelle lisse"
       },
-      "credit": "Goran Dusej",
-      "width": 359,
-      "height": 359
+      "credit": "Goran Dusej"
     }
   ]
 }

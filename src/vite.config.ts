@@ -1,32 +1,32 @@
-import { readdirSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 import { defineConfig, type Plugin } from "vite";
+import { attr } from "./app/html.ts";
 import { loadTrail, resolveTrailDir } from "./build/trail.ts";
 
 const srcDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(srcDir, "..");
+const trailDir = resolveTrailDir(repoRoot);
 const VIRTUAL = "virtual:trail";
 const RESOLVED = "\0" + VIRTUAL;
 
 /** Serves the trail folder as the module `virtual:trail`, and names the page after the trail. */
 function trailPlugin(): Plugin {
-  const trailDir = resolveTrailDir(repoRoot);
   return {
     name: "waymarked-trail",
     resolveId: (id) => (id === VIRTUAL ? RESOLVED : undefined),
     load(id) {
       if (id !== RESOLVED) return;
       const t = loadTrail(trailDir);
-      for (const f of filesUnder(trailDir)) this.addWatchFile(f);
+      for (const w of t.warnings) this.warn(`${w} (fields the format doesn't know)`);
       const imports: string[] = [];
       const asset = (file: string) => {
         const name = `__img${imports.length}`;
         imports.push(`import ${name} from ${JSON.stringify(file.replace(/\\/g, "/"))};`);
         return `@@${name}@@`;
       };
-      const { dir: _d, report: _r, stylesheet, mark, cover, footer, ...rest } = t;
+      const { dir: _d, report: _r, warnings: _w, stylesheet, mark, cover, footer, ...rest } = t;
       // The trail's own look, after the engine's stylesheet (main.ts imports that first).
       if (stylesheet) imports.push(`import ${JSON.stringify(stylesheet.replace(/\\/g, "/"))};`);
       const brand = {
@@ -36,18 +36,8 @@ function trailPlugin(): Plugin {
       };
       const items = t.items.map(({ dir: _dir, images, audio, ...item }) => ({
         ...item,
-        audio: Object.fromEntries(
-          Object.entries(audio).map(([lang, { file, synthetic }]) => {
-            const name = `__img${imports.length}`;
-            imports.push(`import ${name} from ${JSON.stringify(file.replace(/\\/g, "/"))};`);
-            return [lang, { synthetic, url: `@@${name}@@` }];
-          }),
-        ),
-        images: images.map(({ file, ...im }) => {
-          const name = `__img${imports.length}`;
-          imports.push(`import ${name} from ${JSON.stringify(file.replace(/\\/g, "/"))};`);
-          return { ...im, url: `@@${name}@@` };
-        }),
+        audio: Object.fromEntries(Object.entries(audio).map(([lang, { file, synthetic }]) => [lang, { synthetic, url: asset(file) }])),
+        images: images.map(({ file, ...im }) => ({ ...im, url: asset(file) })),
       }));
       const json = JSON.stringify({ ...rest, ...brand, items }).replace(/"@@(__img\d+)@@"/g, "$1");
       return `${imports.join("\n")}\nexport default ${json};\n`;
@@ -55,14 +45,14 @@ function trailPlugin(): Plugin {
     transformIndexHtml(html) {
       const t = loadTrail(trailDir);
       const lang = t.languages[0];
-      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
       return html
-        .replace(/<html lang="[^"]*"/, `<html lang="${esc(lang)}"`)
-        .replace(/<title>[^<]*<\/title>/, `<title>${esc(t.items[0].title[lang])}</title>`)
-        .replace(/<meta name="description" content="[^"]*"/, `<meta name="description" content="${esc(t.subtitle[lang] ?? "")}"`)
-        .replace(/<meta name="theme-color" content="[^"]*"/, `<meta name="theme-color" content="${esc(t.theme.accentDark ?? "#ffffff")}"`)
+        .replace(/<html lang="[^"]*"/, `<html lang="${attr(lang)}"`)
+        .replace(/<title>[^<]*<\/title>/, `<title>${attr(t.items[0].title[lang])}</title>`)
+        .replace(/<meta name="description" content="[^"]*"/, `<meta name="description" content="${attr(t.subtitle[lang] ?? "")}"`)
+        .replace(/<meta name="theme-color" content="[^"]*"/, `<meta name="theme-color" content="${attr(t.theme.accentDark ?? "#ffffff")}"`)
         .replace("fill='%23333'", `fill='${encodeURIComponent(t.theme.accentDark ?? "#333")}'`);
     },
+    // A change in the trail folder reloads the page with the folder read again.
     configureServer(server) {
       server.watcher.add(trailDir);
       const onChange = (file: string) => {
@@ -76,13 +66,6 @@ function trailPlugin(): Plugin {
       server.watcher.on("unlink", onChange);
     },
   };
-}
-
-function filesUnder(dir: string): string[] {
-  return readdirSync(dir).flatMap((name) => {
-    const p = join(dir, name);
-    return statSync(p).isDirectory() ? filesUnder(p) : [p];
-  });
 }
 
 // `npm run dev:https` (mode "https"): the same dev server over https with a
@@ -105,7 +88,8 @@ export default defineConfig(({ mode }) => ({
     host: true,
     port: mode === "https" ? 5443 : 5173,
     strictPort: mode === "https",
-    fs: { allow: [repoRoot] },
+    // The engine and the trail folder, which WAYMARKED_TRAIL may name outside the repository.
+    fs: { allow: [repoRoot, trailDir] },
   },
   preview: { host: true, port: 4173 },
   build: { outDir: "dist", emptyOutDir: true, chunkSizeWarningLimit: 1500 },

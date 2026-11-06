@@ -9,12 +9,19 @@
 
 import "./language.css";
 import type { IControl, Map as MLMap } from "maplibre-gl";
-import type { Item, Trail } from "./trail-types.ts";
+import type { Item, Localized, Trail } from "./trail-types.ts";
 import type { Strings } from "./strings.ts";
 import { store } from "./store.ts";
+import { esc } from "./html.ts";
 
 const KEY = "lang";
 const base = (code: string | null | undefined) => (code ?? "").toLowerCase().split("-")[0];
+
+/** A trail's texts in the language shown: where one is missing there, the source language's (docs/design/trail-content.md, Languages). */
+export function textFor(trail: Trail, lang: string): (l?: Localized) => string {
+  const source = trail.languages[0];
+  return (l) => l?.[lang] ?? l?.[source] ?? "";
+}
 
 /**
  * The language to open in: the address's ?lang= (a link or QR code can name
@@ -101,8 +108,6 @@ export function mountLanguage(map: MLMap, trail: Trail, lang: string, s: Strings
     if (b?.dataset.lang && b.dataset.lang !== lang) choose(b.dataset.lang, before);
   });
 }
-
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /**
  * What a card says above a text that is a machine translation: that it is,

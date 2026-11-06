@@ -4,10 +4,11 @@
 import { AttributionControl, LngLat as MLLngLat, Map as MLMap, Marker, MercatorCoordinate, setWorkerUrl, type IControl, type StyleSpecification } from "maplibre-gl";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Basemap, Trail } from "./trail-types.ts";
+import type { Basemap, Localized, Trail } from "./trail-types.ts";
 import type { Strings } from "./strings.ts";
 import { store } from "./store.ts";
-import { toLocal } from "./geo.ts";
+import { textFor } from "./language.ts";
+import { distance, onLine, routeLines, toLocal } from "./geo.ts";
 
 setWorkerUrl(workerUrl);
 
@@ -39,12 +40,12 @@ export class TrailMap {
   private covered?: Padding;
 
   private trail: Trail;
-  private lang: string;
+  private tx: (l?: Localized) => string;
   private s: Strings;
 
   constructor(container: HTMLElement, trail: Trail, lang: string, s: Strings, onSelect: (n: number) => void, initial: View | undefined) {
     this.trail = trail;
-    this.lang = lang;
+    this.tx = textFor(trail, lang);
     this.s = s;
     this.basemaps = trail.basemaps.length ? trail.basemaps : DEFAULT_BASEMAPS;
     // Remembered by label, so reordering the trail's basemaps doesn't remap a visitor's choice.
@@ -54,7 +55,7 @@ export class TrailMap {
     this.map = new MLMap({
       container,
       style: this.styleFor(this.basemaps[this.basemapIndex]),
-      bounds: initial ? undefined : trail.bounds,
+      bounds: initial ? undefined : trail.extent,
       fitBoundsOptions: { padding: 40 },
       center: initial?.center,
       zoom: initial?.zoom,
@@ -81,7 +82,7 @@ export class TrailMap {
       el.type = "button";
       el.className = "marker";
       el.textContent = String(item.n);
-      el.setAttribute("aria-label", `${s.station} ${item.n}: ${item.title[lang] ?? item.title[trail.languages[0]]}`);
+      el.setAttribute("aria-label", `${s.station} ${item.n}: ${this.tx(item.title)}`);
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         onSelect(item.n);
@@ -96,7 +97,7 @@ export class TrailMap {
 
   basemapLabel(i = this.basemapIndex): string {
     const l = this.basemaps[i].label;
-    return l[this.lang] ?? l[this.trail.languages[0]] ?? Object.values(l)[0] ?? "";
+    return this.tx(l) || Object.values(l)[0] || ""; // the engine's default basemap has its label in en and de only
   }
 
   get basemapCount(): number {
@@ -126,9 +127,9 @@ export class TrailMap {
 
   /**
    * What covers the map now (portrait: the sheet below its top edge). The
-   * bounds hold for the part left visible, so the trail's edges reach into
-   * the strip above a raised sheet; a lowered sheet uncovers map that may lie
-   * past them, and the map moves back inside.
+   * bounds hold for the part left visible (bounded()), so the trail's edges
+   * reach into the strip above a raised sheet; moving the sheet moves that
+   * part, and the map follows where it would leave the bounds.
    */
   setCovered(p: Padding) {
     const was = this.covered;
@@ -148,38 +149,64 @@ export class TrailMap {
   }
 
   /**
-   * The map's constraint (MapLibre's transformConstrain): the visible part of
-   * the map, not the whole canvas, stays inside the trail's bounds, zoomed in
-   * where it would be larger than they are. A turned map shows a turned
-   * rectangle; its extent along north and east is what is held inside.
+   * The map's constraint (MapLibre's transformConstrain): the middle of the
+   * part of the map the sheet leaves visible stays inside the trail's bounds.
+   * Their margins are generous and the minimum zoom shows them whole, so the
+   * trail can't be lost; and anything inside them, the visitor near their
+   * edge included, can be brought to the middle of the view, turned or not,
+   * which is where following keeps the visitor. (Holding the whole view
+   * inside kept a turned map, whose corners reach out first, away from
+   * everything near the edge.)
    */
   private bounded(lngLat: MLLngLat, zoom: number): { center: MLLngLat; zoom: number } {
     const m = this.map as MLMap | undefined; // undefined while MapLibre constructs
     const z = Math.min(m?.getMaxZoom() ?? 19, Math.max(m?.getMinZoom() ?? this.trail.limits.minZoom, zoom ?? m?.getZoom() ?? 0));
     const p = this.covered;
     if (!m || !p) return { center: lngLat, zoom: z }; // the first view is set before the layout is known
-    const el = m.getContainer();
-    const w = Math.max(1, el.clientWidth - p.left - p.right), h = Math.max(1, el.clientHeight - p.top - p.bottom);
-    const rad = (m.getBearing() * Math.PI) / 180, cos = Math.cos(rad), sin = Math.sin(rad);
-    // The visible part's centre, from the canvas centre, in world pixels (x east, y south).
-    const sx = (p.left - p.right) / 2, sy = (p.top - p.bottom) / 2;
-    const ox = sx * cos - sy * sin, oy = sx * sin + sy * cos;
-    const ew = Math.abs(w * cos) + Math.abs(h * sin), eh = Math.abs(w * sin) + Math.abs(h * cos);
+    const size = worldSize(z);
+    const [ox, oy] = toWorld((p.left - p.right) / 2, (p.top - p.bottom) / 2, m.getBearing());
     const [[west, south], [east, north]] = this.trail.limits.bounds;
     const nw = MercatorCoordinate.fromLngLat([west, north]), se = MercatorCoordinate.fromLngLat([east, south]);
-    let zz = z;
-    let size = 512 * 2 ** zz; // MapLibre's world size in pixels at this zoom
-    const need = Math.max(ew / ((se.x - nw.x) * size), eh / ((se.y - nw.y) * size));
-    if (need > 1) {
-      zz += Math.log2(need);
-      size = 512 * 2 ** zz;
-    }
-    const hold = (v: number, lo: number, hi: number) => (lo > hi ? (lo + hi) / 2 : Math.min(hi, Math.max(lo, v)));
+    const hold = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
     const at = MercatorCoordinate.fromLngLat(lngLat);
-    const vx = hold(at.x * size + ox, nw.x * size + ew / 2, se.x * size - ew / 2);
-    const vy = hold(at.y * size + oy, nw.y * size + eh / 2, se.y * size - eh / 2);
-    return { center: new MercatorCoordinate((vx - ox) / size, (vy - oy) / size).toLngLat(), zoom: zz };
+    const vx = hold(at.x * size + ox, nw.x * size, se.x * size);
+    const vy = hold(at.y * size + oy, nw.y * size, se.y * size);
+    return { center: new MercatorCoordinate((vx - ox) / size, (vy - oy) / size).toLngLat(), zoom: z };
   }
+
+  /**
+   * The map centre that shows `at` at the screen point `pt` (container
+   * pixels), at this zoom and bearing: a camera move by its true centre, so
+   * the constraint judges where the map will be. (MapLibre's easeTo with an
+   * offset constrains the point it places, as if it were the centre.)
+   */
+  centreFor(at: [number, number], pt: { x: number; y: number }, zoom: number, bearing: number): [number, number] {
+    const el = this.map.getContainer();
+    const size = worldSize(zoom);
+    const [ox, oy] = toWorld(pt.x - el.clientWidth / 2, pt.y - el.clientHeight / 2, bearing);
+    const a = MercatorCoordinate.fromLngLat(at);
+    const c = new MercatorCoordinate(a.x - ox / size, a.y - oy / size).toLngLat();
+    return [c.lng, c.lat];
+  }
+
+  /**
+   * Metres from p to the trail: the nearest point of its route, or of a
+   * station where that is nearer. Far off (a visitor at home), the route's
+   * flat local geometry no longer holds, and the nearest of its points by
+   * great circle is the answer at that scale.
+   */
+  distanceToTrail(p: [number, number]): number {
+    const c = this.nearCache;
+    if (c && c.p[0] === p[0] && c.p[1] === p[1]) return c.d; // asked on every frame of a move, for the same fix
+    const lines = routeLines(this.trail.route);
+    let d = Infinity;
+    for (const it of this.trail.items.slice(1)) d = Math.min(d, distance(p, it.position!));
+    for (const line of lines) for (const q of line) d = Math.min(d, distance(p, q));
+    if (d <= 50_000) for (const line of lines) d = Math.min(d, onLine(p, line, 0)?.off ?? Infinity);
+    this.nearCache = { p, d };
+    return d;
+  }
+  private nearCache?: { p: [number, number]; d: number };
 
   view(): View {
     const c = this.map.getCenter();
@@ -205,7 +232,7 @@ export class TrailMap {
    */
   frame(n: number, padding: Padding) {
     const leg = this.trail.legs.find((l) => l.from === n);
-    const bounds = n === 0 ? this.trail.bounds : boundsOf([this.trail.items[n].position!, ...(leg ? leg.coordinates : [])]);
+    const bounds = n === 0 ? this.trail.extent : boundsOf([this.trail.items[n].position!, ...(leg ? leg.coordinates : [])]);
     this.map.fitBounds(bounds, { padding: this.fitPadding(padding), maxZoom: n === 0 ? 17 : 18, linear: true, duration: 0 });
   }
 
@@ -230,7 +257,7 @@ export class TrailMap {
 
     if (n === 0) {
       if (this.trail.items.slice(1).every((it) => inView(it.position!))) return;
-      this.map.fitBounds(this.trail.bounds, { padding: this.fitPadding(padding), maxZoom: zoom, bearing: this.map.getBearing(), linear: true, duration });
+      this.map.fitBounds(this.trail.extent, { padding: this.fitPadding(padding), maxZoom: zoom, bearing: this.map.getBearing(), linear: true, duration });
       return;
     }
     const pos = this.trail.items[n].position!;
@@ -306,7 +333,7 @@ export class TrailMap {
    * selected station along the leg into it): that leg is the one emphasised.
    * undefined: the leg on from the selection, as without walking help.
    */
-  walking(from: number | undefined) {
+  emphasiseLeg(from: number | undefined) {
     if (from === this.walked) return;
     this.walked = from;
     this.updateLeg();
@@ -326,19 +353,14 @@ export class TrailMap {
 
 /**
  * The route as drawn: each stretch once. A route that walks a stretch twice
- * (there and back, Baden's 5→6 and 7→8) has it twice in its data, and two
+ * (there and back) has it twice in its data, and two
  * dashed lines on one stretch fill each other's gaps until it looks solid.
  * A segment lying within a metre of one already drawn, at both ends, is
  * dropped; what is left is joined back into runs, so the dashes flow on.
  * The data stays as it is: the legs are built from it (build/legs.ts).
  */
 function drawnRoute(route: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
-  const lines: [number, number][][] = [];
-  for (const f of route.features) {
-    const g = f.geometry;
-    if (g.type === "LineString") lines.push(g.coordinates as [number, number][]);
-    else if (g.type === "MultiLineString") lines.push(...(g.coordinates as [number, number][][]));
-  }
+  const lines = routeLines(route);
   const origin = lines.find((l) => l.length)?.[0];
   if (!origin) return route;
   const TOL = 1; // metres
@@ -366,6 +388,17 @@ function drawnRoute(route: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection
     if (run.length > 1) runs.push(run);
   }
   return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "MultiLineString", coordinates: runs } }] };
+}
+
+/** MapLibre's world size in pixels at a zoom. */
+function worldSize(zoom: number): number {
+  return 512 * 2 ** zoom;
+}
+
+/** A screen offset (x right, y down) in world pixels (x east, y south) on a map turned by `bearing`. */
+function toWorld(sx: number, sy: number, bearing: number): [number, number] {
+  const r = (bearing * Math.PI) / 180, cos = Math.cos(r), sin = Math.sin(r);
+  return [sx * cos - sy * sin, sx * sin + sy * cos];
 }
 
 function boundsOf(pts: [number, number][]): [[number, number], [number, number]] {

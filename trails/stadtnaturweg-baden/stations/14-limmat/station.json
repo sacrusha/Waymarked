@@ -15,7 +15,7 @@
       "fr": "Limmat"
     },
     "gegenstand": {
-      "de": "Wasseramsel und Bergstelze",
+      "de": "Wasseramsel und Gebirgsstelze",
       "en": "White-throated dipper and wagtails",
       "fr": "Cincle plongeur et bergeronnettes"
     }
@@ -28,9 +28,7 @@
         "en": "Grey wagtail",
         "fr": "Bergeronnette des ruisseaux"
       },
-      "credit": "Michael Gerber, birds-online.ch",
-      "width": 710,
-      "height": 995
+      "credit": "Michael Gerber, birds-online.ch"
     },
     {
       "file": "wasseramsel.jpg",
@@ -39,9 +37,7 @@
         "en": "White-throated dipper",
         "fr": "Cincle plongeur"
       },
-      "credit": "Michael Gerber, birds-online.ch",
-      "width": 447,
-      "height": 447
+      "credit": "Michael Gerber, birds-online.ch"
     }
   ]
 }

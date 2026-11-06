@@ -5,7 +5,6 @@
 const strings = {
   de: {
     next: "Weiter",
-    prev: "Zurück",
     nextTo: "Weiter zu Station",
     prevTo: "Zurück zu Station",
     startAt: "Start bei",
@@ -53,7 +52,6 @@ const strings = {
   },
   en: {
     next: "Next",
-    prev: "Back",
     nextTo: "Next: station",
     prevTo: "Back to station",
     startAt: "Start at",
@@ -101,7 +99,6 @@ const strings = {
   },
   fr: {
     next: "Suivant",
-    prev: "Retour",
     nextTo: "Suivant : station",
     prevTo: "Retour à la station",
     startAt: "Départ :",

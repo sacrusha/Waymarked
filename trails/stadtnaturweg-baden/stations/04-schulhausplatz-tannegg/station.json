@@ -28,9 +28,7 @@
         "en": "Giant sequoia",
         "fr": "Séquoia géant"
       },
-      "credit": "Thomas Burger",
-      "width": 997,
-      "height": 707
+      "credit": "Thomas Burger"
     },
     {
       "file": "blutbuche.jpg",
@@ -39,9 +37,7 @@
         "en": "Copper beech",
         "fr": "Hêtre pourpre"
       },
-      "credit": "Thomas Burger",
-      "width": 447,
-      "height": 444
+      "credit": "Thomas Burger"
     }
   ]
 }

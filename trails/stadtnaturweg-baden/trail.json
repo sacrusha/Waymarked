@@ -70,9 +70,7 @@
     "file": "baden-ist.svg",
     "alt": {
       "de": "Baden ist."
-    },
-    "width": 161,
-    "height": 41
+    }
   },
   "cover": {
     "file": "cover.jpg",
@@ -80,9 +78,7 @@
       "de": "Die Limmat in Baden, am Ufer die Häuser der Altstadt und ein Kirchturm",
       "en": "The Limmat in Baden, with the houses of the old town and a church tower on the bank",
       "fr": "La Limmat à Baden, avec sur la rive les maisons de la vieille ville et un clocher"
-    },
-    "width": 1200,
-    "height": 1118
+    }
   },
   "footer": {
     "logos": [
@@ -90,18 +86,14 @@
         "file": "stadt-baden.svg",
         "alt": {
           "de": "Stadt Baden"
-        },
-        "width": 88,
-        "height": 38
+        }
       },
       {
         "file": "navo.png",
         "alt": {
           "de": "NAVO Baden/Ennetbaden"
         },
-        "url": "https://www.navobaden.ch",
-        "width": 237,
-        "height": 186
+        "url": "https://www.navobaden.ch"
       }
     ],
     "text": {
@@ -112,8 +104,9 @@
   },
   "audio": {
     "voices": {
-      "de": "de-CH-LeniNeural"
+      "de": "de-DE-SeraphinaMultilingualNeural"
     },
+    "rate": { "de": "+8%" },
     "say": {
       "NAVO": "Navo",
       "Baden/Ennetbaden": {

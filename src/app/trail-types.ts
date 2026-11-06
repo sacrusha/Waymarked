@@ -97,7 +97,8 @@ export interface Trail {
   legs: Leg[];
   /** Sum of the legs from station 1 to the last, metres. */
   length: number;
-  bounds: [LngLat, LngLat];
+  /** The stations' and the route's extent, [[west, south], [east, north]]. */
+  extent: [LngLat, LngLat];
   /** How far the map may go: the trail's extent with its margin, and the matching minimum zoom. */
   limits: { bounds: [LngLat, LngLat]; minZoom: number };
 }

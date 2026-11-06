@@ -5,22 +5,23 @@
 A printed map's route is intent, not geometry. This routes each leg from one
 station to the next over the paths OpenStreetMap knows (footways, steps, streets
 with no foot ban), writes route.geojson as one ordered line, and renders every
-leg over the swisstopo Landeskarte or Luftbild so a person who knows the ground
-can check it. Swiss trails only for the pictures (swisstopo); the routing works
-anywhere OSM has paths.
+leg over a map or an aerial so a person who knows the ground can check it. The
+pictures use the trail's raster basemaps (trail.json map.basemaps, those with
+"tiles"): the first as the map, the next as the aerial; a trail without one is
+drawn on OpenStreetMap's map, and has no aerial.
 
     pip install pillow            # only for render and view
     python src/build/route-trail.py fetch
     python src/build/route-trail.py route [--dry]
     python src/build/route-trail.py verify
     python src/build/route-trail.py render [A-B ...] [--aerial] [--osm] [--intended] [--overview] [--out DIR]
-    python src/build/route-trail.py view N [radius_m]  (a station over Landeskarte | Luftbild)
+    python src/build/route-trail.py view N [radius_m]  (a station over the map | the aerial)
     python src/build/route-trail.py explain A-B        (the OSM ways a leg runs on)
     python src/build/route-trail.py place N lon lat    (move a station's position)
     python src/build/route-trail.py legs               (the build's legs, as `npm run check` prints them)
 
-Every command takes --trail FOLDER; without it the only folder under trails/ (or
-WAYMARKED_TRAIL, as the build does). Needs Python 3.10+ and Node 22.18+ (the legs come from the build's
+Every command takes --trail FOLDER; without it WAYMARKED_TRAIL, as the build
+reads it, or the only folder under trails/. Needs Python 3.10+ and Node 22.18+ (the legs come from the build's
 own build/legs.ts, so the numbers equal `npm run check`) and network for the
 first fetch and the map tiles. Downloads are cached in .cache/route/ (git-ignored).
 
@@ -48,7 +49,6 @@ build does and compares them with what was routed.
 from __future__ import annotations
 
 import argparse
-import glob
 import hashlib
 import heapq
 import io
@@ -66,11 +66,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CACHE = ROOT / ".cache" / "route"
 UA = {"User-Agent": "waymarked-route-trail (github.com/waymarked)"}
-TILES = {
-    "lk": "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
-    "lb": "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg",
-}
-MAX_ZOOM = {"lk": 18, "lb": 20}  # the Landeskarte has no tiles beyond 18; it is enlarged
+# The pictures' map where the trail has no raster basemap (as trail.json would name it).
+OSM_MAP = {"tiles": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], "tileSize": 256, "maxzoom": 19}
 OVERPASS = ["https://overpass-api.de", "https://overpass.kumi.systems", "https://overpass.private.coffee"]
 MARGIN_M = 300
 TRACE_W, TRACE_D = 1.5, 40.0
@@ -83,12 +80,18 @@ ATTACH_TO = ("footway", "path", "steps", "pedestrian", "track", "living_street",
 
 # --- the trail folder -------------------------------------------------------
 
+def read_json(path: Path):
+    """A JSON file of the folder; a byte-order mark (some Windows editors write one) is allowed, as in the build."""
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
 def resolve_trail(arg: str | None) -> Path:
-    """The folder like build/trail.ts resolveTrailDir: argument, WAYMARKED_TRAIL, or the only trail."""
-    name = arg or os.environ.get("WAYMARKED_TRAIL")
+    """The folder: --trail (a name under trails/, or a path from here), else WAYMARKED_TRAIL
+    (a name, or a path from the repository, as build/trail.ts resolveTrailDir reads it), else the only trail."""
+    name, base = (arg, Path.cwd()) if arg else (os.environ.get("WAYMARKED_TRAIL"), ROOT)
     if name:
         d = ROOT / "trails" / name
-        d = d if d.exists() else Path(name).resolve()
+        d = d if d.exists() else (base / name).resolve()
     else:
         found = [p for p in (ROOT / "trails").glob("*") if (p / "trail.json").exists()]
         if len(found) != 1:
@@ -105,18 +108,25 @@ class Trail:
         self.route = folder / "route.geojson"
         self.spec_file = folder / "legspec.json"
         self.trace_file = folder / "route-trace.geojson"
-        self.spec = json.loads(self.spec_file.read_text(encoding="utf8")) if self.spec_file.exists() else {}
+        self.spec = read_json(self.spec_file) if self.spec_file.exists() else {}
+        self.config = read_json(folder / "trail.json")
         self.work = CACHE / folder.name
         self.work.mkdir(parents=True, exist_ok=True)
 
     def station_files(self) -> list[Path]:
-        return sorted(p / "station.json" for p in (self.dir / "stations").iterdir() if (p / "station.json").exists())
+        """station.json of each station folder, in the build's order: station n is the n-th folder."""
+        return sorted(p / "station.json" for p in (self.dir / "stations").iterdir() if p.is_dir())
 
     def stations(self) -> list[tuple[float, float]]:
-        return [tuple(json.loads(f.read_text(encoding="utf8"))["position"]) for f in self.station_files()]
+        return [tuple(read_json(f)["position"]) for f in self.station_files()]
 
     def trace(self) -> list[list[list[float]]]:
-        return lines_of(json.loads(self.trace_file.read_text(encoding="utf8"))) if self.trace_file.exists() else []
+        return lines_of(read_json(self.trace_file)) if self.trace_file.exists() else []
+
+    def pictures(self) -> tuple[dict, dict | None]:
+        """The raster basemaps to draw on: the trail's first as the map, its next as the aerial."""
+        rasters = [b for b in self.config.get("map", {}).get("basemaps", []) if b.get("tiles")]
+        return (rasters[0] if rasters else OSM_MAP), (rasters[1] if len(rasters) > 1 else None)
 
     def bbox(self) -> tuple[float, float, float, float]:
         pts = list(self.stations()) + [tuple(p) for l in self.trace() for p in l]
@@ -129,8 +139,9 @@ class Trail:
 
 # --- geometry ---------------------------------------------------------------
 
-def hav(a, b) -> float:
-    la = math.radians((a[1] + b[1]) / 2)
+def metres(a, b) -> float:
+    """Distance between two [lon, lat] points, flat (equirectangular): right at a trail's scale, as build/legs.ts."""
+    la =math.radians((a[1] + b[1]) / 2)
     return math.hypot((a[0] - b[0]) * 111320 * math.cos(la), (a[1] - b[1]) * 110574)
 
 
@@ -200,7 +211,7 @@ class Router:
         pts = []
         for l in trace:  # densified to ~5 m
             for a, b in zip(l, l[1:]):
-                n = max(1, int(hav(a, b) / 5))
+                n = max(1, int(metres(a, b) / 5))
                 pts += [(a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n) for i in range(n)]
             pts.append(tuple(l[-1]))
         self.grid: dict = {}
@@ -221,7 +232,7 @@ class Router:
         self.adj: dict = {}
         for a, b, f, h in self.edges:
             m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
-            w = hav(a, b) * f * (1 + TRACE_W * min(1.0, self.trace_dist(m) / TRACE_D))
+            w = metres(a, b) * f * (1 + TRACE_W * min(1.0, self.trace_dist(m) / TRACE_D))
             self.adj.setdefault(a, []).append((b, w))
             self.adj.setdefault(b, []).append((a, w))
         self.nodes = list(self.adj)
@@ -233,7 +244,7 @@ class Router:
         for dx in (-2, -1, 0, 1, 2):
             for dy in (-2, -1, 0, 1, 2):
                 for q in self.grid.get((cx + dx, cy + dy), ()):
-                    best = min(best, hav(p, q))
+                    best = min(best, metres(p, q))
         return best
 
     def snap_edge(self, p):
@@ -260,7 +271,7 @@ class Router:
             if d > dist.get(u, 1e18):
                 continue
             for v, w in adj[u]:
-                if avoid and v[0] != "S" and any(hav(v, (x[0], x[1])) < x[2] for x in avoid):
+                if avoid and v[0] != "S" and any(metres(v, (x[0], x[1])) < x[2] for x in avoid):
                     continue
                 if d + w < dist.get(v, 1e18):
                     dist[v], prev[v] = d + w, u
@@ -280,17 +291,17 @@ class Router:
         for i, p in enumerate(S, 1):
             d, a, b, q = self.snap_edge(tuple(att[str(i)]) if str(i) in att else p)
             node = ("S", i)  # a station joins the network at the nearest point of the nearest path
-            adj[node] = [(a, hav(q, a)), (b, hav(q, b))]
-            adj[a] = adj[a] + [(node, hav(q, a))]
-            adj[b] = adj[b] + [(node, hav(q, b))]
+            adj[node] = [(a, metres(q, a)), (b, metres(q, b))]
+            adj[a] = adj[a] + [(node, metres(q, a))]
+            adj[b] = adj[b] + [(node, metres(q, b))]
             snap.append((node, q))
-            print("station %2d: %3.0f m from the nearest path" % (i, hav(p, q)))
+            print("station %2d: %3.0f m from the nearest path" % (i, metres(p, q)))
         coord = {n: n for n in adj if n[0] != "S"}
         coord.update({n: q for n, q in snap})
         out = []
         for a in range(1, len(S)):
             sp = spec.get("%d-%d" % (a, a + 1), {})
-            stops = [snap[a - 1][0]] + [min(self.nodes, key=lambda k: hav(k, tuple(v))) for v in sp.get("via", [])] + [snap[a][0]]
+            stops = [snap[a - 1][0]] + [min(self.nodes, key=lambda k: metres(k, tuple(v))) for v in sp.get("via", [])] + [snap[a][0]]
             pts = []
             for s_, t_ in zip(stops, stops[1:]):
                 path = self.dijkstra(adj, s_, t_, [tuple(x) for x in sp.get("avoid", [])])
@@ -300,7 +311,7 @@ class Router:
                 pts += path if not pts else path[1:]
             if pts is None:
                 print("NO PATH %d->%d: drawn straight" % (a, a + 1))
-                out.append({"from": a, "to": a + 1, "coordinates": [list(S[a - 1]), list(S[a])], "length": round(hav(S[a - 1], S[a])), "straight": True})
+                out.append({"from": a, "to": a + 1, "coordinates": [list(S[a - 1]), list(S[a])], "length": round(metres(S[a - 1], S[a])), "straight": True})
                 continue
             c = [list(coord[n]) for n in pts]
             i = 1
@@ -310,7 +321,7 @@ class Router:
                     i = max(1, i - 1)
                 else:
                     i += 1
-            L = sum(hav(x, y) for x, y in zip(c, c[1:]))
+            L = sum(metres(x, y) for x, y in zip(c, c[1:]))
             out.append({"from": a, "to": a + 1, "coordinates": c, "length": round(L), "straight": False})
             print("leg %2d->%-2d %4d m" % (a, a + 1, round(L)))
         return out
@@ -379,9 +390,9 @@ def cmd_explain(tr: Trail, name: str) -> None:
         t = w["tags"] if w else {}
         k = (w["id"] if w else None, t.get("highway"), t.get("name"), t.get("surface"), t.get("bridge"), t.get("tunnel"), t.get("foot"))
         if runs and runs[-1][0] == k:
-            runs[-1][1] += hav(a, b)
+            runs[-1][1] += metres(a, b)
         else:
-            runs.append([k, hav(a, b)])
+            runs.append([k, metres(a, b)])
     print(name, lg["length"], "m")
     for k, d in runs:
         print("  %4.0f m  %s  (way %s)" % (d, " ".join(str(x) for x in k[1:] if x), k[0]))
@@ -401,32 +412,40 @@ def cmd_place(tr: Trail, n: int, lon: float, lat: float) -> None:
 
 # --- pictures ---------------------------------------------------------------
 
-def _tile(layer: str, z: int, x: int, y: int) -> bytes:
-    f = CACHE / "tiles" / layer / str(z) / str(x) / ("%d.jpg" % y)
-    if not f.exists():
-        f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_bytes(urllib.request.urlopen(urllib.request.Request(TILES[layer].format(z=z, x=x, y=y), headers=UA), timeout=60).read())
-    return f.read_bytes()
-
-
-def draw(out: Path, bb, pad_m, layer="lk", zoom=18, scale=1, legs=(), osm_lines=(), stations=(), labels=(), cand=()):
-    """bb = (lon0, lat0, lon1, lat1). zoom is the detail wanted: the Landeskarte is fetched at 18 and enlarged."""
+def pillow():
+    """PIL's modules, or the one line that says how to get them."""
     try:
         from PIL import Image, ImageDraw, ImageFont
     except ImportError:
         sys.exit("pip install pillow")
-    zt = min(zoom, MAX_ZOOM[layer])
-    k = 2 ** (zoom - zt) * scale  # enlargement of a tile pixel
+    return Image, ImageDraw, ImageFont
+
+
+def _tile(basemap: dict, z: int, x: int, y: int) -> bytes:
+    url = basemap["tiles"][0]
+    f = CACHE / "tiles" / hashlib.sha1(url.encode()).hexdigest()[:10] / str(z) / str(x) / str(y)
+    if not f.exists():
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_bytes(urllib.request.urlopen(urllib.request.Request(url.format(z=z, x=x, y=y), headers=UA), timeout=60).read())
+    return f.read_bytes()
+
+
+def draw(out: Path, bb, pad_m, basemap: dict, zoom=18, scale=1, legs=(), osm_lines=(), stations=(), labels=(), cand=()):
+    """bb = (lon0, lat0, lon1, lat1). zoom is the detail wanted: beyond the basemap's maxzoom its tiles are enlarged."""
+    Image, ImageDraw, ImageFont = pillow()
+    zt = min(zoom, basemap.get("maxzoom", 19))
+    ts = basemap.get("tileSize", 256)
+    k = 2 ** (zoom - zt) * scale * 256 / ts  # enlargement of a tile pixel
     la = bb[1]
     pad = (pad_m / (111320 * math.cos(math.radians(la))), pad_m / 110574)
     x0, y1 = merc(bb[0] - pad[0], bb[1] - pad[1], zt)
     x1, y0 = merc(bb[2] + pad[0], bb[3] + pad[1], zt)
     tx0, tx1, ty0, ty1 = int(x0), int(x1), int(y0), int(y1)
-    im = Image.new("RGB", ((tx1 - tx0 + 1) * 256, (ty1 - ty0 + 1) * 256))
+    im = Image.new("RGB", ((tx1 - tx0 + 1) * ts, (ty1 - ty0 + 1) * ts))
     for tx in range(tx0, tx1 + 1):
         for ty in range(ty0, ty1 + 1):
-            im.paste(Image.open(io.BytesIO(_tile(layer, zt, tx, ty))).convert("RGB"), ((tx - tx0) * 256, (ty - ty0) * 256))
-    box = [int(v) for v in ((x0 - tx0) * 256, (y0 - ty0) * 256, (x1 - tx0) * 256, (y1 - ty0) * 256)]
+            im.paste(Image.open(io.BytesIO(_tile(basemap, zt, tx, ty))).convert("RGB"), ((tx - tx0) * ts, (ty - ty0) * ts))
+    box = [int(v) for v in ((x0 - tx0) * ts, (y0 - ty0) * ts, (x1 - tx0) * ts, (y1 - ty0) * ts)]
     im = im.crop(box).resize((int((box[2] - box[0]) * k), int((box[3] - box[1]) * k)), Image.LANCZOS)
     dr = ImageDraw.Draw(im, "RGBA")
     try:
@@ -436,7 +455,7 @@ def draw(out: Path, bb, pad_m, layer="lk", zoom=18, scale=1, legs=(), osm_lines=
 
     def px(p):
         X, Y = merc(p[0], p[1], zt)
-        return ((X - x0) * 256 * k, (Y - y0) * 256 * k)
+        return ((X - x0) * ts * k, (Y - y0) * ts * k)
     for l, col in osm_lines:
         dr.line([px(p) for p in l], fill=col, width=3)
     for lg in legs:
@@ -452,7 +471,7 @@ def draw(out: Path, bb, pad_m, layer="lk", zoom=18, scale=1, legs=(), osm_lines=
         q = px(p)
         dr.ellipse([q[0] - 5, q[1] - 5, q[0] + 5, q[1] + 5], outline=(0, 255, 255, 255), width=3)
         dr.text((q[0] + 8, q[1] + 4), txt, fill=(0, 0, 0, 255), font=font, stroke_width=2, stroke_fill=(0, 255, 255, 255))
-    mpp = 156543.03 * math.cos(math.radians(la)) / 2 ** zt / k
+    mpp = 156543.03 * math.cos(math.radians(la)) / 2 ** zt * 256 / ts / k
     dr.rectangle([20, im.height - 40, 20 + 50 / mpp, im.height - 30], fill=(0, 0, 0, 255))
     dr.text((20, im.height - 75), "50 m   orange = leg as the build computes it, blue = OSM paths, yellow = stations",
             fill=(0, 0, 0, 255), font=font, stroke_width=2, stroke_fill=(255, 255, 255, 255))
@@ -470,40 +489,46 @@ def osm_overlay(tr: Trail):
 def cmd_render(tr: Trail, names, aerial, with_osm, intended, overview, out: Path) -> None:
     legs = json.loads(intended_file(tr).read_text())["legs"] if intended else build_legs(tr)["legs"]
     st = list(enumerate(tr.stations(), 1))
-    layer = "lb" if aerial else "lk"
+    basemap, air = tr.pictures()
+    if aerial:
+        if not air:
+            sys.exit("--aerial: trail.json names no second raster basemap (an aerial) to draw on")
+        basemap = air
     ov = osm_overlay(tr) if with_osm else []
     todo = [("overview", legs)] if overview else [("%02d-%02d" % (l["from"], l["to"]), [l]) for l in legs if not names or "%d-%d" % (l["from"], l["to"]) in names]
     for name, ls in todo:
         c = [p for l in ls for p in l["coordinates"]]
         bb = (min(p[0] for p in c), min(p[1] for p in c), max(p[0] for p in c), max(p[1] for p in c))
-        extent = max(hav((bb[0], bb[1]), (bb[2], bb[1])), hav((bb[0], bb[1]), (bb[0], bb[3]))) + 70
+        extent = max(metres((bb[0], bb[1]), (bb[2], bb[1])), metres((bb[0], bb[1]), (bb[0], bb[3]))) + 70
         z = 18 if not aerial else 19
         sc = max(1, int(1500 * 0.404 / extent * 2 ** (z - 18)))  # about 1500 px on the long side
         f = out / ("leg_%s%s.png" % (name, "_air" if aerial else "")) if not overview else out / "overview.png"
-        draw(f, bb, 35, layer, z, sc if not overview else 1, ls, ov, st)
+        draw(f, bb, 35, basemap, z, sc if not overview else 1, ls, ov, st)
         print(f)
 
 
 def cmd_view(tr: Trail, n: int, radius: float) -> None:
-    from PIL import Image  # noqa: F401  (clear error from draw otherwise)
+    Image = pillow()[0]
     S = tr.stations()
     p = S[n - 1]
     ov = []
     for e in osm(tr, "features"):
         t = e.get("tags", {})
         c = (e["lon"], e["lat"]) if e["type"] == "node" else (e["center"]["lon"], e["center"]["lat"])
-        if hav(c, p) > radius * 1.5:
+        if metres(c, p) > radius * 1.5:
             continue
         if t.get("species"):
             ov.append((c, t["species"][:14]))
         elif "name" in t and not t.get("shop") and t.get("amenity") not in ("restaurant", "cafe", "fast_food", "bar", "pharmacy", "parking") and (e["type"] != "way" or "building" in t):
             ov.append((c, t["name"][:22]))
     out = tr.work / "view"
-    a = draw(out / "_a.png", (p[0], p[1], p[0], p[1]), radius, "lk", 20, 1, (), (), [(n, p)], ov)
-    b = draw(out / "_b.png", (p[0], p[1], p[0], p[1]), radius, "lb", 20, 1, (), (), [(n, p)], ov)
-    im = Image.new("RGB", (a.width + b.width + 10, a.height), "white")
-    im.paste(a, (0, 0))
-    im.paste(b, (a.width + 10, 0))
+    panels = [draw(out / ("_%d.png" % i), (p[0], p[1], p[0], p[1]), radius, b, 20, 1, (), (), [(n, p)], ov)
+              for i, b in enumerate(b for b in tr.pictures() if b)]
+    im = Image.new("RGB", (sum(a.width for a in panels) + 10 * (len(panels) - 1), panels[0].height), "white")
+    x = 0
+    for a in panels:
+        im.paste(a, (x, 0))
+        x += a.width + 10
     f = out / ("station_%02d.png" % n)
     im.save(f)
     print(f)
@@ -515,7 +540,7 @@ def main() -> None:
     ap.add_argument("args", nargs="*", help="leg names A-B (render, explain), or N [radius] (view), or N lon lat (place)")
     ap.add_argument("--trail", help="trail folder (name under trails/, or a path)")
     ap.add_argument("--dry", action="store_true", help="route: do not write route.geojson")
-    ap.add_argument("--aerial", action="store_true", help="render: Luftbild instead of Landeskarte")
+    ap.add_argument("--aerial", action="store_true", help="render: on the aerial (the trail's second raster basemap) instead of the map")
     ap.add_argument("--osm", action="store_true", help="render: draw the OSM paths")
     ap.add_argument("--intended", action="store_true", help="render: the routed legs, not what the build computes from route.geojson")
     ap.add_argument("--overview", action="store_true", help="render: the whole trail in one picture")

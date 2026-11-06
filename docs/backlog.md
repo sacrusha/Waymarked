@@ -97,10 +97,13 @@ workflow exists, no GitHub repository does), git.
 
 - Per-station audio in the card, usable while walking (plays on, screen
   locked). Demonstration with pre-generated speech files from the placard
-  texts, Swiss Standard German voice; the easy, keyless path is Microsoft's
-  neural voices via edge-tts (unofficial endpoint, fine for a demo; the
-  official Azure service has the same voices for production). Real
-  recordings would replace the files, same slot.
+  texts through Microsoft's neural voices via edge-tts (unofficial
+  endpoint, fine for a demo; the official Azure service has the same voices
+  for production). German is read by de-DE Seraphina at +8 %: the two Swiss
+  Standard German voices were judged weaker in a listening test, and 0 %
+  too slow. Real recordings would replace the files, same slot. The spoken
+  "Station n" could become the sign's own label ("Tafel n"), a content call
+  that remakes every file.
 
 ### 4. Walking help — the map-weak half can walk it
 
@@ -118,7 +121,14 @@ workflow exists, no GitHub repository does), git.
 
 - Mock trail, README with fork instructions for an AI, docs/ as CLAUDE.md
   lays out.
-- Baden purged from the GitHub history (Situation: rights).
+- Baden purged from the GitHub history (Situation: rights). The purge is
+  one path for content; the backlog and design docs cite Baden throughout
+  and need their examples replaced.
+- Legs taken as given: `route-trail.py` could write one feature per leg so
+  the build uses them instead of re-deriving legs from one merged line and
+  checking the two against each other (`verify`, `legs_intended.json`);
+  derivation would remain only for traced fragments. Simpler, and it
+  touches the route section of docs/design/trail-content.md.
 
 ### 7. Offline — tiles and content survive dead spots
 
@@ -128,7 +138,8 @@ workflow exists, no GitHub repository does), git.
 
 - Wildlife integration: bird watching, sightings, species information.
 - Seasonal content: what is to be seen now (Alpensegler from April,
-  Lerchensporn in early spring).
+  Lerchensporn in early spring). Sources, licences and options for both:
+  docs/notes/wildlife-and-seasons.md.
 - Easy wins in content: more on the Stadtturm and similar additions beyond
   the placards.
 - Walking time in item 0 derived from distance and swisstopo height data,
@@ -141,8 +152,14 @@ workflow exists, no GitHub repository does), git.
 - Image licensing for the public site beyond the demo (CC BY-NC-SA items,
   individual photographers): with the partner.
 - The leaflet's cover photo, item 0's cover on the site, has no credit.
-- Placard 3's small photo carries two credits in the source (Hugo Bischof /
-  BirdLife Schweiz); the site shows none for it until settled.
+- Placard 3's small photo: the site credits Hugo Bischof as the legible
+  print does; an invisible stale layer in the PDF says BirdLife Schweiz.
+  For NAVO to confirm.
+- Print errors corrected on the site, for NAVO to know: Tafel 1 "aus 20
+  Metern Höhe", Tafel 3 "über 100 Kilometern pro Stunde"; the leaflet's
+  "Bergaster" and "Bergstelze" follow the placards (Berg-Aster,
+  Gebirgsstelze). The leaflet names a Flaumeiche at station 9 that the
+  placard never mentions.
 - Placard 15's large photo is Infoflora's (Christophe Bornand) without a
   printed licence; 11 and 12 print CC BY-NC-SA 4.0 for theirs.
 - Station 9: the leaflet's list says Schartenfels, its photo caption "Der

@@ -40,7 +40,11 @@ card, not only from the trail's ends: it is where the whole trail is seen.
 
 Bounds: a trail is local. The map is bounded to the trail's extent with
 generous margins and a matching minimum zoom, both derived from the trail's
-data, so panning and zooming can't lose the trail. A visitor out of view,
+data, so panning and zooming can't lose the trail. What the bounds hold is
+the centre of the visible map, not its whole area: follow mode must be
+able to put the visitor at its anchor anywhere inside the bounds, turned
+or not, and the margins are wide enough that half a view past the edge
+still shows trail. A visitor out of view,
 far away or panned past, sees their own position as an arrow at the map's
 edge with the distance ("256 km"); tapped, it follows them where the map
 can go.

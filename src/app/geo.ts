@@ -1,11 +1,23 @@
-// Small geometry for walking help: distances, bearings, and where a walker is
-// along a leg. Local and flat (a trail spans a few kilometres): metres on a
-// plane tangent at the walker, good to well under a metre at that scale.
+// Small geometry for the map, walking help and the build: the route's lines,
+// distances, bearings, and where a walker is along a leg. Local and flat (a
+// trail spans a few kilometres): metres on a plane tangent at the walker,
+// good to well under a metre at that scale.
 
 import type { LngLat } from "./trail-types.ts";
 
 const M_PER_DEG_LAT = 111_132;
 const RAD = Math.PI / 180;
+
+/** The lines of a route (route.geojson), as its data has them: LineStrings and the parts of MultiLineStrings. */
+export function routeLines(route: GeoJSON.FeatureCollection): LngLat[][] {
+  const lines: LngLat[][] = [];
+  for (const f of route.features) {
+    const g = f.geometry;
+    if (g?.type === "LineString") lines.push(g.coordinates as LngLat[]);
+    else if (g?.type === "MultiLineString") lines.push(...(g.coordinates as LngLat[][]));
+  }
+  return lines;
+}
 
 /** p relative to origin o, in metres east and north. */
 export function toLocal(o: LngLat, p: LngLat): [number, number] {

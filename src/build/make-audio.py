@@ -8,11 +8,12 @@ neural voice through edge-tts (unofficial endpoint, no key; fine for a demo).
     pip install edge-tts
     python src/build/make-audio.py [trail folder] [--lang de] [--force] [--dry-run]
 
-Without a folder it uses the only one under trails/ (or WAYMARKED_TRAIL, as
-the build does). It is incremental: audio.json in the trail folder records,
-for each file this script wrote, a hash of what was spoken from, and a file
-whose source is unchanged is left alone. A file that audio.json does not list
-(a real recording put in the same slot) is never overwritten, even with --force
+Without a folder it uses WAYMARKED_TRAIL, as the build does, or the only one
+under trails/. It is incremental: audio.json in the trail folder records, for
+each file this script wrote, a hash of what was spoken from and the file's
+size, and a file whose source is unchanged is left alone. A file that
+audio.json does not list, or of another size than the one listed (a real
+recording put in the same slot), is never overwritten, even with --force
 unless --overwrite-recordings is also given.
 
 Settings come from an optional "audio" object in trail.json, read by this
@@ -20,8 +21,9 @@ script only (the site ignores it):
 
     "audio": {
       "voices": { "de": "de-CH-LeniNeural" },   // per language; defaults below
-      "rate": "-5%",                            // speaking speed, edge-tts syntax
-      "say": { "NAVO": "Navo" }                 // pronunciation: written -> spoken
+      "rate": "-5%",                            // speaking speed, edge-tts syntax,
+                                                // or { "de": "+8%" } per language
+      "say": { "WWF": "W W F" }                 // pronunciation: written -> spoken
                                                 // a value may be { "de": "…", "en": "…" } to say it per language
     }
 """
@@ -46,6 +48,8 @@ DEFAULT_VOICES = {
 # Said before a station's title, so the listener can match it to the sign.
 STATION_WORD = {"de": "Station", "en": "Station", "fr": "Station", "it": "Stazione"}
 MANIFEST = "audio.json"
+DEFAULT_RATE = "-5%"
+BOM = "\ufeff"
 
 
 def read_json(path: Path) -> dict:
@@ -53,11 +57,13 @@ def read_json(path: Path) -> dict:
 
 
 def find_trail(arg: str | None) -> Path:
+    """The folder: the argument (a name under trails/, or a path from here), else WAYMARKED_TRAIL (a name, or a path from the repository, as the build reads it), else the only trail."""
     repo = Path(__file__).resolve().parents[2]
-    arg = arg or os.environ.get("WAYMARKED_TRAIL")
-    if arg:
-        by_name = repo / "trails" / arg
-        d = by_name if by_name.exists() else Path(arg).resolve()
+    env = os.environ.get("WAYMARKED_TRAIL")
+    name, base = (arg, Path.cwd()) if arg else (env, repo)
+    if name:
+        by_name = repo / "trails" / name
+        d = by_name if by_name.exists() else (base / name).resolve()
     else:
         found = [p for p in (repo / "trails").glob("*") if (p / "trail.json").exists()]
         if len(found) != 1:
@@ -70,13 +76,13 @@ def find_trail(arg: str | None) -> Path:
 
 def source_hash(title: str, md: str) -> str:
     """What the site's check recomputes (build/trail.ts): title, newline, text with LF line ends."""
-    text = md.replace("\r\n", "\n").replace("﻿", "")
+    text = md.replace("\r\n", "\n").replace(BOM, "")
     return hashlib.sha256(f"{title}\n{text}".encode("utf-8")).hexdigest()
 
 
 def plain(md: str) -> str:
     """The text as it is said: Markdown reduced to sentences."""
-    t = md.replace("﻿", "")
+    t = md.replace(BOM, "")
     t = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", t)  # links: their text
     t = re.sub(r"(\*\*|__)(.+?)\1", r"\2", t)  # bold
     t = re.sub(r"(\*|_)(.+?)\1", r"\2", t)  # emphasis
@@ -106,20 +112,68 @@ def spoken(n: int, title: str, md: str, lang: str, say: dict[str, str]) -> str:
 async def synth(text: str, voice: str, rate: str, out: Path) -> None:
     import edge_tts  # imported late so --dry-run works without it
 
-    tmp = out.with_suffix(".part")
+    # The part file is written outside the trail folder: a dev server watching
+    # the folder re-reads its audio on every change, and on Windows a file it
+    # is reading can't be replaced. Same drive, so the final move is atomic.
+    tmp = part_dir(out) / (out.name + ".part")
+    sweep_old(tmp.parent)
     last: Exception | None = None
     for attempt in range(3):
         try:
             await edge_tts.Communicate(text, voice, rate=rate).save(str(tmp))
             if tmp.stat().st_size < 1000:
                 raise RuntimeError("empty audio")
-            tmp.replace(out)
+            await replace_when_free(tmp, out)
             return
         except Exception as e:  # network, endpoint hiccup: retry
             last = e
             await asyncio.sleep(2 * (attempt + 1))
     tmp.unlink(missing_ok=True)
     raise RuntimeError(f"{out}: {last}")
+
+
+def part_dir(out: Path) -> Path:
+    """A scratch folder on the same drive as `out`, outside any watched tree."""
+    for parent in out.resolve().parents:
+        if (parent / "trails").is_dir() and (parent / "src").is_dir():
+            d = parent / ".cache" / "audio"
+            break
+    else:
+        d = out.parent
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+async def replace_when_free(tmp: Path, out: Path) -> None:
+    """Put the new file in place even while something streams the old one.
+
+    A dev server serving the old file to a browser that has paused the
+    download keeps it open for as long as the page lives; Windows then
+    refuses to replace it, but allows renaming it (Node opens files with
+    share-delete). So the old file is moved aside into the part folder and
+    deleted there, now or on a later run.
+    """
+    try:
+        tmp.replace(out)
+        return
+    except PermissionError:
+        pass
+    aside = part_dir(out) / f"{out.parent.name}-{out.name}.{os.getpid()}.old"
+    out.replace(aside)
+    tmp.replace(out)
+    try:
+        aside.unlink()
+    except PermissionError:
+        pass
+
+
+def sweep_old(out_dir: Path) -> None:
+    """Delete files moved aside by earlier runs whose readers have gone."""
+    for f in out_dir.glob("*.old"):
+        try:
+            f.unlink()
+        except PermissionError:
+            pass
 
 
 async def main() -> None:
@@ -136,12 +190,18 @@ async def main() -> None:
     cfg = read_json(trail / "trail.json")
     audio = cfg.get("audio", {})
     voices = {**DEFAULT_VOICES, **audio.get("voices", {})}
-    rate = audio.get("rate", "-5%")
+    rate = audio.get("rate", DEFAULT_RATE)
+    rate_for = lambda lang: rate.get(lang, DEFAULT_RATE) if isinstance(rate, dict) else rate
     say = audio.get("say", {})
     langs = cfg.get("languages", [])
     manifest_path = trail / MANIFEST
     manifest = read_json(manifest_path) if manifest_path.exists() else {"files": {}}
     files: dict = manifest.setdefault("files", {})
+    changed = False  # audio.json needs saving without new speech: sizes recorded, recordings unlisted
+
+    def save() -> None:
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                                 encoding="utf-8", newline="\n")
 
     items: list[tuple[int, Path, str]] = []  # (n, folder, title key source)
     items.append((0, trail, "trail.json"))
@@ -167,26 +227,38 @@ async def main() -> None:
                 sys.exit(f"No voice for language '{lang}': set audio.voices.{lang} in trail.json")
             digest = source_hash(title, md)
             say_l = say_for(say, lang)
+            rate_l = rate_for(lang)
             entry = files.get(key)
-            if out.exists() and not entry and not args.overwrite_recordings:
-                print(f"  keep   {key} (not made by this script)")
+            size = out.stat().st_size if out.exists() else None
+            # Ours if listed at the size it was made (entries from before sizes were recorded: listed is enough).
+            made = entry is not None and entry.get("bytes") in (None, size)
+            if out.exists() and not made and not args.overwrite_recordings:
+                print(f"  keep   {key} (a recording, not made by this script)")
+                if entry is not None:
+                    del files[key]
+                    changed = True
                 continue
-            if out.exists() and entry and entry.get("source") == digest and entry.get("voice") == voice \
-                    and entry.get("rate") == rate and entry.get("say") == say_l and not args.force:
+            if out.exists() and made and entry.get("source") == digest and entry.get("voice") == voice \
+                    and entry.get("rate") == rate_l and entry.get("say") == say_l and not args.force:
                 print(f"  fresh  {key}")
+                if "bytes" not in entry:
+                    entry["bytes"] = size
+                    changed = True
                 continue
-            jobs.append((key, out, spoken(n, title, md, lang, say_l), voice, digest, say_l))
+            jobs.append((key, out, spoken(n, title, md, lang, say_l), voice, digest, say_l, rate_l))
 
-    for key, out, text, voice, digest, say_l in jobs:
+    for key, out, text, voice, digest, say_l, rate_l in jobs:
         if args.dry_run:
-            print(f"--- {key} ({voice}, {rate})\n{text}\n")
+            print(f"--- {key} ({voice}, {rate_l})\n{text}\n")
             continue
         print(f"  speak  {key} ({voice}) ...", end=" ", flush=True)
-        await synth(text, voice, rate, out)
-        files[key] = {"source": digest, "voice": voice, "rate": rate, "say": say_l}
+        await synth(text, voice, rate_l, out)
+        files[key] = {"source": digest, "voice": voice, "rate": rate_l, "say": say_l, "bytes": out.stat().st_size}
         print(f"{out.stat().st_size // 1024} KB")
         # Saved after each file, so an interrupted run keeps what it made.
-        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        save()
+    if changed and not args.dry_run:
+        save()
 
     print(f"{len(jobs)} file(s) {'to make' if args.dry_run else 'made'}.")
 

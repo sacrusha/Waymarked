@@ -28,9 +28,7 @@
         "en": "Common swift",
         "fr": "Martinet noir"
       },
-      "credit": "BirdLife Schweiz",
-      "width": 859,
-      "height": 1200
+      "credit": "BirdLife Schweiz"
     },
     {
       "file": "mauersegler-nistkasten.jpg",
@@ -39,8 +37,7 @@
         "en": "Common swift at the entrance hole of a nest box",
         "fr": "Martinet noir à l’entrée d’un nichoir"
       },
-      "width": 448,
-      "height": 448
+      "credit": "Hugo Bischof"
     }
   ]
 }

@@ -22,7 +22,7 @@ import { Walking, type Mode } from "./walking.ts";
 import { Guide } from "./guide.ts";
 import { session, store } from "./store.ts";
 import { uiStrings } from "./strings.ts";
-import { mountLanguage, pickLanguage } from "./language.ts";
+import { mountLanguage, pickLanguage, textFor } from "./language.ts";
 
 const lang = pickLanguage(trail);
 const s = uiStrings(lang);
@@ -57,7 +57,8 @@ card.innerHTML = `<header class="card-head"></header><div class="card-body"></di
 const head = card.querySelector<HTMLElement>(".card-head")!;
 const body = card.querySelector<HTMLElement>(".card-body")!;
 const end = card.querySelector<HTMLElement>(".card-end")!;
-const player = new Player(card, trail.items[0].title[lang], s);
+const tx = textFor(trail, lang);
+const player = new Player(card, tx(trail.items[0].title), s);
 
 // --- where the visitor was (survives reload and tab discard) -------------
 
@@ -107,7 +108,7 @@ here.onChange((what) => {
   if (here.state === "denied") store.set("here", "");
 });
 
-// Dev servers only: the map and walking help for the console and for scripted checks.
+// Dev servers only: the map and walking help on window, for agents' scripted checks in a headless browser.
 if (import.meta.env.DEV) Object.assign(window, { __map: tmap.map, __here: here, __walking: walking });
 
 // --- sheet geometry --------------------------------------------------------
@@ -126,9 +127,6 @@ function setCardTop(y: number, smooth = false) {
   sheet.scrollTo({ top: target, behavior: smooth && !reduceMotion.matches ? "smooth" : "auto" });
 }
 
-/** Map kept clear at the top for its controls: the basemap choice, and the language toggle under it. */
-const mapTop = trail.languages.length > 1 ? 100 : 56;
-
 /** Screen y where the map stops showing (portrait): the card's top, or the sheet's once the card's text scrolls under its head. */
 function mapBottom(): number {
   return Math.max(cardTop(), sheet.getBoundingClientRect().top);
@@ -146,8 +144,10 @@ function mapBottom(): number {
 const MAP_STRIP = 140;
 const topControls = document.querySelector<HTMLElement>(".maplibregl-ctrl-top-left");
 const tools = document.getElementById("map-tools")!;
-/** The top controls' height (to the bottom of the language toggle), without their slide. */
-const topControlsHeight = () => (topControls ? topControls.offsetTop + topControls.offsetHeight : mapTop);
+/** The top controls' height (the basemap choice and the language toggle, those the trail has), without their slide. */
+const topControlsHeight = () => (topControls ? topControls.offsetTop + topControls.offsetHeight : 0);
+/** Map kept clear at the top for those controls. */
+const mapTop = () => topControlsHeight() + 8;
 /** How far out the controls have slid: 0 (in place) to 1 (gone). */
 function controlsOut(): number {
   if (!portrait()) return 0;
@@ -161,9 +161,9 @@ function controlsOut(): number {
  * the top controls as far as they are still in.
  */
 function mapPadding() {
-  if (!portrait()) return { top: mapTop, bottom: 24, left: 24, right: 24 };
+  if (!portrait()) return { top: mapTop(), bottom: 24, left: 24, right: 24 };
   const bottom = mapBottom();
-  const top = Math.max(8, Math.round(mapTop * (1 - controlsOut())));
+  const top = Math.max(8, Math.round(mapTop() * (1 - controlsOut())));
   return { top, bottom: innerHeight - bottom + 16, left: 24, right: 24 };
 }
 
@@ -204,18 +204,20 @@ function render(n: number) {
   player.show();
   card.setAttribute("aria-label", parts.label);
   guide.show(n);
-  document.title = n === 0 ? trail.items[0].title[lang] : `${parts.label} – ${trail.items[0].title[lang]}`;
+  const trailTitle = tx(trail.items[0].title);
+  document.title = n === 0 ? trailTitle : `${parts.label} – ${trailTitle}`;
 }
 
 function select(n: number, opts: { walk?: boolean; from?: number; fromHistory?: boolean } = {}) {
   if (n < 0 || n > last) return;
-  const changed = n !== current;
+  const was = current;
+  const changed = n !== was;
   // Minimised, the sheet hops once as the card changes: it scrolls, there is more (docs/design/surface.md, Depth).
   const hop = changed && !opts.walk && atPeek();
   current = n;
   render(n);
   if (changed && !reduceMotion.matches) {
-    const dir = opts.from ?? Math.sign(n - (Number(card.dataset.prev ?? n) || 0));
+    const dir = opts.from ?? Math.sign(n - was);
     const slideIn = [
       { transform: `translateX(${dir * 40}px)`, opacity: 0.35, easing: "cubic-bezier(.2,.7,.3,1)" },
       { transform: "none", opacity: 1 },
@@ -232,7 +234,6 @@ function select(n: number, opts: { walk?: boolean; from?: number; fromHistory?: 
     ];
     card.animate(hop ? slideAndHop : slideIn, { duration: hop ? 740 : 220 });
   }
-  card.dataset.prev = String(n);
   // Each station change is a history entry: Back steps back through the cards.
   if (changed && !opts.fromHistory) history.pushState(null, "", n === 0 ? location.pathname + location.search : `#${n}`);
 
@@ -249,7 +250,7 @@ function select(n: number, opts: { walk?: boolean; from?: number; fromHistory?: 
   }
 
   // Walking on, the sheet is on its way down: the view is the one above the peek.
-  const padding = opts.walk && portrait() ? { ...mapPadding(), top: mapTop, bottom: (peekHeight() || 120) + 16 } : mapPadding();
+  const padding = opts.walk && portrait() ? { ...mapPadding(), top: mapTop(), bottom: (peekHeight() || 120) + 16 } : mapPadding();
   tmap.select(n);
   // Following the visitor, the map keeps them in place and only zooms out to show the station too;
   // the overview is the whole trail, so it ends following.
@@ -482,7 +483,6 @@ if (store.get("here") === "on" || (resume?.mode && resume.mode !== "free")) {
 }
 
 render(current);
-card.dataset.prev = String(current);
 requestAnimationFrame(() => {
   setPeek();
   if (resume) {

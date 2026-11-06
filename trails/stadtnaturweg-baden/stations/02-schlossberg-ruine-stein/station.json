@@ -28,9 +28,7 @@
         "en": "Common wall lizard",
         "fr": "Lézard des murailles"
       },
-      "credit": "Heinz Häusler",
-      "width": 310,
-      "height": 436
+      "credit": "Heinz Häusler"
     },
     {
       "file": "zauneidechse.jpg",
@@ -39,9 +37,7 @@
         "en": "Sand lizard",
         "fr": "Lézard des souches"
       },
-      "credit": "Goran Dusej",
-      "width": 447,
-      "height": 436
+      "credit": "Goran Dusej"
     }
   ]
 }

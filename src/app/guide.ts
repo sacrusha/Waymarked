@@ -15,8 +15,9 @@
 
 import type { Here } from "./here.ts";
 import type { TrailMap } from "./map.ts";
-import type { LngLat, Trail } from "./trail-types.ts";
+import type { LngLat, Localized, Trail } from "./trail-types.ts";
 import { formatLive, type Strings } from "./strings.ts";
+import { textFor } from "./language.ts";
 import { bearing, distance, onLine } from "./geo.ts";
 
 /** Within this many metres of a station the visitor is at it ... */
@@ -45,6 +46,7 @@ export class Guide {
   private head: HTMLElement;
   private s: Strings;
   private lang: string;
+  private tx: (l?: Localized) => string;
   private n = 0;
   /** The station the visitor is at, with hysteresis. */
   private at?: number;
@@ -58,6 +60,7 @@ export class Guide {
     this.head = head;
     this.s = s;
     this.lang = lang;
+    this.tx = textFor(trail, lang);
     here.onChange((what) => (what === "heading" ? this.turnArrows() : this.update()));
     tm.map.on("rotate", () => this.turnArrows());
   }
@@ -66,11 +69,6 @@ export class Guide {
   show(n: number) {
     this.n = n;
     this.update();
-  }
-
-  /** The station the visitor is at, if any. */
-  get station(): number | undefined {
-    return this.at;
   }
 
   private update() {
@@ -90,7 +88,7 @@ export class Guide {
         if (chip) {
           chip.dataset.go = String(this.at);
           chip.querySelector(".here-chip-n")!.textContent = String(this.at);
-          chip.setAttribute("aria-label", `${this.s.hereAt} ${this.s.station} ${this.at}: ${this.title(this.at)}`);
+          chip.setAttribute("aria-label", `${this.s.hereAt} ${this.s.station} ${this.at}: ${this.tx(this.trail.items[this.at].title)}`);
         }
       } else if (n > 0 && this.at !== n) {
         state = "approach";
@@ -103,11 +101,11 @@ export class Guide {
       // The way on: from the station the visitor is at (or to the first, from the overview).
       if (next && (state === "here" || n === 0)) {
         const to = Number(next.dataset.go);
-        if (to >= 1) this.fill(next, this.way(fix.at, to, n === 0 ? undefined : n), `${this.s.station} ${to}`);
+        if (to >= 1) this.fill(next, this.way(fix.at, to), `${this.s.station} ${to}`);
       }
     }
     head.dataset.guide = state;
-    this.tm.walking(walked);
+    this.tm.emphasiseLeg(walked);
     head.querySelectorAll<HTMLElement>(".go-next[data-live]").forEach((el) => (el.dataset.live = state === "here" || (fix && n === 0) ? "on" : ""));
     if (slot) slot.hidden = state !== "approach";
     if (chip) chip.hidden = state !== "elsewhere";
@@ -136,11 +134,11 @@ export class Guide {
     });
   }
 
-  /** The way to station `to`, along the leg into it (or out of `from`) where the visitor is on it. */
-  private way(p: LngLat, to: number, from = to - 1): Way | undefined {
+  /** The way to station `to`, along the leg into it where the visitor is on it. */
+  private way(p: LngLat, to: number): Way | undefined {
     const target = this.trail.items[to]?.position;
     if (!target) return undefined;
-    const leg = this.trail.legs.find((l) => l.from === from && l.to === to) ?? this.trail.legs.find((l) => l.to === to);
+    const leg = this.trail.legs.find((l) => l.to === to);
     if (leg && !leg.straight) {
       const o = onLine(p, leg.coordinates, AHEAD);
       if (o && o.off <= ON_LEG) {
@@ -156,7 +154,7 @@ export class Guide {
   private arrival(p: LngLat, accuracy: number): number | undefined {
     if (accuracy > VAGUE) return undefined;
     const d = (i: number) => distance(p, this.trail.items[i].position!);
-    // Stations can stand closer together than the arrival radius (Baden's 6 and 7: 17 m):
+    // Stations can stand closer together than the arrival radius:
     // the selected one wins among those in reach, so standing at it never suggests its neighbour.
     if (this.n > 0 && d(this.n) <= ARRIVE) return this.n;
     if (this.at !== undefined && d(this.at) <= LEAVE) return this.at;
@@ -166,10 +164,5 @@ export class Guide {
       if (di <= bestD) (best = i), (bestD = di);
     }
     return best;
-  }
-
-  private title(n: number): string {
-    const t = this.trail.items[n].title;
-    return t[this.lang] ?? t[this.trail.languages[0]] ?? "";
   }
 }

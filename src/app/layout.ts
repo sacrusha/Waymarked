@@ -5,13 +5,13 @@
 // changes one place.
 
 /** The card stays wide enough for its title, fields and orientation row. */
-export const CARD_MIN = 300;
+const CARD_MIN = 300;
 /** Wider than this, lines pass a comfortable reading measure. */
-export const CARD_MAX = 720;
+const CARD_MAX = 720;
 /** The map keeps at least this share of the width ... */
-export const MAP_MIN_SHARE = 0.4;
+const MAP_MIN_SHARE = 0.4;
 /** ... and at least this many pixels. */
-export const MAP_MIN = 320;
+const MAP_MIN = 320;
 /** Where the divider starts, and returns to on double-click. */
 export const CARD_DEFAULT_SHARE = 0.34;
 

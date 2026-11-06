@@ -33,6 +33,8 @@ export interface WalkingOptions {
 const FOLLOW_ZOOM = 17;
 /** The visitor's place in the visible map, as a share of its height from the top: heading-up shows more ahead. */
 const ANCHOR = { follow: 0.5, heading: 0.64 };
+/** Heading-up turns the map this share of the way to the heading per frame: steady, not nervous. */
+const TURN_EASE = 0.18;
 
 export class Walking {
   mode: Mode = "free";
@@ -157,7 +159,7 @@ export class Walking {
   setMode(m: Mode, opts: { quiet?: boolean } = {}) {
     if (m !== "free" && this.here.fix && !inBox(this.here.fix.at, this.tm.limits.bounds)) {
       // Far from the trail: the map can't go there; the edge shows where and how far.
-      this.toast(this.o.s.farAway.replace("{d}", formatLive(distance(this.here.fix.at, this.centre()), this.o.lang)));
+      this.toast(this.o.s.farAway.replace("{d}", formatLive(this.tm.distanceToTrail(this.here.fix.at), this.o.lang)));
       m = "free";
     }
     const was = this.mode;
@@ -206,12 +208,7 @@ export class Walking {
       return;
     }
     if (what === "fix") {
-      const fix = h.fix;
-      if (!fix) {
-        this.you.remove();
-        this.drawEdge();
-        return;
-      }
+      const fix = h.fix!; // Here reports "fix" only with one, and never clears it
       if (this.toastEl.dataset.kind === "unavailable") this.toastEl.hidden = true; // it came after all
       if (!this.you.getElement().isConnected) this.you.setLngLat(fix.at).addTo(this.tm.map);
       this.you.setLngLat(fix.at);
@@ -261,7 +258,7 @@ export class Walking {
     if (this.mode === "heading" && this.here.heading) {
       const d = turn(b, this.here.heading.deg);
       if (Math.abs(d) > 1.5) {
-        bearingTo = b + d * Math.min(1, 0.18);
+        bearingTo = b + d * TURN_EASE;
         busy = true;
       }
     }
@@ -270,18 +267,29 @@ export class Walking {
     const a = this.anchor(r);
     const q = map.project(at);
     if (bearingTo !== undefined || Math.hypot(q.x - a.x, q.y - a.y) > 0.5) {
-      map.easeTo({ center: at, bearing: bearingTo ?? b, offset: this.offset(a), duration: 0 });
+      const bearing = bearingTo ?? b;
+      map.jumpTo({ center: this.tm.centreFor(at, a, map.getZoom(), bearing), bearing });
     }
     if (busy) this.kick();
   }
 
-  /** An animated move that keeps the visitor at the anchor. */
+  /**
+   * An animated move that ends with the visitor at the anchor: around them
+   * where they are there already (they stay the fixed point), else to them.
+   * Moves go by the map's true centre (TrailMap.centreFor), which the bounds judge.
+   */
   private camera(o: { zoom?: number; bearing?: number; duration: number }) {
     const map = this.tm.map;
     const at = this.shownNow();
     if (!at) return;
     const a = this.anchor(rect(map.getContainer(), this.o.visible()));
-    map.easeTo({ center: at, offset: this.offset(a), zoom: o.zoom, bearing: o.bearing, duration: o.duration });
+    const q = map.project(at);
+    if (Math.hypot(q.x - a.x, q.y - a.y) < 2) {
+      map.easeTo({ around: at, zoom: o.zoom, bearing: o.bearing, duration: o.duration });
+      return;
+    }
+    const zoom = o.zoom ?? map.getZoom(), bearing = o.bearing ?? map.getBearing();
+    map.easeTo({ center: this.tm.centreFor(at, a, zoom, bearing), zoom, bearing, duration: o.duration });
   }
 
   private shownNow(now = performance.now()): LngLat {
@@ -298,10 +306,6 @@ export class Walking {
   private anchor(r: Rect): { x: number; y: number } {
     const share = this.mode === "heading" ? ANCHOR.heading : ANCHOR.follow;
     return { x: (r.l + r.r) / 2, y: r.t + (r.b - r.t) * share };
-  }
-  private offset(a: { x: number; y: number }): [number, number] {
-    const c = this.tm.map.getContainer();
-    return [a.x - c.clientWidth / 2, a.y - c.clientHeight / 2];
   }
   private centre(): LngLat {
     const map = this.tm.map;
@@ -346,20 +350,24 @@ export class Walking {
     const r = rect(map.getContainer(), this.o.visible());
     const p = map.project(fix.at);
     const IN = 22;
-    if (r.r - r.l < 120 || r.b - r.t < 100 || (p.x >= r.l && p.x <= r.r && p.y >= r.t && p.y <= r.b)) {
+    // Down to the strip above a raised sheet: the arrow is 36 px high, and a far-away visitor needs it most.
+    if (r.r - r.l < 120 || r.b - r.t < 48 || (p.x >= r.l && p.x <= r.r && p.y >= r.t && p.y <= r.b)) {
       this.edge.hidden = true;
       return;
     }
     const cx = (r.l + r.r) / 2, cy = (r.t + r.b) / 2;
     const dx = p.x - cx, dy = p.y - cy;
-    const hw = (r.r - r.l) / 2 - IN - 20, hh = (r.b - r.t) / 2 - IN;
+    const hw = (r.r - r.l) / 2 - IN - 20, hh = Math.max(0, (r.b - r.t) / 2 - IN);
     const t = Math.min(hw / Math.abs(dx || 1e-9), hh / Math.abs(dy || 1e-9));
     const x = cx + dx * t, y = cy + dy * t;
     const angle = (Math.atan2(dx, -dy) * 180) / Math.PI;
     this.edge.hidden = false;
     this.edge.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
     this.edge.querySelector<SVGElement>(".you-edge-arrow")!.style.transform = `rotate(${angle}deg)`;
-    const d = formatLive(distance(this.centre(), fix.at), this.o.lang);
+    // Beyond the map's reach, how far the visitor is from the trail (as the far-away line says);
+    // within it (panned past), how far from what the map shows, since they may stand on the trail.
+    const away = inBox(fix.at, this.tm.limits.bounds) ? distance(this.centre(), fix.at) : this.tm.distanceToTrail(fix.at);
+    const d = formatLive(away, this.o.lang);
     this.edge.querySelector(".you-edge-dist")!.textContent = d;
     this.edge.setAttribute("aria-label", this.o.s.youAreThere.replace("{d}", d));
   }
@@ -382,7 +390,7 @@ export class Walking {
     this.drawNorth();
   }
 
-  toast(msg: string, kind = "") {
+  private toast(msg: string, kind = "") {
     this.toastEl.dataset.kind = kind;
     this.toastEl.textContent = msg;
     this.toastEl.hidden = false;

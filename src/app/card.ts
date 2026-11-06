@@ -5,7 +5,8 @@
 import type { Image, Item, Localized, Logo, Trail } from "./trail-types.ts";
 import { formatDistance, type Strings } from "./strings.ts";
 import { peekPlay, pickAudio, renderPlayer } from "./player.ts";
-import { machineNote } from "./language.ts";
+import { machineNote, textFor } from "./language.ts";
+import { attr, esc } from "./html.ts";
 
 export interface CardParts {
   head: string;
@@ -15,7 +16,7 @@ export interface CardParts {
 }
 
 export function renderCard(trail: Trail, n: number, lang: string, s: Strings): CardParts {
-  const tx = (l: Localized | undefined) => (l ? l[lang] ?? l[trail.languages[0]] ?? "" : "");
+  const tx = textFor(trail, lang);
   const item = trail.items[n];
   const last = trail.items.length - 1;
   const next = n < last ? trail.items[n + 1] : undefined;
@@ -218,10 +219,3 @@ const chevronLeft = `<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><p
 const wayArrow = `<svg class="way-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l7 17.5-7-4.3-7 4.3z" fill="currentColor"/></svg>`;
 // A waymark: a path between three posts.
 const trailGlyph = `<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 19c3-1 4-5 8-6s5-5 8-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3 3.2"/><circle cx="4" cy="19" r="2.2" fill="currentColor"/><circle cx="12" cy="13" r="2.2" fill="currentColor"/><circle cx="20" cy="5" r="2.2" fill="currentColor"/></svg>`;
-
-export function esc(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-function attr(s: string): string {
-  return esc(s).replace(/"/g, "&quot;");
-}

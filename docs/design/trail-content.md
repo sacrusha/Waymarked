@@ -74,7 +74,7 @@ walking order; the slug after it is only for people.
 | `signLabel` | text | How the trail's signs name a station, with `{n}` for its number and Markdown bold (Baden: `"Stadtnaturweg **Tafel {n}**"`). Opens each station card, so a visitor standing at a sign sees the card is the sign's. |
 | `mark` | logo | The trail's or its publisher's mark, as a footer logo below: beside the sign label on each station card, and on the cover (without one, at the top of item 0). |
 | `cover` | image | One photo, as in `images`, that opens item 0 edge to edge. |
-| `footer` | object | The end of item 0, who stands behind the trail: `logos`, a list of `{ "file": "navo.png", "alt": text, "url": "…", "width": 237, "height": 186 }` (`url` optional, the logo links there), and `text`, a text in Markdown. Below it the engine adds its own one line. |
+| `footer` | object | The end of item 0, who stands behind the trail: `logos`, a list of `{ "file": "navo.png", "alt": text, "url": "…" }` (`url` optional, the logo links there), and `text`, a text in Markdown. Below it the engine adds its own one line. |
 | `map.basemaps` | list | The basemaps, first is the default; with more than one the map shows a toggle. Each is `{ "label": text, "style": "<MapLibre style URL>" }` for vector tiles, or `{ "label": text, "tiles": ["…/{z}/{x}/{y}.jpeg"], "tileSize": 256, "maxzoom": 19, "attribution": "<HTML>" }` for raster tiles. Without any, the engine uses an OSM-based vector map. |
 | `map.margin` | number | Metres the map may show beyond the trail's extent (stations and route). Default: the larger of 1.5 km and half the extent. The minimum zoom follows from it: the bounded area spans about a phone's width. |
 
@@ -140,7 +140,7 @@ engine change can move them; photos carry `data-shape` (`square`,
 | `title` | required, text | The station's heading (Baden: the placard's title, the leaflet's Thema). |
 | `position` | required | `[longitude, latitude]`, WGS84 degrees, GeoJSON order. |
 | `fields` | object | Values for the trail's `stationFields`, by key; each a text. Keys not declared there are an error. |
-| `images` | list | `{ "file": "turmfalke.jpg", "caption": text, "alt": text, "credit": "…", "license": "…", "width": 569, "height": 798 }`. `file` is next to `station.json`; `alt` defaults to the caption; width and height (pixels) let the card reserve the space. The card shows them after the text as one group: the first large, the rest as insets after it, the caption with each, and one line naming each credit and licence with the captions of its photos. |
+| `images` | list | `{ "file": "turmfalke.jpg", "caption": text, "alt": text, "credit": "…", "license": "…" }`. `file` is next to `station.json` (JPEG, PNG, WebP, GIF or SVG); `alt` defaults to the caption; the build reads each photo's size from the file, so the card reserves its space and knows its shape. The card shows them after the text as one group: the first large, the rest as insets after it, the caption with each, and one line naming each credit and licence with the captions of its photos. |
 
 ### text.&lt;lang&gt;.md
 
@@ -166,10 +166,11 @@ match the screen.
 
 Two kinds of file fill the slot, and the card tells them apart: a real
 recording (put there by hand), and speech made by `build/make-audio.py`, which
-lists every file it made in `audio.json` and which the card marks "read aloud
-by a synthetic voice". A recording dropped over a made file stops being listed
-only when its entry is deleted from `audio.json`; the script never overwrites
-a file it did not make (`--overwrite-recordings` says otherwise).
+lists every file it made in `audio.json`, with its size, and which the card
+marks "read aloud by a synthetic voice". A file of another size than the one
+listed is a recording put over a made file: the card shows it as a recording,
+and the script never overwrites a file it did not make
+(`--overwrite-recordings` says otherwise).
 
 **Making the speech.** The script speaks, per `text.<lang>.md`, the item's
 title ("Station 7. Title." for a station, so the listener can match the sign)
@@ -192,7 +193,7 @@ by the script only:
 | Field | | |
 |---|---|---|
 | `audio.voices` | object | Voice per language code. Defaults: `de` de-CH-LeniNeural (Swiss Standard German), `en` en-GB-SoniaNeural, `fr` fr-CH-ArianeNeural, `it` it-IT-ElsaNeural. `edge-tts --list-voices` lists them. |
-| `audio.rate` | text | Speaking speed in edge-tts syntax. Default `-5%`. |
+| `audio.rate` | text or object | Speaking speed in edge-tts syntax, one value or one per language code. Default `-5%`. |
 | `audio.say` | object | Pronunciation: written text → text to speak, where the voice gets a word wrong (Baden: `NAVO` → `Navo`). A value may itself be an object by language code, where the words differ (`"Baden/Ennetbaden": { "de": "Baden und Ennetbaden", "en": "Baden and Ennetbaden" }`). |
 
 `npm run check` reports per language how many items have audio, the size, the
@@ -224,8 +225,8 @@ from the stations and OpenStreetMap:
 1. Put the traced route in the folder as `route-trace.geojson` (optional) and
    place each station on the object it names, not beside it: a building's
    roof, a tree's crown, the river's bank. `view N` shows station N over the
-   swisstopo Landeskarte and the Luftbild side by side, with OSM's named
-   things; where a path runs under tree canopy the two together show it.
+   map and the aerial side by side (below), with OSM's named things; where a
+   path runs under tree canopy the two together show it.
    `place N lon lat` moves a station.
 2. `fetch` downloads the OSM paths around the trail (cached in `.cache/route/`,
    git-ignored). `route` routes every leg over them: footways and steps are
@@ -236,8 +237,8 @@ from the stations and OpenStreetMap:
    line avoids, and a stretch walked twice (Baden's legs 5 to 6 and 7 to 8) is
    in the line twice.
 3. `verify` recomputes the legs the way the build does and compares them
-   with what was routed; `render` draws every leg over the Landeskarte
-   (`--aerial` over the Luftbild, `--osm` with the OSM paths) for someone who
+   with what was routed; `render` draws every leg over the map
+   (`--aerial` over the aerial, `--osm` with the OSM paths) for someone who
    knows the ground to check. `explain A-B` lists the OSM ways a leg runs on.
 4. A correction goes into `legspec.json` and `route` runs again: `via`
    (the leg passes these points), `avoid` (it keeps out of these circles),
@@ -245,15 +246,19 @@ from the stations and OpenStreetMap:
    one to walk). The file is the record of what a person who knows the ground
    said; every leg is routed again from it and the trace.
 
-The pictures use swisstopo tiles and so serve Swiss trails; the routing works
-wherever OSM maps the paths.
+The pictures are drawn on the trail's raster basemaps (`map.basemaps` entries
+with `tiles`): the first is the map, the next the aerial (Baden: the
+Landeskarte and the Luftbild). A trail without a raster basemap is drawn on
+OpenStreetMap's map and has no aerial. The routing works wherever OSM maps the
+paths.
 
 ## Building and checking
 
 In `src/`: `npm run check` loads the folder as the build would, reports
 errors by file and field, and prints each leg's length, each station's
 distance to the route, the gaps it bridged, and the map's bounds, so a wrong join shows before
-it shows on the map. `npm run dev` serves the site and reloads when a file
+it shows on the map. It also lists the fields the format doesn't know, most
+likely typos; they are ignored, and the build warns about them too. `npm run dev` serves the site and reloads when a file
 in the folder changes; `npm run build` writes it to `src/dist/`.
 
 On a phone in the same network, location and the compass need a secure page,
@@ -267,7 +272,7 @@ open (`Network: https://…:5443/`).
 
 The build uses the only folder under `trails/` that has a `trail.json`; with
 several, the environment variable `WAYMARKED_TRAIL` names one (a folder name
-under `trails/`, or a path). The Pages workflow reads it from the repository
+under `trails/`, or a path, relative to the repository). The Pages workflow reads it from the repository
 variable of the same name.
 
 ## Not known

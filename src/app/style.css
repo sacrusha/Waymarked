@@ -22,7 +22,8 @@
   /* Map strip that stays visible above the sheet at full extent. */
   --strip: 15vh;
   --strip: 15dvh;
-  --side-w: clamp(320px, 34vw, 460px);
+  /* The card column, side by side: main.ts sets it within layout.ts's limits. */
+  --side-w: 34vw;
   --radius: 18px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

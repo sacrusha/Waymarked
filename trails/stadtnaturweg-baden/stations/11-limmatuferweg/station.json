@@ -28,9 +28,7 @@
         "en": "Plants growing on a wall",
         "fr": "Végétation sur un mur"
       },
-      "credit": "Thomas Burger",
-      "width": 663,
-      "height": 933
+      "credit": "Thomas Burger"
     },
     {
       "file": "zimbelkraut.jpg",
@@ -39,9 +37,7 @@
         "en": "Ivy-leaved toadflax",
         "fr": "Cymbalaire des murailles"
       },
-      "credit": "François Clot",
-      "width": 447,
-      "height": 447
+      "credit": "François Clot"
     },
     {
       "file": "mauerraute.jpg",
@@ -51,9 +47,7 @@
         "fr": "Doradille rue-des-murailles"
       },
       "credit": "Françoise Alsaker, Infoflora",
-      "license": "CC BY-NC-SA 4.0",
-      "width": 359,
-      "height": 359
+      "license": "CC BY-NC-SA 4.0"
     }
   ]
 }

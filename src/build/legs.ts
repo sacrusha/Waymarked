@@ -8,6 +8,7 @@
 // exists, the leg is a straight line and is marked as such.
 
 import type { Leg, LngLat } from "../app/trail-types.ts";
+import { routeLines } from "../app/geo.ts";
 
 /** Largest gap between fragments that is bridged, metres. */
 const GAP_M = 60;
@@ -22,12 +23,7 @@ export interface LegReport {
 }
 
 export function computeLegs(route: GeoJSON.FeatureCollection, stations: LngLat[]): { legs: Leg[]; report: LegReport } {
-  const lines: LngLat[][] = [];
-  for (const f of route.features) {
-    const g = f.geometry;
-    if (g?.type === "LineString") lines.push(g.coordinates as LngLat[]);
-    else if (g?.type === "MultiLineString") lines.push(...(g.coordinates as LngLat[][]));
-  }
+  const lines = routeLines(route);
   const report: LegReport = { offRoute: [], bridges: [], straight: [] };
   const lat0 = stations.reduce((s, p) => s + p[1], 0) / Math.max(1, stations.length);
   const kx = 111320 * Math.cos((lat0 * Math.PI) / 180);

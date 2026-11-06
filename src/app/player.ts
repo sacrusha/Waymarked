@@ -10,6 +10,7 @@
 import "./player.css";
 import type { Audio, Item, Trail } from "./trail-types.ts";
 import type { Strings } from "./strings.ts";
+import { attr } from "./html.ts";
 
 /**
  * The audio to offer for an item in a language: that language's file; or,
@@ -20,8 +21,6 @@ import type { Strings } from "./strings.ts";
 export function pickAudio(trail: Trail, item: Item, lang: string): Audio | undefined {
   return item.audio[lang] ?? (item.body[lang] ? undefined : item.audio[trail.languages[0]]);
 }
-
-const attr = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
 const playIcon = `<svg class="player-icon player-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>`;
 const pauseIcon = `<svg class="player-icon player-icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z" fill="currentColor"/></svg>`;
