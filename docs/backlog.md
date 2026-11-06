@@ -198,6 +198,10 @@ Not yet: a ground test in Baden, iOS.
 - CLAUDE.md's layout names `docs/brand/`, `docs/user-flow.md` and
   `secrets/`, none of which exist; the brand doc is docs/design/brand.md
   and deploys need no local credentials. The user's file.
+- German speech: the current files ("Hier ist Station n: Titel.", short
+  paragraph openers joined by a comma; docs/design/trail-content.md, Making
+  the speech) are checked only by a speech recognizer, not yet by ear;
+  item 0's "Stadt-Naturweg" reads only weakly as German there.
 - Translations (en, fr) are unreviewed, and so are the French short titles
   of stations 1, 2, 4, 8 and 12 (Claude's, where the French titles were cut
   off in the card's head); the English and French voices
