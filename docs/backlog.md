@@ -69,10 +69,12 @@ so another trail is a fork with its folder replaced.
 Each ends with a working site more useful than the last. Items state the
 purpose they serve; how is the implementer's.
 
-State: 1–5 are built; `npm run check` and `npm run build` pass. Verified in
-headless browsers, version 1 also on desktop and Android (Samsung
-browser). Not yet: a ground test in Baden, iOS, a deploy (the Pages
-workflow exists, no GitHub repository does), git.
+State: 1–5 are built, reviewed and pushed to github.com/sacrusha/Waymarked;
+`npm run check`, `npm run build` and `route-trail.py verify` pass. Verified
+in headless browsers and by the user on desktop and Android (Samsung
+browser): flow, camera, audio voices, navigation against the bounds. The
+site deploys to sacrusha.github.io/Waymarked through the Pages workflow.
+Not yet: a ground test in Baden, iOS.
 
 ### 1. Walkable surface — the interaction model can be tested on phones in Baden
 
@@ -176,9 +178,14 @@ workflow exists, no GitHub repository does), git.
   navigation the site carries between stations.
 - Walking help, untested on the ground: compass steadiness, "Hier: n" at
   25 m with the 6/7 pair 17 m apart, whether the locate button's first
-  tap should only follow rather than also turn the map, and whether a
+  tap should only follow rather than also turn the map, whether a
   walker with the sheet raised minds lowering it to reach the locate
-  button (the controls slide out as the map strip shrinks).
+  button (the controls slide out as the map strip shrinks), and whether
+  "Hier" and the arrow go stale after a dead spot (a fix never expires;
+  the last one is used until the next arrives).
+- CLAUDE.md's layout names `docs/brand/`, `docs/user-flow.md` and
+  `secrets/`, none of which exist; the brand doc is docs/design/brand.md
+  and deploys need no local credentials. The user's file.
 - Translations (en, fr) are unreviewed; the English and French voices
   mispronounce German names. The machine-translation note opens every card
   in a marked language, possibly more than a visitor needs.
