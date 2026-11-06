@@ -32,12 +32,12 @@ export class TrailError extends Error {}
 
 /** The fields the format knows, per kind of object (docs/design/trail-content.md). */
 const KNOWN = {
-  trail: ["languages", "machineTranslated", "title", "subtitle", "publisher", "duration", "gettingThere", "links", "stationFields", "images", "theme", "signLabel", "mark", "cover", "footer", "map", "audio"],
+  trail: ["languages", "machineTranslated", "title", "shortTitle", "subtitle", "publisher", "duration", "gettingThere", "links", "stationFields", "images", "theme", "signLabel", "mark", "cover", "footer", "map", "audio"],
   map: ["basemaps", "margin"],
   theme: ["accent", "accentDark"],
   footer: ["logos", "text"],
   audio: ["voices", "rate", "say"],
-  station: ["title", "position", "fields", "images"],
+  station: ["title", "shortTitle", "position", "fields", "images"],
   stationField: ["key", "label"],
   link: ["label", "url"],
   basemap: ["label", "style", "tiles", "tileSize", "maxzoom", "attribution"],
@@ -163,6 +163,7 @@ export function loadTrail(dir: string): SourceTrail {
     n: 0,
     dir,
     title: title0,
+    shortTitle: loc(raw.shortTitle, "trail.json shortTitle", false),
     fields: {},
     body: readBodies(dir, languages),
     images: readImages(dir, raw.images, "trail.json", checks),
@@ -189,6 +190,7 @@ export function loadTrail(dir: string): SourceTrail {
       n: i + 1,
       dir: sdir,
       title,
+      shortTitle: loc(s.shortTitle, `${where} shortTitle`, false),
       position: okPos ? (p as LngLat) : undefined,
       fields,
       body: readBodies(sdir, languages),

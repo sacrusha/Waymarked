@@ -28,7 +28,7 @@ Three layers:
 
 - **Shell** (`src/app/`): the map, the sheet, the selection, the address
   and history, the card's head (badge, title, the peek's slot for the way,
-  "Here" and Listen) and end ("Next", the engine's line), prev / overview
+  "Here" and the language choice) and end ("Next", the engine's line), prev / overview
   / next, the settings, walking help, the engine's words, and the audio.
 - **Content framework** (`src/app/content/`): the blocks a card body is
   made of (sign row, machine-translation note, player view, fields, text,
@@ -46,7 +46,7 @@ select; elements that take a sideways drag carry `data-no-swipe`.
 
 Audio is the shell's: one audio element for the page, stopped when the
 card changes unless the new card shows the same track, the lock screen
-named from the track's data, the peek's Listen playing the item's track.
+named from the track's data.
 A body shows it through views (`.player[data-audio]`), any number, each
 naming its track; the framework's view is `content/player-view.ts`. So
 several sounds in one card share the one element and the lock screen.
@@ -64,8 +64,5 @@ several sounds in one card share the one element and the lock screen.
   nowhere to keep its own data yet.
 - The card body's styles are still in `src/app/style.css` with the
   shell's; the player's are in `content/player.css`.
-- Where the language toggle goes: it is a setting of the whole site, sits
-  on the map because the map is always on screen, and an embedding page
-  may want to own the choice (`?lang=` exists; hiding the toggle does not).
-- On a card with several tracks, the peek's Listen plays the item's own;
-  whether that suffices is a content question once a second track exists.
+- An embedding page may want to own the language choice: `?lang=` exists;
+  hiding the card's choice does not.

@@ -7,14 +7,14 @@
 
 import type { Trail } from "./trail-types.ts";
 import { formatDistance, type Strings } from "./strings.ts";
-import { peekPlay, pickAudio } from "./player.ts";
-import { machineNote, textFor } from "./language.ts";
+import { pickAudio } from "./player.ts";
+import { languageRow, machineNote, textFor } from "./language.ts";
 import { attr, esc } from "./html.ts";
 import type { BodyRenderer, Track } from "./content/context.ts";
 import { renderBody } from "./content/body.ts";
 
 export interface CardParts {
-  /** The item's audio, for the shell's player (the peek's Listen, the lock screen). */
+  /** The item's audio, for the shell's player (the card's views, the lock screen). */
   track?: Track;
   head: string;
   body: string;
@@ -34,7 +34,11 @@ export function renderCard(trail: Trail, n: number, lang: string, s: Strings, bo
     n === 0
       ? `<span class="badge badge-trail" aria-hidden="true">${trailGlyph}</span>`
       : `<span class="badge" aria-hidden="true">${n}</span>`;
-  const heading = n === 0 ? esc(tx(item.title)) : `<span class="sr">${s.station} ${n}: </span>${esc(tx(item.title))}`;
+  // The head is short of room: the short title where the language has one,
+  // else that language's title; only a title missing in the language falls
+  // back to the source's (docs/design/trail-content.md, station.json).
+  const short = item.shortTitle[lang] ?? (item.title[lang] ? item.title[lang] : tx(item.shortTitle) || tx(item.title));
+  const heading = n === 0 ? esc(short) : `<span class="sr">${s.station} ${n}: </span>${esc(short)}`;
 
   let orient: string;
   if (n === 0) {
@@ -67,15 +71,15 @@ export function renderCard(trail: Trail, n: number, lang: string, s: Strings, bo
 
   const label = n === 0 ? tx(item.title) : `${n} · ${tx(item.title)}`;
   const audio = pickAudio(trail, item, lang);
-  const track: Track | undefined = audio && { url: audio.url, label, art: item.images[0]?.url, synthetic: audio.synthetic };
+  // The lock screen cuts a long name off too.
+  const track: Track | undefined = audio && { url: audio.url, label: n === 0 ? short : `${n} · ${short}`, art: item.images[0]?.url, synthetic: audio.synthetic };
 
-  // Beside the title, what concerns this item: the way to it while walking
-  // there (guide.ts fills it in), the station the visitor is at instead, or
-  // listening to it, so a visitor at the sign needn't raise the sheet.
+  // Beside the title: the way to it while walking there (guide.ts fills it
+  // in), the station the visitor is at instead, else the languages.
   const slot = `
     <span class="guide" hidden>${wayArrow}<span class="way-dist"></span></span>
     <button class="here-chip" data-go="" hidden><span class="here-chip-label">${s.hereChip}</span><span class="badge badge-small here-chip-n" aria-hidden="true"></span>${chevron}</button>
-    ${audio ? peekPlay(s) : ""}`;
+    ${languageRow(trail, lang, s)}`;
 
   const head = `
     <div class="grabber" aria-hidden="true"></div>

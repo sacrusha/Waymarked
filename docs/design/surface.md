@@ -58,8 +58,8 @@ map and grows as the visitor scrolls, then its content scrolls; any
 position between is legal. Implementation sketch, not a rule: the map fixed
 behind a scroll container whose top is a transparent spacer that passes
 touches to the map; the card begins below it. Peek holds a handle, the
-title row ("7 · Title", and beside it what concerns this station: the way
-to it, or Listen) and one orientation row (prev as a small button, the
+title row ("7 · Title", and beside it the way to the station, the
+station the visitor is at, or else the language choice) and one orientation row (prev as a small button, the
 overview, "Next 8 · 350 m"): about 110–130 px, 15–18 % of a phone
 viewport; a title on two lines adds one line. At full extent a
 strip of map (about 15 %) remains; with GPS follow mode centring the map on
@@ -89,9 +89,11 @@ zooms the map out around them until it shows, and the overview ends
 following.
 
 Listening: where a station has audio (docs/design/trail-content.md), its
-card opens with a player, a large "Listen" button, the length, and a position
-slider, so a visitor can listen instead of reading and then put the phone
-away. One audio element belongs to the page, not the card, because cards are
+card opens with a player, a large "Vorlesen" (read aloud) button, the
+length, and a position slider, so a visitor can listen instead of reading
+and then put the phone away. The button is in the card only: some
+testers (an anecdotal sample) missed a small one in the peek, and the
+peek's slot went to the language choice. One audio element belongs to the page, not the card, because cards are
 re-rendered at every selection. Audio belongs to the card in view: selecting
 another card stops it, so nothing plays that the screen doesn't show. While
 it plays, the lock screen and headphones carry the media controls (play,
@@ -102,7 +104,7 @@ selection highlighted, the least surprising control for a visitor who never
 learns the site; screen space allows it for now. When the sheet leaves
 only a strip of map, the strip is the map's: the controls give way, and
 stay findable by a visitor who never learns the site. They slide out as the
-strip shrinks, following the sheet (the basemap and language choices up off
+strip shrinks, following the sheet (the basemap choice up off
 the screen, the map's buttons down under the card), and come back as it
 grows: their form never changes, so there is nothing to learn, and lowering
 the sheet, the gesture for more map, is what brings them back. The
@@ -145,7 +147,7 @@ turned the way they face, so that ahead on the map is ahead on the ground.
 - The way, in the peek. The station walked to is the selected one until the
   visitor is at it, then the next. Walking to the selected station, the
   title row shows an arrow and the distance to it; at it, the title row
-  shows Listen and "Next 9" gains the arrow and the distance from where they
+  shows the language choice again and "Next 9" gains the arrow and the distance from where they
   stand; on the overview, "Start at 1" does. The arrow aims along the leg
   into the target where the visitor is on it (at a point a little ahead on
   the route, so it follows bends and stairs) and the distance is what is
@@ -165,10 +167,11 @@ position, the view and follow mode survive a reload in the tab. Each station cha
 is a history entry, so Back steps back through the cards; leaving the site
 on Back would surprise.
 
-Language: with more than one, a toggle on the map's top left under the
-basemap choice, the languages by their own names side by side, so a visitor
-who can't read the site's first language finds it by looking at the map, the
-one thing that is always on screen. The site opens in the visitor's browser
+Language: with more than one, a compact choice in the title row, the
+current code and a ∨ ("DE ∨", as government sites show it); a tap opens
+the device's own picker with the languages by their own names. It is a
+setting of the whole site and sits on every card's head, where the
+visitor's eye is; it gives way while the slot shows the way or "Here". The site opens in the visitor's browser
 language where the trail has it. Details and the machine-translation note:
 docs/design/trail-content.md, Languages.
 
@@ -191,7 +194,7 @@ Attribution: swisstopo's line stays visible over whatever map remains.
 - Whether audio should carry on, or continue with the next station's, when
   the visitor walks on; today it stops with the card. Background playback
   with the screen locked is expected from the browsers' media session but
-  untested on iOS and Android, as is the peek's Listen.
+  untested on iOS and Android.
 - Whether the arrival suggestion ("Here: 9") is noticed and is enough; and
   whether 25 m suits placards whose mapped positions are ±5–10 m and set
   beside their objects (docs/backlog.md, Situation).

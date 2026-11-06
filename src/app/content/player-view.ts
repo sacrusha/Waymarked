@@ -1,5 +1,5 @@
 // The content framework's view of the shell's audio (player.ts): the large
-// Listen button, the length, the position slider, the synthetic-voice note.
+// "Vorlesen" button, the length, the position slider, the synthetic-voice note.
 // player.ts binds any `.player[data-audio]` in the card by these classes;
 // a view may leave parts out.
 

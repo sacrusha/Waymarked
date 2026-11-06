@@ -63,6 +63,7 @@ walking order; the slug after it is only for people.
 | `languages` | required | Language codes; the first is the source language. With more than one, the site shows a language toggle (Languages, below). |
 | `machineTranslated` | list | The languages, other than the source, whose texts are machine translations nobody has reviewed. The cards in those languages say so. |
 | `title` | required, text | The trail's name. Page title and item 0's heading. |
+| `shortTitle` | text | Item 0's heading where room is short (as a station's). |
 | `subtitle` | text | One line under the title; also the page description. |
 | `publisher` | text | Who publishes the trail, shown at the end of item 0. |
 | `duration` | text | Walking time as the publisher states it. Not derived. |
@@ -100,10 +101,10 @@ link or a sign's QR code can name a language); else the visitor's earlier
 choice; else the first of the browser's languages the trail has; else English
 if the trail has it, else the source language.
 
-**The toggle.** The map's top left, under the basemap choice: the languages
-by their own names ("Deutsch", "English", "Français") side by side, the
-current one filled, like the basemap choice, so it needs no learning and is
-there whatever the sheet shows. A choice is remembered. Changing language
+**The toggle.** In every card's title row: the current code and a ∨
+("DE ∨"); a tap opens the device's own picker with the languages by their
+own names ("Deutsch", "English", "Français") (docs/design/surface.md,
+Language). A choice is remembered. Changing language
 reloads the page, after saving where the visitor is (station, sheet, map
 view), which is why the map, card, walking help and the audio player need no
 live switching; playing audio stops.
@@ -142,6 +143,7 @@ src/app/style.css, so an engine change can move them; photos carry `data-shape` 
 | Field | | |
 |---|---|---|
 | `title` | required, text | The station's heading (Baden: the placard's title, the leaflet's Thema). |
+| `shortTitle` | text | The title in fewer words, for where room is short: the card's head (two lines beside the language choice) and the lock screen while it plays. The title stays everywhere else (the station list, "Next", the page title, the spoken intro). A language without one shows its own title; `npm run check` lists titles over about 36 characters that have none. Baden's are French only, where the translations ran long. |
 | `position` | required | `[longitude, latitude]`, WGS84 degrees, GeoJSON order. |
 | `fields` | object | Values for the trail's `stationFields`, by key; each a text. Keys not declared there are an error. |
 | `images` | list | `{ "file": "turmfalke.jpg", "caption": text, "alt": text, "credit": "…", "license": "…" }`. `file` is next to `station.json` (JPEG, PNG, WebP, GIF or SVG); `alt` defaults to the caption; the build reads each photo's size from the file, so the card reserves its space and knows its shape. The card shows them after the text as one group: the first large, the rest as insets after it, the caption with each, and one line naming each credit and licence with the captions of its photos. |

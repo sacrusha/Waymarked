@@ -149,7 +149,7 @@ try {
   mapEl.append(note);
 }
 // The language toggle (a change reloads; where the visitor is has been saved first).
-mountLanguage(tmap?.map ?? mapEl, trail, lang, s, () => saveNow());
+mountLanguage(trail, lang, () => saveNow());
 
 // Walking help (docs/design/surface.md): the visitor's position on the map, and the way in the peek row.
 const here = new Here();

@@ -193,7 +193,9 @@ Not yet: a ground test in Baden, iOS.
 - CLAUDE.md's layout names `docs/brand/`, `docs/user-flow.md` and
   `secrets/`, none of which exist; the brand doc is docs/design/brand.md
   and deploys need no local credentials. The user's file.
-- Translations (en, fr) are unreviewed; the English and French voices
+- Translations (en, fr) are unreviewed, and so are the French short titles
+  of stations 1, 2, 4, 8 and 12 (Claude's, where the French titles were cut
+  off in the card's head); the English and French voices
   mispronounce German names. The machine-translation note opens every card
   in a marked language, possibly more than a visitor needs.
 - The "STADT BADEN" administrative logo sits in item 0's footer on the

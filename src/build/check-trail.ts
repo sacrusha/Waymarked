@@ -49,6 +49,13 @@ try {
         (stale.length ? `; TEXT CHANGED since the speech was made: ${stale.join(" ")} (run build/make-audio.py)` : ""),
     );
   }
+  // Two lines of the card's head beside the language choice hold about this
+  // many characters on a 360 px phone; word breaks make it an estimate.
+  const LONG_TITLE = 36;
+  for (const lang of t.languages) {
+    const long = t.items.filter((it) => (it.title[lang]?.length ?? 0) > LONG_TITLE && !it.shortTitle[lang]).map((it) => it.n);
+    if (long.length) console.log(`Titles ${lang} over ${LONG_TITLE} characters without a shortTitle, likely cut off in the card's head on a phone: ${long.join(" ")}`);
+  }
   const far = t.report.offRoute.map((d, i) => [d, i + 1]).filter(([d]) => d > 50);
   if (far.length) console.log(`More than 50 m off the route: ${far.map(([d, n]) => `${n} (${d} m)`).join(", ")}`);
   if (t.warnings.length) console.log(`Fields the format doesn't know (a typo?), ignored:\n  ${t.warnings.join("\n  ")}`);

@@ -3,18 +3,16 @@
 //
 // The card is re-rendered at every selection, so the player cannot live in
 // it: one audio element belongs to the page. The shell hands it the item's
-// track as data (`show`), which the peek's Listen plays; the body's views of
-// it (`.player[data-audio]`, content/player-view.ts) are bound after each
-// render, whichever track they name. Audio belongs to the card in view:
+// track as data (`show`); the body's views (`.player[data-audio]`,
+// content/player-view.ts) are bound after each render, whichever track they
+// name. Audio belongs to the card in view:
 // selecting another card stops it. While it plays, the lock screen and
 // headphones get the Media Session controls, so the phone can stay in the
 // pocket.
 
 import type { Audio, Item, Trail } from "./trail-types.ts";
 import type { Strings } from "./strings.ts";
-import { attr } from "./html.ts";
 import type { Track } from "./content/context.ts";
-import { pauseIcon, playIcon } from "./content/player-view.ts";
 
 /**
  * The audio to offer for an item in a language: that language's file; or,
@@ -24,11 +22,6 @@ import { pauseIcon, playIcon } from "./content/player-view.ts";
  */
 export function pickAudio(trail: Trail, item: Item, lang: string): Audio | undefined {
   return item.audio[lang] ?? (item.body[lang] ? undefined : item.audio[trail.languages[0]]);
-}
-
-/** The item's track's play button for the peek row, beside the title (card.ts). */
-export function peekPlay(s: Strings): string {
-  return `<button type="button" class="peek-play" data-state="idle" aria-label="${attr(s.listen)}" title="${attr(s.listen)}">${playIcon}${pauseIcon}</button>`;
 }
 
 const clock = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
@@ -44,7 +37,7 @@ export class Player {
   private el = new window.Audio();
   /** The track playing or paused. */
   private active?: Track;
-  /** The item's track, the one the peek plays. */
+  /** The item's track: its views get their label and artwork from it. */
   private track?: Track;
   private probe?: HTMLAudioElement;
   private failed = false;
@@ -69,7 +62,6 @@ export class Player {
       const t = e.target as Element;
       const view = t.closest(".player-toggle")?.closest<HTMLElement>(".player[data-audio]");
       if (view) void this.toggle(viewTrack(view, this.track));
-      else if (t.closest(".peek-play") && this.track) void this.toggle(this.track);
     });
     card.addEventListener("input", (e) => {
       const seek = e.target as HTMLInputElement;
@@ -172,14 +164,6 @@ export class Player {
     const playing = !!this.active && !this.el.paused && !this.el.ended;
     const stateOf = (url?: string) =>
       !url || this.active?.url !== url ? "idle" : this.failed ? "error" : playing ? "playing" : "idle";
-
-    const peek = this.card.querySelector<HTMLElement>(".peek-play");
-    if (peek) {
-      const st = stateOf(this.track?.url);
-      peek.dataset.state = st;
-      peek.setAttribute("aria-label", st === "playing" ? this.s.pause : this.s.listen);
-      peek.title = st === "playing" ? this.s.pause : this.s.listen;
-    }
 
     const dur = this.el.duration;
     for (const p of this.views()) {

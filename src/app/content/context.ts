@@ -17,7 +17,7 @@
 import type { Item, Localized, Trail } from "../trail-types.ts";
 import type { Strings } from "../strings.ts";
 
-/** A recording as the shell plays it: the card's controls, the peek's Listen, the lock screen. */
+/** A recording as the shell plays it: the card's controls, the lock screen. */
 export interface Track {
   url: string;
   /** What the lock screen names it. */
@@ -36,7 +36,7 @@ export interface BodyContext {
   tx: (l?: Localized) => string;
   /** The engine's own words in the language shown. */
   s: Strings;
-  /** The item's audio in this language, which the peek's Listen plays too; none where it has none. */
+  /** The item's audio in this language; none where it has none. */
   track?: Track;
   /** The note a machine-translated text opens with, or "". */
   machineNote: string;

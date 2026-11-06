@@ -50,6 +50,11 @@ export interface Item {
   /** 0 for the trail, 1..n for stations: the number on the ground signage. */
   n: number;
   title: Localized;
+  /**
+   * Where room is short (the card's head, the lock screen): what the title
+   * says in fewer words, per language; the title where a language has none.
+   */
+  shortTitle: Localized;
   /** Station fields by key (see Trail.stationFields). */
   fields: Record<string, Localized>;
   /** Rendered HTML of text.<lang>.md, per language. */

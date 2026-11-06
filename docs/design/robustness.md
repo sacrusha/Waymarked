@@ -54,8 +54,7 @@ their departure is known.
   are not polyfilled.
 - No map (no WebGL2: an old or blocked GPU, WebGL switched off): MapLibre
   throws. The map's place then says that this device can't show the map,
-  and that the texts and pictures are all there; it holds the language
-  toggle. The cards work, opening half raised because there is no map to
+  and that the texts and pictures are all there. The cards work, opening half raised because there is no map to
   show. Walking help is not offered.
 - A map style given as a URL (vector basemaps, the generic default) that
   fails to load leaves the map blank for the visit. The map says it isn't

@@ -533,31 +533,10 @@ button {
   display: none;
 }
 /* Listen, from the peek. While walking to the station the way takes its place; playing, it stays. */
-.peek-play {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: var(--accent-dark);
-  color: #fff;
-}
-.peek-play svg {
-  width: 20px;
-  height: 20px;
-}
-.peek-play .player-icon-pause,
-.peek-play[data-state="playing"] .player-icon-play {
-  display: none;
-}
-.peek-play[data-state="playing"] .player-icon-pause {
-  display: block;
-}
-.card-head[data-guide="approach"] .peek-play:not([data-state="playing"]),
-.card-head[data-guide="elsewhere"] .peek-play:not([data-state="playing"]) {
+/* While the slot shows the way or the station the visitor is at, the
+   languages give it room. */
+.card-head[data-guide="approach"] .lang-pick,
+.card-head[data-guide="elsewhere"] .lang-pick {
   display: none;
 }
 @media (max-width: 380px) {

@@ -4,6 +4,9 @@
     "en": "Meeting Place of the City Birds",
     "fr": "Rendez-vous des oiseaux de la ville"
   },
+  "shortTitle": {
+    "fr": "Les oiseaux de la ville"
+  },
   "position": [
     8.307886,
     47.473236

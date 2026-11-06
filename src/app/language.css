@@ -1,33 +1,45 @@
-/* The language toggle on the map (language.ts) and the machine-translation
-   note in a card. Only the theme's tokens, as the basemap toggle beside it. */
+/* The language choice in the card's head (language.ts) and the
+   machine-translation note in a card. Only the theme's tokens. */
 
-.maplibregl-ctrl.lang-switch {
+.lang-pick {
+  position: relative;
+  flex: none;
+  display: inline-grid;
+}
+.lang-pick-code {
   display: inline-flex;
-  padding: 3px;
-  gap: 2px;
+  align-items: center;
+  gap: 3px;
+  min-height: 40px;
+  padding: 0 8px 0 10px;
+  border: 1px solid var(--line);
   border-radius: 20px;
-  background: var(--glass);
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
-}
-.lang-switch button {
-  height: 32px;
-  padding: 0 11px;
-  border: 0;
-  border-radius: 16px;
-  background: none;
   color: var(--ink);
-  font-size: 0.82rem;
-  font-weight: 600;
-  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
-/* Hovered too: MapLibre's own control hover would otherwise empty the filled one. */
-.lang-switch button[aria-pressed="true"],
-.maplibregl-ctrl.lang-switch button[aria-pressed="true"]:hover {
-  background: var(--accent-dark);
-  color: #fff;
+.lang-pick-code svg {
+  width: 12px;
+  height: 12px;
 }
-.lang-switch button[aria-pressed="false"]:hover {
+/* The select covers the code, invisible: the tap is the device picker's. */
+.lang-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  font-size: 16px; /* iOS zooms into a focused select below 16px */
+  cursor: pointer;
+}
+.lang-pick:hover .lang-pick-code {
   background: var(--wash);
+}
+/* Keyboard focus shows on the code (browsers without :has() show none). */
+.lang-pick:has(.lang-select:focus-visible) .lang-pick-code {
+  outline: 3px solid var(--accent-text, var(--accent));
+  outline-offset: 2px;
 }
 
 .mt-note {
@@ -51,7 +63,7 @@
 }
 
 /* The map's top-left controls stay above the station markers, so a marker
-   never hides a language. */
+   never hides the basemap choice. */
 .maplibregl-ctrl-top-left {
   z-index: 5;
 }

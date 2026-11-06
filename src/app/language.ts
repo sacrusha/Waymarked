@@ -8,7 +8,6 @@
 // saved before it, main.ts), so the reload is the cheap, robust switch.
 
 import "./language.css";
-import type { IControl, Map as MLMap } from "maplibre-gl";
 import type { Item, Localized, Trail } from "./trail-types.ts";
 import type { Strings } from "./strings.ts";
 import { store } from "./store.ts";
@@ -63,49 +62,35 @@ function choose(code: string, before: () => void) {
   location.reload();
 }
 
-class LanguageSwitch implements IControl {
-  private el = document.createElement("div");
-  private trail: Trail;
-  private lang: string;
-  private s: Strings;
-  private before: () => void;
-  constructor(trail: Trail, lang: string, s: Strings, before: () => void) {
-    this.trail = trail;
-    this.lang = lang;
-    this.s = s;
-    this.before = before;
-  }
-  onAdd() {
-    this.el.className = "maplibregl-ctrl lang-switch";
-    this.el.setAttribute("role", "group");
-    this.el.setAttribute("aria-label", this.s.language);
-    for (const code of this.trail.languages) {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.lang = code;
-      b.textContent = endonym(code);
-      b.setAttribute("aria-pressed", String(code === this.lang));
-      b.addEventListener("click", () => code !== this.lang && choose(code, this.before));
-      this.el.append(b);
-    }
-    return this.el;
-  }
-  onRemove() {
-    this.el.remove();
-  }
+/**
+ * The language choice in the title row's slot (card.ts): the current code
+ * and a ∨ ("DE ∨"), a setting of the whole site where the visitor's eye is
+ * on every card. A native select lies over it, invisible, so a tap opens the
+ * device's own picker, with the languages by their own names. Empty for a
+ * single language.
+ */
+export function languageRow(trail: Trail, lang: string, s: Strings): string {
+  if (trail.languages.length < 2) return "";
+  const options = trail.languages
+    .map((code) => `<option value="${esc(code)}" lang="${esc(code)}"${code === lang ? " selected" : ""}>${esc(endonym(code))}</option>`)
+    .join("");
+  return `<label class="lang-pick">
+      <span class="lang-pick-code" aria-hidden="true">${esc(lang.toUpperCase())}<svg viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <select class="lang-select" aria-label="${esc(s.language)}">${options}</select>
+    </label>`;
 }
 
 /**
- * The toggle on the map's top left, under the basemap choice (so it is there
- * whatever the sheet shows), and the "read the original" buttons in cards.
- * `before` runs just ahead of the reload: main.ts saves where the visitor is.
+ * The language choice in the card's head and the "read the original"
+ * buttons in cards. `before` runs just ahead of the reload:
+ * main.ts saves where the visitor is.
  */
-export function mountLanguage(on: MLMap | HTMLElement, trail: Trail, lang: string, s: Strings, before: () => void) {
+export function mountLanguage(trail: Trail, lang: string, before: () => void) {
   if (trail.languages.length < 2) return;
-  const sw = new LanguageSwitch(trail, lang, s, before);
-  // Where the device shows no map, the toggle sits in the map's place on its own.
-  if (on instanceof HTMLElement) on.append(sw.onAdd());
-  else on.addControl(sw, "top-left");
+  document.addEventListener("change", (e) => {
+    const sel = (e.target as Element).closest<HTMLSelectElement>(".lang-select");
+    if (sel && sel.value !== lang) choose(sel.value, before);
+  });
   document.addEventListener("click", (e) => {
     const b = (e.target as Element).closest<HTMLElement>("[data-lang]");
     if (b?.dataset.lang && b.dataset.lang !== lang) choose(b.dataset.lang, before);
