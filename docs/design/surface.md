@@ -195,7 +195,9 @@ Language: with more than one, a compact choice in the title row, the
 current code and a ∨ ("DE ∨", as government sites show it); a tap opens
 the device's own picker with the languages by their own names. It is a
 setting of the whole site and sits on every card's head, where the
-visitor's eye is; it gives way while the slot shows the way or "Here". The site opens in the visitor's browser
+visitor's eye is; it gives way while the slot shows the way or "Here". A
+visitor scanning a placard for the first time sees it: location is only
+asked for from the locate button's tap, so there is no way to show yet. The site opens in the visitor's browser
 language where the trail has it. Details and the machine-translation note:
 docs/design/trail-content.md, Languages.
 
