@@ -10,6 +10,8 @@
   --paper: #ffffff;
   --wash: #eff3f0;
   --line: #d6ded9;
+  /* The sheet's handle: a mark to be seen, not a border, so dark gives it more than --line. */
+  --grip: var(--line);
   --accent: #3d8fc4;
   --accent-dark: #17507a;
   /* The accent as text, lines and focus on paper. Light: the dark accent; dark: main.ts derives one. */
@@ -65,6 +67,7 @@
     --paper: #141b18;
     --wash: #202925;
     --line: #34403a;
+    --grip: #6b7872;
     --accent-text: var(--accent-text-dark, #6fb0dc);
     --accent-tint: var(--accent-tint-dark, #1f3a4c);
     --on-accent: #101713;
@@ -350,7 +353,7 @@ button {
   width: 40px;
   height: 5px;
   border-radius: 3px;
-  background: var(--line);
+  background: var(--grip);
 }
 
 /* The title, and beside it the way to the station, the station the visitor is at, or Listen. */
