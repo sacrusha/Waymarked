@@ -1,7 +1,7 @@
 // The surface (docs/design/surface.md): one map, one sheet, one selection.
 //
 // Selection: item 0 is the trail, 1..n the stations. Marker taps, prev/next,
-// swipes and the URL hash all go through select(); the map, the card and the
+// arrow keys and the URL hash all go through select(); the map, the card and the
 // hash follow it.
 //
 // Portrait: the map fills the screen; the sheet is a scroll container over it
@@ -344,68 +344,6 @@ addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight" && current < last) select(current + 1, { from: 1 });
   else if (e.key === "ArrowLeft" && current > 0) select(current - 1, { from: -1 });
 });
-
-// --- swipe along the trail -----------------------------------------------------
-
-{
-  let g: { id: number; x0: number; y0: number; t0: number; dx: number; axis?: "x" | "y" } | null = null;
-  let swallowClick = false;
-  const reset = (animate: boolean) => {
-    card.style.transition = animate ? "transform .18s ease-out" : "";
-    card.style.transform = "";
-    if (animate) setTimeout(() => (card.style.transition = ""), 200);
-  };
-  card.addEventListener("pointerdown", (e) => {
-    if (e.pointerType === "mouse" || !e.isPrimary) return;
-    // Content that takes a sideways drag of its own says so (content/context.ts); a slider always does.
-    if ((e.target as Element).closest("[data-no-swipe], input[type=range]")) return;
-    g = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: e.timeStamp, dx: 0 };
-  });
-  card.addEventListener("pointermove", (e) => {
-    if (!g || e.pointerId !== g.id) return;
-    const dx = e.clientX - g.x0, dy = e.clientY - g.y0;
-    if (!g.axis) {
-      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-        g.axis = "x";
-        card.setPointerCapture(e.pointerId);
-      } else if (Math.abs(dy) > 10) {
-        g = null; // vertical: the browser scrolls the sheet
-        return;
-      } else return;
-    }
-    const target = current + (dx < 0 ? 1 : -1);
-    g.dx = target < 0 || target > last ? dx * 0.25 : dx;
-    card.style.transform = `translateX(${g.dx}px)`;
-  });
-  const finish = (e: PointerEvent) => {
-    if (!g || e.pointerId !== g.id) return;
-    const { dx, t0, axis } = g;
-    g = null;
-    if (axis !== "x") return;
-    swallowClick = true;
-    setTimeout(() => (swallowClick = false), 400);
-    const dir = dx < 0 ? 1 : -1;
-    const target = current + dir;
-    const fast = Math.abs(dx) / Math.max(1, e.timeStamp - t0) > 0.5;
-    if (e.type === "pointerup" && target >= 0 && target <= last && (Math.abs(dx) > card.offsetWidth * 0.22 || (fast && Math.abs(dx) > 30))) {
-      reset(false);
-      select(target, { from: dir });
-    } else reset(true);
-  };
-  card.addEventListener("pointerup", finish);
-  card.addEventListener("pointercancel", finish);
-  card.addEventListener(
-    "click",
-    (e) => {
-      if (swallowClick) {
-        e.preventDefault();
-        e.stopPropagation();
-        swallowClick = false;
-      }
-    },
-    true,
-  );
-}
 
 // --- divider (side by side) ------------------------------------------------------
 

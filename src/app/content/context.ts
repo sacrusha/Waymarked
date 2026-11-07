@@ -9,8 +9,6 @@
 // - Its first element is the lead: the peek shows the head and half a line
 //   into it, the cut-off that says the sheet scrolls (docs/design/surface.md, Depth).
 // - A `[data-go="n"]` button selects item n, as the shell's own buttons do.
-// - Elements that take a sideways drag of their own (a slider, a gallery)
-//   carry `data-no-swipe`, so the drag doesn't change the card.
 // - A `.player[data-audio]` element is a view of the shell's audio
 //   (player.ts binds it; content/player-view.ts is the framework's).
 

@@ -41,8 +41,8 @@ and what the shell has prepared (the text accessor, the engine's words, the
 item's audio track, the machine-translation note, and on the overview the
 station list, which is navigation and so the shell's, for the body to
 place) and returns the body. What the shell relies on in a body is stated
-there: its first element is the lead the peek cuts into; `data-go` buttons
-select; elements that take a sideways drag carry `data-no-swipe`.
+there: its first element is the lead the peek cuts into, and `data-go` buttons
+select.
 
 Audio is the shell's: one audio element for the page, stopped when the
 card changes unless the new card shows the same track, the lock screen
