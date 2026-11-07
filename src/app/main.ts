@@ -96,10 +96,13 @@ sheet.setAttribute("aria-label", s.sheet);
 root.lang = lang;
 divider.setAttribute("aria-label", s.resize);
 
-card.innerHTML = `<header class="card-head"></header><div class="card-body"></div><footer class="card-end"></footer>`;
+// The last child is the "more" mark: sticky at the sheet's bottom while the card's content goes on below it.
+const moreChevron = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+card.innerHTML = `<header class="card-head"></header><div class="card-body"></div><footer class="card-end"></footer><div class="more" aria-hidden="true"><span>${s.more}${moreChevron}</span></div>`;
 const head = card.querySelector<HTMLElement>(".card-head")!;
 const body = card.querySelector<HTMLElement>(".card-body")!;
 const end = card.querySelector<HTMLElement>(".card-end")!;
+const more = card.querySelector<HTMLElement>(".more")!;
 const tx = textFor(trail, lang);
 const player = new Player(card, tx(trail.items[0].title), s);
 
@@ -249,6 +252,30 @@ new ResizeObserver(setPeek).observe(head);
 /** Minimised: the sheet at its peek. */
 const atPeek = () => portrait() && sheet.scrollTop < 4;
 
+/**
+ * Content still below the screen's edge (docs/design/surface.md, Depth): not
+ * the scroll's end, since a short card can rise further over blank paper. The
+ * mark sits stuck at the sheet's bottom while the content goes on past it, and
+ * at its own place after the content once that is on screen.
+ */
+const moreBelow = () => end.getBoundingClientRect().bottom > more.getBoundingClientRect().bottom + 1;
+function showMore() {
+  more.classList.toggle("more-on", moreBelow());
+}
+new ResizeObserver(showMore).observe(body);
+
+// The hop: the sheet bounces up and back, it moves and there is more.
+const up = "cubic-bezier(.25,.7,.45,1)", down = "cubic-bezier(.55,0,.75,.45)";
+const hopFrames = (from: number) => [
+  { transform: "translateY(0)", opacity: 1, offset: from, easing: up },
+  { transform: "translateY(-18px)", offset: from + (1 - from) * 0.31, easing: down },
+  { transform: "translateY(0)", offset: from + (1 - from) * 0.6, easing: up },
+  { transform: "translateY(-5px)", offset: from + (1 - from) * 0.79, easing: down },
+  { transform: "translateY(0)", offset: 1 },
+];
+/** Minimised, with more to show: the hop has something to say. */
+const mayHop = () => atPeek() && moreBelow() && !reduceMotion.matches;
+
 // --- selection ---------------------------------------------------------------
 
 function parseHash(): number {
@@ -263,6 +290,7 @@ function render(n: number) {
   end.innerHTML = parts.end;
   card.dataset.n = String(n);
   setPeek();
+  showMore();
   player.show(parts.track);
   card.setAttribute("aria-label", parts.label);
   guide?.show(n);
@@ -275,9 +303,10 @@ function select(n: number, opts: { walk?: boolean; from?: number; fromHistory?: 
   const was = current;
   const changed = n !== was;
   // Minimised, the sheet hops once as the card changes: it scrolls, there is more (docs/design/surface.md, Depth).
-  const hop = changed && !opts.walk && atPeek();
+  const wasAtPeek = atPeek();
   current = n;
   render(n);
+  const hop = changed && !opts.walk && wasAtPeek && mayHop();
   if (changed && !reduceMotion.matches) {
     const dir = opts.from ?? Math.sign(n - was);
     const slideIn = [
@@ -285,15 +314,7 @@ function select(n: number, opts: { walk?: boolean; from?: number; fromHistory?: 
       { transform: "none", opacity: 1 },
     ];
     // The hop follows the slide, in one animation: both move the card's transform.
-    const up = "cubic-bezier(.25,.7,.45,1)", down = "cubic-bezier(.55,0,.75,.45)";
-    const slideAndHop = [
-      { ...slideIn[0], offset: 0 },
-      { transform: "translateY(0)", opacity: 1, offset: 0.3, easing: up },
-      { transform: "translateY(-18px)", offset: 0.52, easing: down },
-      { transform: "translateY(0)", offset: 0.72, easing: up },
-      { transform: "translateY(-5px)", offset: 0.85, easing: down },
-      { transform: "translateY(0)", offset: 1 },
-    ];
+    const slideAndHop = [{ ...slideIn[0], offset: 0 }, ...hopFrames(0.3)];
     card.animate(hop ? slideAndHop : slideIn, { duration: hop ? 740 : 220 });
   }
   // Each station change is a history entry: Back steps back through the cards.
@@ -413,14 +434,20 @@ addEventListener("keydown", (e) => {
 // --- the handle: dragging it does what scrolling does (portrait) -------------------
 // Touch already scrolls the sheet natively; this gives a mouse the same grip.
 
+/** A mouse drag on the head just ended: the click it ends in is not a tap. */
+let dragged = false;
 head.addEventListener("pointerdown", (e) => {
   if (e.pointerType !== "mouse" || e.button !== 0 || !portrait()) return;
   if ((e.target as Element).closest("button, a")) return;
   e.preventDefault();
   const y0 = e.clientY, s0 = sheet.scrollTop;
+  dragged = false;
   head.setPointerCapture(e.pointerId);
   surface.classList.add("dragging-sheet");
-  const move = (ev: PointerEvent) => (sheet.scrollTop = s0 - (ev.clientY - y0));
+  const move = (ev: PointerEvent) => {
+    if (Math.abs(ev.clientY - y0) > 4) dragged = true;
+    sheet.scrollTop = s0 - (ev.clientY - y0);
+  };
   const up = () => {
     head.removeEventListener("pointermove", move);
     head.removeEventListener("pointerup", up);
@@ -430,6 +457,14 @@ head.addEventListener("pointerdown", (e) => {
   head.addEventListener("pointermove", move);
   head.addEventListener("pointerup", up);
   head.addEventListener("pointercancel", up);
+});
+
+// A tap on the head, beside its controls, answers with the hop: the head is the
+// sheet's grip, and the hop shows it moves without moving it (docs/design/surface.md, Depth).
+head.addEventListener("click", (e) => {
+  if (dragged) return void (dragged = false);
+  if ((e.target as Element).closest("button, a, select, input, label")) return;
+  if (mayHop()) card.animate(hopFrames(0), { duration: 520 });
 });
 
 // --- saving where the visitor was ---------------------------------------------------
@@ -460,6 +495,7 @@ function placeTools() {
   root.style.setProperty("--top-controls-out", `${Math.round(out * (topControlsHeight() + 8))}px`);
   root.style.setProperty("--tools-out", `${Math.round(out * (tools.offsetHeight + 22))}px`);
   surface.dataset.controls = out >= 1 ? "out" : "";
+  showMore();
   tmap?.setCovered(covered());
   walking?.nudge();
 }

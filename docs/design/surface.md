@@ -69,11 +69,20 @@ viewport; a title on two lines adds one line. At full extent a
 strip of map (about 15 %) remains; with GPS follow mode centring the map on
 the visitor, that strip shows them, their heading and the selected station.
 Same map, less of it. Untrained visitors did not discover that the
-minimised sheet scrolls, so peek shows the first half-line of the text, cut
-off, and the sheet bounces briefly when a different station is selected
-while minimised: both say there is more. A visitor arriving (first visit,
-link, QR code) finds the sheet at peek, where the cut-off line is seen;
-higher, it is not.
+minimised sheet scrolls. Peek shows the first half-line of what the card
+opens with, cut off; that is the trail's content (a sign row, a photo), so
+it says "more" on some trails better than on others. The site's own word
+is "Weiterlesen ∨" on a faded wash at the sheet's bottom edge, shown while
+the card's content goes on below the screen's edge, at any sheet height and
+side by side alike: not until the scroll's end, since a short card can
+still rise to full extent over blank paper, and full extent stays reachable
+on every card so the sheet's travel is the same from card to card. It is a
+mark, not a control; touches pass through it. The sheet bounces briefly
+when a different station is selected while minimised, and when the head is
+tapped beside its controls: the head is the sheet's grip, and the bounce
+answers the tap with "this moves" without moving it. Neither bounces where
+the card's content is all on screen. A visitor arriving (first visit, link,
+QR code) finds the sheet at peek.
 
 Transitions the site initiates: exactly one. "Next: 8 Title →" at a card's
 end moves along the trail and collapses the sheet to peek; the visitor is
@@ -222,3 +231,10 @@ Attribution: swisstopo's line stays visible over whatever map remains.
 - Whether the leg's line in "Next" (0.8 rem) reads in sunlight.
 - Whether the strip above a raised sheet should keep the selected station
   in view too while following; today the peek's arrow points to it.
+- Whether "Weiterlesen" and the head's bounce are noticed, in sunlight at
+  the screen's bottom edge, and are enough. If not, the fallback that does
+  not depend on discovering the scroll is a visible button that opens and
+  closes the sheet.
+- Whether a station link (a QR code at its placard) should land at full
+  extent: the visitor standing there wants the text. For the overview, the
+  map may be the point.

@@ -190,6 +190,49 @@ button {
   display: none;
 }
 
+/* "Read on": while the card's content goes on below the screen's edge (main.ts,
+   moreBelow), at any sheet height and side by side alike. It shows the way, it
+   is not a control: touches pass through to the card. At the peek it lies over
+   the cut-off half-line, below the head. */
+.more {
+  position: sticky;
+  bottom: var(--safe-bottom);
+  z-index: 2;
+  height: 0;
+  pointer-events: none;
+}
+.more > span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding-bottom: 4px;
+  background: linear-gradient(to bottom, transparent, var(--paper) 55%);
+  color: var(--accent-text);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.2;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.more > span svg {
+  width: 14px;
+  height: 14px;
+}
+.more.more-on > span {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .more > span {
+    transition: none;
+  }
+}
+
 /* The map's place where the device can't show a map (main.ts), and the
    notice of a map style that hasn't loaded (map.ts). */
 .map-none {
