@@ -50,8 +50,9 @@ able to put the visitor at its anchor anywhere inside the bounds, turned
 or not, and the margins are wide enough that half a view past the edge
 still shows trail. A visitor out of view,
 far away or panned past, sees their own position as an arrow at the map's
-edge with the distance ("256 km"); tapped, it follows them where the map
-can go.
+edge, without a distance: the card's tag gives the way to the station, and
+a second figure on the map (from the map's centre to the visitor) was read
+as the same; tapped, it follows them where the map can go.
 
 Depth (vertical): the sheet. In portrait it rests at a peek height over the
 map and grows as the visitor scrolls, then its content scrolls; any

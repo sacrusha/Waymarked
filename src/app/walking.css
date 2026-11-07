@@ -122,7 +122,7 @@
   opacity: 0.7;
 }
 
-/* The visitor out of view: at the map's edge, toward them, with the distance. */
+/* The visitor out of view: at the map's edge, pointing toward them. */
 .you-edge {
   position: absolute;
   left: 0;
@@ -130,18 +130,14 @@
   z-index: 2;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  min-height: 36px;
-  padding: 0 12px 0 6px;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   border: 2px solid #fff;
-  border-radius: 18px;
+  border-radius: 50%;
   background: var(--you);
   color: #fff;
-  font-family: var(--font);
-  font-weight: 700;
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
   box-shadow: 0 1px 6px rgb(0 0 0 / 0.3);
 }
 .you-edge[hidden] {

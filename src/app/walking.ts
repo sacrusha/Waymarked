@@ -14,7 +14,7 @@ import type { Padding, TrailMap } from "./map.ts";
 import type { Here, HereChange } from "./here.ts";
 import type { LngLat } from "./trail-types.ts";
 import { formatLive, type Strings } from "./strings.ts";
-import { distance, inBox, toLocal, turn } from "./geo.ts";
+import { inBox, toLocal, turn } from "./geo.ts";
 
 export type Mode = "free" | "follow" | "heading";
 
@@ -82,7 +82,8 @@ export class Walking {
     this.edge.type = "button";
     this.edge.className = "you-edge";
     this.edge.hidden = true;
-    this.edge.innerHTML = `<svg class="you-edge-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 16-7-4-7 4z" fill="currentColor"/></svg><span class="you-edge-dist"></span>`;
+    this.edge.setAttribute("aria-label", o.s.youAreThere);
+    this.edge.innerHTML = `<svg class="you-edge-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 16-7-4-7 4z" fill="currentColor"/></svg>`;
     this.edge.addEventListener("click", () => this.toVisitor());
     map.getContainer().append(this.edge);
 
@@ -158,7 +159,7 @@ export class Walking {
 
   setMode(m: Mode, opts: { quiet?: boolean } = {}) {
     if (m !== "free" && this.here.fix && !inBox(this.here.fix.at, this.tm.limits.bounds)) {
-      // Far from the trail: the map can't go there; the edge shows where and how far.
+      // Far from the trail: the map can't go there; the edge shows where, this line how far.
       this.toast(this.o.s.farAway.replace("{d}", formatLive(this.tm.distanceToTrail(this.here.fix.at), this.o.lang)));
       m = "free";
     }
@@ -316,12 +317,6 @@ export class Walking {
     const share = this.mode === "heading" ? ANCHOR.heading : ANCHOR.follow;
     return { x: (r.l + r.r) / 2, y: r.t + (r.b - r.t) * share };
   }
-  private centre(): LngLat {
-    const map = this.tm.map;
-    const r = rect(map.getContainer(), this.o.visible());
-    const c = map.unproject([(r.l + r.r) / 2, (r.t + r.b) / 2]);
-    return [c.lng, c.lat];
-  }
 
   // --- drawing -----------------------------------------------------------------
 
@@ -351,7 +346,7 @@ export class Walking {
     src.setData({ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [ring] } });
   }
 
-  /** The visitor out of view: an arrow at the edge of the visible map, pointing to them, with the distance. */
+  /** The visitor out of view: an arrow at the edge of the visible map, pointing to them. */
   private drawEdge() {
     const fix = this.here.fix;
     const map = this.tm.map;
@@ -362,26 +357,20 @@ export class Walking {
     const r = rect(map.getContainer(), this.o.visible());
     const p = map.project(fix.at);
     const IN = 22;
-    // Down to the strip above a raised sheet: the arrow is 36 px high, and a far-away visitor needs it most.
-    if (r.r - r.l < 120 || r.b - r.t < 48 || (p.x >= r.l && p.x <= r.r && p.y >= r.t && p.y <= r.b)) {
+    // Down to the strip above a raised sheet: the arrow is 36 px across, and a far-away visitor needs it most.
+    if (r.r - r.l < 48 || r.b - r.t < 48 || (p.x >= r.l && p.x <= r.r && p.y >= r.t && p.y <= r.b)) {
       this.edge.hidden = true;
       return;
     }
     const cx = (r.l + r.r) / 2, cy = (r.t + r.b) / 2;
     const dx = p.x - cx, dy = p.y - cy;
-    const hw = (r.r - r.l) / 2 - IN - 20, hh = Math.max(0, (r.b - r.t) / 2 - IN);
+    const hw = Math.max(0, (r.r - r.l) / 2 - IN), hh = Math.max(0, (r.b - r.t) / 2 - IN);
     const t = Math.min(hw / Math.abs(dx || 1e-9), hh / Math.abs(dy || 1e-9));
     const x = cx + dx * t, y = cy + dy * t;
     const angle = (Math.atan2(dx, -dy) * 180) / Math.PI;
     this.edge.hidden = false;
     this.edge.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
     this.edge.querySelector<SVGElement>(".you-edge-arrow")!.style.transform = `rotate(${angle}deg)`;
-    // Beyond the map's reach, how far the visitor is from the trail (as the far-away line says);
-    // within it (panned past), how far from what the map shows, since they may stand on the trail.
-    const away = inBox(fix.at, this.tm.limits.bounds) ? distance(this.centre(), fix.at) : this.tm.distanceToTrail(fix.at);
-    const d = formatLive(away, this.o.lang);
-    this.edge.querySelector(".you-edge-dist")!.textContent = d;
-    this.edge.setAttribute("aria-label", this.o.s.youAreThere.replace("{d}", d));
   }
 
   private drawNorth() {
