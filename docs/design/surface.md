@@ -126,7 +126,10 @@ turned the way they face, so that ahead on the map is ahead on the ground.
 
 - The visitor on the map: a blue dot, the blue every map app uses for
   "you", its accuracy as a pale circle, and a cone toward where they face
-  while a heading is known.
+  while a heading is known. A fix older than 30 s (a dead spot, the lift,
+  the page back from the background) is stale: the dot goes grey and the
+  peek's way and "Here" wait for the next fix, since a walker has gone some
+  40 m by then, as far as "at a station" lasts.
 - The locate button: a tap shows the visitor and follows them. On a phone
   the first tap also turns the map with them (heading-up, the visitor placed
   low in the visible map so more of what is ahead shows); the next tap
@@ -138,7 +141,9 @@ turned the way they face, so that ahead on the map is ahead on the ground.
   above a raised sheet still shows them.
 - Heading: the compass where the device has one and allows it; else the GPS
   course while walking (between fixes at walking pace, so a jumping fix
-  gives no direction). The compass on iOS needs a permission asked from a
+  gives no direction). A compass without an estimate of its own error (iOS
+  reports that, uncalibrated or under interference) shows its widest cone
+  and gives way to the course while walking. The compass on iOS needs a permission asked from a
   tap: the locate button's tap asks it first, so it still counts as the
   tap's. Location and the compass need a secure page (https); a phone on a
   local preview gets one from the https dev server
@@ -153,7 +158,9 @@ turned the way they face, so that ahead on the map is ahead on the ground.
   shows the language choice again and "Next 9" gains the arrow and the distance from where they
   stand; on the overview, "Start at 1" does. The arrow aims along the leg
   into the target where the visitor is on it (at a point a little ahead on
-  the route, so it follows bends and stairs) and the distance is what is
+  the route, so it follows bends and stairs; where the leg passes close to
+  itself, as at a switchback, the fold they were on is kept, since a fix
+  can't tell the folds apart) and the distance is what is
   left of the leg; off the route, both are the straight line. The arrow
   points the way in the world while a heading is known, else as on the map.
   On that leg into the selected station, the map emphasises it instead of
@@ -162,7 +169,11 @@ turned the way they face, so that ahead on the map is ahead on the ground.
   visitor is at it until 40 m away. At a station other than the selected
   one, the title row offers its card ("Here: 9"); the card never switches
   by itself, because the visitor may be reading. Where stations stand closer
-  than that (Baden's 6 and 7, 17 m apart), the selected one wins.
+  than that (Baden's 6 and 7, 17 m apart), the selected one wins. A station
+  the visitor leaves in the cards while standing at it ("Next" at the end
+  of its card) is acknowledged: they know where they are, so the way to the
+  chosen station shows, and no offer of the acknowledged one until they
+  have left it.
 
 State: the selected station in the URL (`#7`), so reload, share and QR
 deep-links land on a station with the sheet at peek; the sheet's
@@ -201,8 +212,9 @@ Attribution: swisstopo's line stays visible over whatever map remains.
 - Whether the arrival suggestion ("Here: 9") is noticed and is enough; and
   whether 25 m suits placards whose mapped positions are ±5–10 m and set
   beside their objects (docs/backlog.md, Situation).
-- Walking help on real phones: the compass direction held flat and raised
-  (on Android the site turns orientation into a heading; iOS gives one),
+- Walking help on real phones: the compass direction held flat, raised, and
+  in landscape (on Android the site turns orientation into a heading; iOS
+  gives one),
   whether heading-up feels steady or nervous at walking pace, the GPS
   course in the old town's lanes, and whether the first tap should turn the
   map or only follow.

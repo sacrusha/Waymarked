@@ -9,7 +9,8 @@
     "dev:https": "vite --mode https",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "check": "tsc --noEmit && node build/check-trail.ts"
+    "check": "tsc --noEmit && node build/check-trail.ts && npm test",
+    "test": "node --test test/*.test.ts"
   },
   "engines": {
     "node": ">=22.18"

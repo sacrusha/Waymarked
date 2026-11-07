@@ -11,7 +11,7 @@
 import { Marker, type GeoJSONSource } from "maplibre-gl";
 import "./walking.css";
 import type { Padding, TrailMap } from "./map.ts";
-import type { Here } from "./here.ts";
+import type { Here, HereChange } from "./here.ts";
 import type { LngLat } from "./trail-types.ts";
 import { formatLive, type Strings } from "./strings.ts";
 import { distance, inBox, toLocal, turn } from "./geo.ts";
@@ -180,11 +180,16 @@ export class Walking {
   private onLocate() {
     const h = this.here;
     if (!h.active || h.compassNeedsGesture) h.start(true);
+    // Said at the tap: the state stays "insecure" on a repeated one. Denied and no fix arrive later, through onHere.
     if (h.state === "insecure") return this.toast(this.o.s.locationInsecure);
-    if (h.state === "denied") return this.toast(this.o.s.locationDenied);
-    const next: Mode =
-      this.mode === "free" ? this.firstMode : this.mode === "heading" ? "follow" : this.firstMode === "heading" ? "heading" : "free";
-    this.setMode(next);
+    this.setMode(this.nextMode());
+  }
+
+  /** The tap cycle: show and follow (a phone turns the map too), then the other way of following; a phone turns again, a desktop lets go. */
+  private nextMode(): Mode {
+    if (this.mode === "free") return this.firstMode;
+    if (this.mode === "heading") return "follow";
+    return this.firstMode === "heading" ? "heading" : "free";
   }
 
   /** The edge arrow, tapped: to the visitor, if the map can go there. */
@@ -197,18 +202,22 @@ export class Walking {
     else this.tm.map.easeTo({ bearing: 0, duration: this.reduceMotion.matches ? 0 : 400 });
   }
 
-  private onHere(what: "fix" | "heading" | "state") {
+  private onHere(what: HereChange) {
     const h = this.here;
     if (what === "state") {
       if (h.state === "denied") this.toast(this.o.s.locationDenied);
-      if (h.state === "insecure") this.toast(this.o.s.locationInsecure);
       if (h.state === "unavailable") this.toast(this.o.s.locationUnavailable, "unavailable");
       if (h.state === "denied" || h.state === "insecure") this.setMode("free");
       this.drawButtons();
       return;
     }
+    if (what === "stale") {
+      this.youEl.dataset.stale = String(h.stale); // the dot greys: where they were, not where they are
+      return;
+    }
     if (what === "fix") {
       const fix = h.fix!; // Here reports "fix" only with one, and never clears it
+      this.youEl.dataset.stale = "false";
       if (this.toastEl.dataset.kind === "unavailable") this.toastEl.hidden = true; // it came after all
       if (!this.you.getElement().isConnected) this.you.setLngLat(fix.at).addTo(this.tm.map);
       this.you.setLngLat(fix.at);
@@ -281,7 +290,6 @@ export class Walking {
   private camera(o: { zoom?: number; bearing?: number; duration: number }) {
     const map = this.tm.map;
     const at = this.shownNow();
-    if (!at) return;
     const a = this.anchor(rect(map.getContainer(), this.o.visible()));
     const q = map.project(at);
     if (Math.hypot(q.x - a.x, q.y - a.y) < 2) {
@@ -292,6 +300,7 @@ export class Walking {
     map.easeTo({ center: this.tm.centreFor(at, a, zoom, bearing), zoom, bearing, duration: o.duration });
   }
 
+  /** Where the visitor is shown now, on the way from the previous fix to the latest. Callers hold a fix. */
   private shownNow(now = performance.now()): LngLat {
     const fix = this.here.fix!.at;
     const s = this.shown;
@@ -346,7 +355,10 @@ export class Walking {
   private drawEdge() {
     const fix = this.here.fix;
     const map = this.tm.map;
-    if (!fix) return void (this.edge.hidden = true);
+    if (!fix) {
+      this.edge.hidden = true;
+      return;
+    }
     const r = rect(map.getContainer(), this.o.visible());
     const p = map.project(fix.at);
     const IN = 22;

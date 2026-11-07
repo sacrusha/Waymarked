@@ -27,7 +27,8 @@ export interface Heading {
 }
 
 export type HereState = "off" | "asking" | "on" | "denied" | "unavailable" | "insecure";
-type Change = "fix" | "heading" | "state";
+/** What changed: a new fix, the heading, the state, or the fix went stale. */
+export type HereChange = "fix" | "heading" | "state" | "stale";
 
 /** Course from the GPS while the visitor walks at least this fast (m/s). */
 const MOVING = 0.6;
@@ -35,8 +36,15 @@ const MOVING = 0.6;
 const WALK_MAX = 4;
 /** A course is believed this long after the movement that gave it (ms). */
 const COURSE_LIFE = 8000;
+/** Half the cone for a course: a direction between fixes is rougher than a compass. */
+const COURSE_SPREAD = 32;
 /** The compass is live while its events keep coming within this (ms). */
 const COMPASS_LIFE = 1500;
+/**
+ * A fix this old (ms) says nothing about where the visitor stands: a walker
+ * has gone some 40 m by then, as far as "at a station" lasts (guide.ts LEAVE).
+ */
+const FIX_LIFE = 30000;
 
 type IOSOrientationEvent = DeviceOrientationEvent & { webkitCompassHeading?: number; webkitCompassAccuracy?: number };
 type IOSOrientationCtor = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<"granted" | "denied"> };
@@ -44,9 +52,11 @@ type IOSOrientationCtor = typeof DeviceOrientationEvent & { requestPermission?: 
 export class Here {
   state: HereState = "off";
   fix?: Fix;
-  private listeners: ((what: Change) => void)[] = [];
+  private listeners: ((what: HereChange) => void)[] = [];
   private watch?: number;
-  private compass?: { deg: number; spread: number; time: number; x: number; y: number };
+  private staleTimer = 0;
+  /** `sure`: the sensor gives an estimate of its error (iOS says when it has none). */
+  private compass?: { deg: number; spread: number; sure: boolean; time: number; x: number; y: number };
   private course?: { deg: number; time: number };
   private courseAnchor?: Fix;
   private orientationOn = false;
@@ -54,10 +64,10 @@ export class Here {
   /** An error was reported since start, so a timeout repeating isn't news. */
   private reported = false;
 
-  onChange(fn: (what: Change) => void) {
+  onChange(fn: (what: HereChange) => void) {
     this.listeners.push(fn);
   }
-  private emit(what: Change) {
+  private emit(what: HereChange) {
     for (const fn of this.listeners) fn(what);
   }
   private setState(s: HereState) {
@@ -66,12 +76,24 @@ export class Here {
     this.emit("state");
   }
 
-  /** The best heading now: the compass while it reports, else the course while walking, else none. */
+  /**
+   * The best heading now: the compass while it reports, else the course while
+   * walking, else none. A compass without an estimate of its error gives way
+   * to the course while there is one: walking tells the direction better than
+   * an uncalibrated sensor.
+   */
   get heading(): Heading | undefined {
     const now = performance.now();
-    if (this.compass && now - this.compass.time < COMPASS_LIFE) return { deg: this.compass.deg, source: "compass", spread: this.compass.spread };
-    if (this.course && now - this.course.time < COURSE_LIFE) return { deg: this.course.deg, source: "course", spread: 32 };
+    const c = this.compass && now - this.compass.time < COMPASS_LIFE ? this.compass : undefined;
+    const k = this.course && now - this.course.time < COURSE_LIFE ? this.course : undefined;
+    if (c && (c.sure || !k)) return { deg: c.deg, source: "compass", spread: c.spread };
+    if (k) return { deg: k.deg, source: "course", spread: COURSE_SPREAD };
     return undefined;
+  }
+
+  /** The fix is too old to say where the visitor stands (FIX_LIFE); "stale" is emitted when it becomes so. */
+  get stale(): boolean {
+    return this.fix !== undefined && performance.now() - this.fix.time >= FIX_LIFE;
   }
 
   get active(): boolean {
@@ -119,6 +141,10 @@ export class Here {
     const fix: Fix = { at: [p.coords.longitude, p.coords.latitude], accuracy: p.coords.accuracy, time: performance.now() };
     this.updateCourse(fix, p.coords.heading, p.coords.speed);
     this.fix = fix;
+    // A little after FIX_LIFE, so `stale` reads true when it fires. A timer held
+    // back in a hidden tab fires on its return, which is when the stale fix would show.
+    clearTimeout(this.staleTimer);
+    this.staleTimer = window.setTimeout(() => this.emit("stale"), FIX_LIFE + 100);
     this.setState("on");
     this.emit("fix");
   }
@@ -196,11 +222,14 @@ export class Here {
     const screenAngle = Number(screen.orientation?.angle ?? (window as { orientation?: number }).orientation ?? 0) || 0;
     let deg: number | undefined;
     let spread = 20;
+    let sure = true;
     if (e.webkitCompassHeading != null && Number.isFinite(e.webkitCompassHeading)) {
-      // iOS: degrees from north of the device's top; a negative accuracy means uncalibrated.
-      if ((e.webkitCompassAccuracy ?? 0) < 0) return;
+      // iOS: degrees from north of the device's top. A negative accuracy is no
+      // estimate (uncalibrated, or interference): the widest cone, and the course wins while walking.
+      const acc = e.webkitCompassAccuracy ?? 20;
+      sure = acc >= 0;
       deg = e.webkitCompassHeading + screenAngle;
-      spread = Math.max(15, Math.min(50, e.webkitCompassAccuracy ?? 20));
+      spread = sure ? Math.max(15, Math.min(50, acc)) : 50;
     } else if (absolute && e.alpha != null && e.beta != null && e.gamma != null) {
       deg = forwardHeading(e.alpha, e.beta, e.gamma, screenAngle);
     }
@@ -211,11 +240,11 @@ export class Here {
     const x = Math.sin(deg * (Math.PI / 180)), y = Math.cos(deg * (Math.PI / 180));
     const c = this.compass;
     if (!c || now - c.time > 500 || Math.abs(turn(c.deg, deg)) > 90) {
-      this.compass = { deg: norm(deg), spread, time: now, x, y };
+      this.compass = { deg: norm(deg), spread, sure, time: now, x, y };
     } else {
       const k = 1 - Math.exp(-(now - c.time) / 120);
       const sx = c.x + k * (x - c.x), sy = c.y + k * (y - c.y);
-      this.compass = { deg: norm(Math.atan2(sx, sy) * (180 / Math.PI)), spread, time: now, x: sx, y: sy };
+      this.compass = { deg: norm(Math.atan2(sx, sy) * (180 / Math.PI)), spread, sure, time: now, x: sx, y: sy };
     }
     this.emit("heading");
   }
@@ -224,11 +253,12 @@ export class Here {
 /**
  * Which way the visitor faces, from absolute device orientation (W3C
  * alpha/beta/gamma, Z-X'-Y''). Held flat, that is where the top of the screen
- * points; raised upright, where the back camera looks. The two are blended by
- * the tilt, so neither degenerates: the top's direction is undefined held
- * upright, the camera's held flat.
+ * points; raised upright (portrait or landscape), where the back camera looks.
+ * The two are blended by how far the screen's normal is from vertical, so
+ * neither degenerates: the top's direction is undefined held upright, the
+ * camera's held flat. Exported for its tests.
  */
-function forwardHeading(alpha: number, beta: number, gamma: number, screenAngle: number): number | undefined {
+export function forwardHeading(alpha: number, beta: number, gamma: number, screenAngle: number): number | undefined {
   const r = Math.PI / 180;
   const sa = Math.sin(alpha * r), ca = Math.cos(alpha * r);
   const sb = Math.sin(beta * r), cb = Math.cos(beta * r);
@@ -240,7 +270,7 @@ function forwardHeading(alpha: number, beta: number, gamma: number, screenAngle:
   // The screen's up: the device's top, turned with the screen's rotation.
   const st = Math.sin(screenAngle * r), ct = Math.cos(screenAngle * r);
   const uE = ct * yE + st * xE, uN = ct * yN + st * xN;
-  const w = sb * sb;
+  const w = 1 - (cb * cg) ** 2; // the screen normal's up component is cb·cg: flat 1, upright 0
   const E = uE + w * zE, N = uN + w * zN;
   if (Math.hypot(E, N) < 0.1) return undefined;
   return norm(Math.atan2(E, N) / r);

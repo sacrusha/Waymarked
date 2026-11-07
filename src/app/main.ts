@@ -531,7 +531,9 @@ new ResizeObserver(placeTools).observe(head);
 tmap?.map.on("moveend", save);
 // Phones discard tabs after screen-lock; hidden is the last reliable moment.
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") (clearTimeout(saveTimer), saveNow());
+  if (document.visibilityState !== "hidden") return;
+  clearTimeout(saveTimer);
+  saveNow();
 });
 
 // --- start ----------------------------------------------------------------------------

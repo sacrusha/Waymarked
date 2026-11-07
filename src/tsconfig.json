@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "types": ["node", "vite/client", "geojson"]
   },
-  "include": ["app", "build", "vite.config.ts"]
+  "include": ["app", "build", "test", "vite.config.ts"]
 }

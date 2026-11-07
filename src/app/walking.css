@@ -1,5 +1,5 @@
 /* Walking help on the map (walking.ts): the visitor, the edge arrow, the
-   buttons above the sheet, the message line. Tokens: --you, --you-tint. */
+   buttons above the sheet, the message line. Tokens: --you, --you-ui, --you-cone, --you-stale. */
 
 /* The buttons ride above the sheet's top edge (main.ts sets --card-top) and
    slide down under the card as the strip above a raised sheet becomes the
@@ -101,12 +101,15 @@
 .you[data-coarse="true"] .you-dot {
   opacity: 0.6;
 }
+.you[data-stale="true"] .you-dot {
+  background: var(--you-stale);
+}
 .you-cone {
   --spread: 25deg;
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(from calc(var(--spread) * -1), rgb(31 111 224 / 0.5) 0 calc(var(--spread) * 2), transparent 0);
+  background: conic-gradient(from calc(var(--spread) * -1), var(--you-cone) 0 calc(var(--spread) * 2), transparent 0);
   -webkit-mask: radial-gradient(circle closest-side, #000 12%, transparent 100%);
   mask: radial-gradient(circle closest-side, #000 12%, transparent 100%);
   display: none;

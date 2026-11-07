@@ -27,6 +27,9 @@
   --on-next: #17231e;
   /* The visitor on the map and the way from them (walking help): the blue every map app uses for "you". */
   --you: #1f6fe0;
+  /* The cone of where they face, and the dot once the fix is stale. The map stays light, so these do too. */
+  --you-cone: rgb(31 111 224 / 0.5);
+  --you-stale: #8a9590;
   /* The same blue as text and icons on paper. */
   --you-ui: var(--you);
   --you-tint: #dde8fb;

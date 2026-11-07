@@ -5,13 +5,18 @@
 // the next. So after "Next: 8" at the end of card 7, card 8 shows the way to
 // 8 beside its title; standing at 8, its "Next 9" button shows the way on.
 // Standing at another station, the row offers that station's card, never
-// switching to it by itself: the visitor may be reading.
+// switching to it by itself: the visitor may be reading. A station the
+// visitor leaves in the cards while standing at it ("Next" at 7, still at 7)
+// is acknowledged: they know they are there, so the way to 8 shows, and no
+// offer of 7 until they have left it.
 //
 // Direction: along the leg into the target where the visitor is on it (a
-// point a little ahead on the route, so the arrow follows bends and stairs),
+// point a little ahead on the route, so the arrow follows bends and stairs;
+// where the leg passes close to itself, the fold they were on is kept),
 // else straight. The arrow points the way in the world when the phone knows
 // which way it faces (compass, or the course while walking), else as on the
-// map. Distance: what is left of the leg, else the straight line.
+// map. Distance: what is left of the leg, else the straight line. A stale
+// fix (here.ts) is no fix: nothing here is from where the visitor was.
 
 import type { Here } from "./here.ts";
 import type { TrailMap } from "./map.ts";
@@ -50,6 +55,10 @@ export class Guide {
   private n = 0;
   /** The station the visitor is at, with hysteresis. */
   private at?: number;
+  /** The station they chose another card away from while at it: no offer of it until they have left. */
+  private acknowledged?: number;
+  /** How far along a leg the visitor last was: keeps them on their fold where the leg passes close to itself (geo.ts onLine). */
+  private progress?: { leg: number; along: number };
   private ways: { el: HTMLElement; way: Way }[] = [];
   private frame = 0;
 
@@ -67,13 +76,18 @@ export class Guide {
 
   /** The card head was rendered for item n. */
   show(n: number) {
+    if (this.at !== undefined && this.at !== n) this.acknowledged = this.at;
     this.n = n;
     this.update();
   }
 
   private update() {
-    const fix = this.here.fix;
-    this.at = fix ? this.arrival(fix.at, fix.accuracy) : undefined;
+    const fix = this.here.fix && !this.here.stale ? this.here.fix : undefined;
+    const at = fix ? this.arrival(fix.at, fix.accuracy) : undefined;
+    if (at !== this.at) {
+      this.at = at;
+      this.acknowledged = undefined;
+    }
     const head = this.head;
     const slot = head.querySelector<HTMLElement>(".guide");
     const chip = head.querySelector<HTMLButtonElement>(".here-chip");
@@ -83,14 +97,14 @@ export class Guide {
     let state = "";
     let walked: number | undefined;
     if (fix) {
-      if (this.at !== undefined && this.at !== n) {
+      if (at !== undefined && at !== n && at !== this.acknowledged) {
         state = "elsewhere";
         if (chip) {
-          chip.dataset.go = String(this.at);
-          chip.querySelector(".here-chip-n")!.textContent = String(this.at);
-          chip.setAttribute("aria-label", `${this.s.hereAt} ${this.s.station} ${this.at}: ${this.tx(this.trail.items[this.at].title)}`);
+          chip.dataset.go = String(at);
+          chip.querySelector(".here-chip-n")!.textContent = String(at);
+          chip.setAttribute("aria-label", `${this.s.hereAt} ${this.s.station} ${at}: ${this.tx(this.trail.items[at].title)}`);
         }
-      } else if (n > 0 && this.at !== n) {
+      } else if (n > 0 && at !== n) {
         state = "approach";
         const way = this.way(fix.at, n);
         walked = way?.leg;
@@ -140,13 +154,16 @@ export class Guide {
     if (!target) return undefined;
     const leg = this.trail.legs.find((l) => l.to === to);
     if (leg && !leg.straight) {
-      const o = onLine(p, leg.coordinates, AHEAD);
+      const was = this.progress?.leg === leg.from ? this.progress.along : undefined;
+      const o = onLine(p, leg.coordinates, AHEAD, was);
       if (o && o.off <= ON_LEG) {
+        this.progress = { leg: leg.from, along: o.along };
         const left = o.length - o.along;
         const aim = left < AHEAD ? target : o.ahead;
         return { deg: bearing(p, aim), metres: left + o.off, leg: leg.from };
       }
     }
+    this.progress = undefined; // off the leg: which fold they were on no longer matters
     return { deg: bearing(p, target), metres: distance(p, target) };
   }
 
@@ -161,7 +178,10 @@ export class Guide {
     let best: number | undefined, bestD = ARRIVE;
     for (let i = 1; i < this.trail.items.length; i++) {
       const di = d(i);
-      if (di <= bestD) (best = i), (bestD = di);
+      if (di <= bestD) {
+        best = i;
+        bestD = di;
+      }
     }
     return best;
   }

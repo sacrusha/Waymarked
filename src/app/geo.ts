@@ -61,13 +61,23 @@ export interface OnLine {
   ahead: LngLat;
 }
 
-/** Where `p` is relative to a polyline: how far off it, how far along it, and a point ahead on it. */
-export function onLine(p: LngLat, line: LngLat[], ahead: number): OnLine | undefined {
+/**
+ * A jump along the line costs this much per metre, against distance off it,
+ * when the walker's last place along it is known (onLine's `was`): where a
+ * line passes close to itself (a switchback), a fix can't tell the folds
+ * apart by distance, and the fold the walker was on is kept; a real move (a
+ * fresh fix after a dead spot) still wins, as the old place is then far off
+ * in distance too.
+ */
+const JUMP_COST = 0.5;
+
+/** Where `p` is relative to a polyline: how far off it, how far along it, and a point ahead on it. `was`: how far along the walker last was, where known. */
+export function onLine(p: LngLat, line: LngLat[], ahead: number, was?: number): OnLine | undefined {
   if (line.length < 2) return undefined;
   const pts = line.map((q) => toLocal(p, q));
   const cum = [0];
   for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
-  let best = { off: Infinity, along: 0 };
+  let best = { off: Infinity, along: 0, cost: Infinity };
   for (let i = 1; i < pts.length; i++) {
     const [ax, ay] = pts[i - 1], [bx, by] = pts[i];
     const dx = bx - ax, dy = by - ay;
@@ -75,10 +85,12 @@ export function onLine(p: LngLat, line: LngLat[], ahead: number): OnLine | undef
     // The walker is the origin: project (0,0) onto the segment.
     const t = len2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len2)) : 0;
     const off = Math.hypot(ax + t * dx, ay + t * dy);
-    if (off < best.off) best = { off, along: cum[i - 1] + t * Math.sqrt(len2) };
+    const along = cum[i - 1] + t * Math.sqrt(len2);
+    const cost = was === undefined ? off : off + JUMP_COST * Math.abs(along - was);
+    if (cost < best.cost) best = { off, along, cost };
   }
   const length = cum[cum.length - 1];
-  return { ...best, length, ahead: pointAt(line, cum, Math.min(length, best.along + ahead)) };
+  return { off: best.off, along: best.along, length, ahead: pointAt(line, cum, Math.min(length, best.along + ahead)) };
 }
 
 function pointAt(line: LngLat[], cum: number[], at: number): LngLat {

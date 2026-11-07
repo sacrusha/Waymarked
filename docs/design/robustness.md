@@ -66,8 +66,12 @@ their departure is known.
   retried by MapLibre; dead spots are version 7's (offline).
 - Location: refused, unavailable (no fix within 30 s, the webview case
   too), or not on https. Each says so in one line; refused and not on https
-  also leave follow mode, while a fix arriving later clears "unavailable". Without the compass the
-  GPS course stands in while walking (surface.md, Walking help).
+  also leave follow mode, while a fix arriving later clears "unavailable".
+  A fix older than 30 s is stale: the dot greys, the peek's way and "Here"
+  wait for the next. Without the compass the GPS course stands in while
+  walking (surface.md, Walking help). iOS 15 has
+  no Permissions API, so there location comes back only on a tap, never by
+  itself on a later visit.
 - Audio that can't play says so in the player. Media Session actions a
   browser lacks are skipped.
 - Storage that is missing or throws (private windows, webviews, blocked
@@ -79,7 +83,10 @@ their departure is known.
   darkens it again: to be checked on the test phone with the browser's
   dark mode on.
 - iOS as a whole: WebGL context restore after a long background, audio
-  with the screen locked, the compass prompt, and whether MapLibre or the
+  with the screen locked, the compass prompt, whether the compass reports
+  an estimate of its error in ordinary use (a negative
+  `webkitCompassAccuracy` is none; the site then trusts the course over it
+  while walking), and whether MapLibre or the
   engine calls APIs newer than iOS 15 (the build lowers syntax, not APIs).
 - In-app browsers: which ones the common QR paths open in this region, and
   what each of them refuses.
@@ -87,5 +94,3 @@ their departure is known.
   language toggle: the page's language is set to the one shown, and cards
   are re-rendered whole, so a translated card should survive a change of
   station. Untested.
-- A fix that goes stale after a dead spot is used until the next one
-  arrives (docs/backlog.md, Open).

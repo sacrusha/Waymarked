@@ -198,8 +198,8 @@ Not yet: a ground test in Baden, iOS.
   tap should only follow rather than also turn the map, whether a
   walker with the sheet raised minds lowering it to reach the locate
   button (the controls slide out as the map strip shrinks), and whether
-  "Hier" and the arrow go stale after a dead spot (a fix never expires;
-  the last one is used until the next arrives).
+  30 s is the right age for a fix to go stale (the dot grey, the way and
+  "Hier" withdrawn until the next fix).
 - CLAUDE.md's layout names `docs/brand/`, `docs/user-flow.md` and
   `secrets/`, none of which exist; the brand doc is docs/design/brand.md
   and deploys need no local credentials. The user's file.
