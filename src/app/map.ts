@@ -134,12 +134,28 @@ export class TrailMap {
    * reach into the strip above a raised sheet; moving the sheet moves that
    * part, and the map follows where it would leave the bounds.
    */
-  setCovered(p: Padding) {
+  setCovered(p: Padding, settleMs = 0) {
+    // A move that ends with the sheet elsewhere (walking on lowers it to peek) is
+    // judged by where the sheet will be: while it travels, its passing positions
+    // would clamp the pan to the old, larger cover. The latest position is applied after.
+    const now = performance.now();
+    if (settleMs) {
+      this.settleUntil = now + settleMs;
+      this.pending = undefined;
+    } else if (now < this.settleUntil) {
+      this.pending = p;
+      clearTimeout(this.settleTimer);
+      this.settleTimer = window.setTimeout(() => this.pending && this.setCovered(this.pending), this.settleUntil - now + 20);
+      return;
+    }
     const was = this.covered;
     if (was && was.top === p.top && was.bottom === p.bottom && was.left === p.left && was.right === p.right) return;
     this.covered = p;
     this.keepInside();
   }
+  private settleUntil = 0;
+  private pending?: Padding;
+  private settleTimer?: number;
 
   /** Back inside the bounds, where a change of what is covered left the view outside them. */
   private keepInside() {
