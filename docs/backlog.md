@@ -216,3 +216,9 @@ Not yet: a ground test in Baden, iOS.
   reading that the partner's okay for "Baden ist." covers it.
 - Item 0 links to www.navobaden.ch/stadtnaturweg, the printed address,
   which does not exist yet. The leaflet's NAVO box text is not in item 0.
+- Type weights: the engine sets 600, 650, 750 and 800; Waymarked Heros has
+  only Regular and Bold, so labels such as "Standort" weigh as much as
+  headings, and iOS's Helvetica Neue (with Medium) renders them otherwise
+  again. The placards use Regular, Medium and Bold.
+- The basemap buttons over the map render in Arial on every device without
+  Helvetica Neue: MapLibre's container sets its own font, not `--font`.
