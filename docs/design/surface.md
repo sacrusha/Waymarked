@@ -76,8 +76,13 @@ is "Weiterlesen ∨" on a faded wash at the sheet's bottom edge, shown while
 the card's content goes on below the screen's edge, at any sheet height and
 side by side alike: not until the scroll's end, since a short card can
 still rise to full extent over blank paper, and full extent stays reachable
-on every card so the sheet's travel is the same from card to card. It is a
-mark, not a control; touches pass through it. The sheet bounces briefly
+on every card so the sheet's travel is the same from card to card. It reads
+as a link, and testers tapped it: a tap turns the page, the line half under
+the wash coming up to just below the head so nothing is skipped, and
+stopping where the card's end reaches the screen's edge, so it never
+scrolls over blank paper. From the peek the same tap raises the sheet. It
+is the scroll the finger would make, so it adds no position or state of
+its own, and a drag starting on it still scrolls. The sheet bounces briefly
 when a different station is selected while minimised, and when the head is
 tapped beside its controls: the head is the sheet's grip, and the bounce
 answers the tap with "this moves" without moving it. Neither bounces where
@@ -234,9 +239,13 @@ Attribution: swisstopo's line stays visible over whatever map remains.
 - Whether the strip above a raised sheet should keep the selected station
   in view too while following; today the peek's arrow points to it.
 - Whether "Weiterlesen" and the head's bounce are noticed, in sunlight at
-  the screen's bottom edge, and are enough. If not, the fallback that does
-  not depend on discovering the scroll is a visible button that opens and
-  closes the sheet.
+  the screen's bottom edge, and are enough. Whether a visitor who tapped
+  "Weiterlesen" then scrolls by finger, or keeps tapping; and how one who
+  only taps gets back down to the map (today: dragging the head down). If
+  that fails, the fallback is a visible button that opens and closes the
+  sheet.
+- Whether the mark's band (28 px, the full width) is tall enough to hit at
+  the screen's bottom edge.
 - Whether a station link (a QR code at its placard) should land at full
   extent: the visitor standing there wants the text. For the overview, the
   map may be the point.

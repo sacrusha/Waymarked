@@ -264,6 +264,23 @@ function showMore() {
 }
 new ResizeObserver(showMore).observe(body);
 
+/**
+ * A tap on the mark turns the page: the line half under its wash comes up to
+ * just below the head, so no line is skipped, and the scroll stops where the
+ * card's end reaches the mark, never over blank paper. From the peek the same
+ * rule raises the sheet; native scrolling does the rest, so the sheet's
+ * geometry stays the finger's.
+ */
+more.addEventListener("click", () => {
+  if (!moreBelow()) return;
+  const wash = more.firstElementChild!.getBoundingClientRect();
+  const readTop = sheet.getBoundingClientRect().top + head.offsetHeight;
+  const page = wash.top - readTop;
+  const left = end.getBoundingClientRect().bottom - wash.bottom;
+  const by = Math.round(Math.min(page, left));
+  if (by > 0) sheet.scrollBy({ top: by, behavior: reduceMotion.matches ? "auto" : "smooth" });
+});
+
 // The hop: the sheet bounces up and back, it moves and there is more.
 const up = "cubic-bezier(.25,.7,.45,1)", down = "cubic-bezier(.55,0,.75,.45)";
 const hopFrames = (from: number) => [

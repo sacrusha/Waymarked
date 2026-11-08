@@ -191,9 +191,10 @@ button {
 }
 
 /* "Read on": while the card's content goes on below the screen's edge (main.ts,
-   moreBelow), at any sheet height and side by side alike. It shows the way, it
-   is not a control: touches pass through to the card. At the peek it lies over
-   the cut-off half-line, below the head. */
+   moreBelow), at any sheet height and side by side alike. Shown, it takes a
+   tap (it turns the page, main.ts); a drag starting on it still scrolls the
+   card. Hidden, touches pass through. At the peek it lies over the cut-off
+   half-line, below the head. */
 .more {
   position: sticky;
   bottom: var(--safe-bottom);
@@ -226,6 +227,8 @@ button {
 }
 .more.more-on > span {
   opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
 }
 @media (prefers-reduced-motion: reduce) {
   .more > span {
