@@ -2,11 +2,42 @@
    Colours that the engine also needs (markers, route, buttons) are in
    trail.json "theme"; this file is the rest. */
 
+/* Waymarked Heros: TeX Gyre Heros, a free Helvetica, renamed and subset
+   (fonts/README-waymarked-heros.txt). Regular and Bold only, with italics. */
+@font-face {
+  font-family: "Waymarked Heros";
+  src: url("./fonts/waymarked-heros-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Waymarked Heros";
+  src: url("./fonts/waymarked-heros-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Waymarked Heros";
+  src: url("./fonts/waymarked-heros-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Waymarked Heros";
+  src: url("./fonts/waymarked-heros-bolditalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   /* Helvetica Neue is the print face; it is licensed, so the site uses it only
-     where the visitor's device has it (iOS, macOS) and the engine's bundled
-     Public Sans elsewhere. */
-  --font: "Helvetica Neue", "Public Sans Variable", Arial, sans-serif;
+     where the visitor's device has it (iOS, macOS) and the free lookalike
+     Waymarked Heros elsewhere. */
+  --font: "Helvetica Neue", "Waymarked Heros", Arial, sans-serif;
   /* The leaflet's text colour: titles and headings. */
   --heading: #0c537f;
   --ink: #1d1d1b;

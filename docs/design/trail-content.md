@@ -35,6 +35,7 @@ trails/<id>/
   route-trace.geojson    the route as traced from the printed map; input of build/route-trail.py (optional)
   legspec.json           corrections to the routing: via points, hints (optional)
   theme.css              the trail's look beyond its colours (optional)
+  <files theme.css uses> fonts, images, by url() (optional)
   <image files>          item 0's photos, cover and logos, named in trail.json
   stations/
     01-<slug>/

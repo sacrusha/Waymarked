@@ -26,7 +26,15 @@ trail's look can use.
     text; a cover photo of the Limmat; the city's "Baden ist." and "STADT
     BADEN" marks and the NAVO logo.
 - Helvetica Neue is licensed and can't be bundled. iOS and macOS have it
-  installed; Android and Windows don't.
+  installed; Android and Windows don't. baden.ch serves its own licensed
+  webfont (Monotype, Neue Helvetica LT Pro), a licence not known to cover
+  this site; navobaden.ch uses BirdLife Switzerland's theme with Noto Sans, a
+  generic face.
+- TeX Gyre Heros (GUST e-foundry, from URW Nimbus Sans) is a free
+  Helvetica with its metrics, in Regular and Bold with italics, no Medium.
+  Its licence (GUST Font License, LPPL) lets it be bundled; a subset is a
+  modified version, which the licence asks to be renamed and requires to
+  carry a notice of its changes and where to get the original.
 - NAVO is the trail's author. The partner confirms that the city's "Baden
   ist." CI and the NAVO logo may appear on the site.
 - Phones are set to dark by their owners, always or from sunset, and some
@@ -52,8 +60,11 @@ Baden's folder uses them so:
   (route, markers, the photo band); a darker green `#357A1F` wherever white
   text sits on green or green is text (buttons, number discs, the sign
   label), 5.3:1; the leaflet's blue for titles and headings.
-- Type: Helvetica Neue where the device has it, the bundled Public Sans
-  elsewhere.
+- Type: Helvetica Neue where the device has it, elsewhere Waymarked
+  Heros: TeX Gyre Heros renamed and subset to Latin, honouring the
+  licence's requests as well as its conditions (`fonts/`, its README says
+  what changed; `make-fonts.py` remakes it). Only Regular and Bold exist,
+  so the engine's 600 to 800 weights all render Bold there.
 - Station card: the placard's top strip first, "Baden ist." left and
   "STADTNATURWEG **TAFEL n**" right; the photos as the
   placard's panel, on a green band: the large photo edge to edge, the round
@@ -105,7 +116,7 @@ dark green with the credits in white, as the light green would glare.
 - Who took the leaflet's cover photo; the site shows it without a credit, as
   the leaflet does.
 - How the look holds in sun on real phones, Android especially, where it
-  falls back to Public Sans; and the dark look in daylight, for a phone set
+  falls back to Waymarked Heros; and the dark look in daylight, for a phone set
   to dark all day.
 - Whether swisstopo offers a dark style of its vector basemap; the site
   would need a basemap field for a dark variant to use one.
