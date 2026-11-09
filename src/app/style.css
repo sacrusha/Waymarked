@@ -221,6 +221,19 @@ button {
   opacity: 0;
   transition: opacity 0.2s;
 }
+/* The wash's paper runs on below it, past the screen's edge, so the hop
+   (main.ts, up to 18px) lifts it without baring the text it covers. It fits
+   the card's bottom padding, so it adds no scroll. */
+.more > span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: calc(24px + var(--safe-bottom));
+  background: var(--paper);
+  pointer-events: none;
+}
 .more > span svg {
   width: 14px;
   height: 14px;

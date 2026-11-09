@@ -86,7 +86,9 @@ its own, and a drag starting on it still scrolls. The sheet bounces briefly
 when a different station is selected while minimised, and when the head is
 tapped beside its controls: the head is the sheet's grip, and the bounce
 answers the tap with "this moves" without moving it. Neither bounces where
-the card's content is all on screen. A visitor arriving (first visit, link,
+the card's content is all on screen. The wash's paper runs on past the
+screen's edge, so a bounce lifts the mark without baring the text below it.
+A visitor arriving (first visit, link,
 QR code) finds the sheet at peek.
 
 Transitions the site initiates: exactly one. "Next: 8 Title →" at a card's
