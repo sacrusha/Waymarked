@@ -15,6 +15,7 @@ import type { Here, HereChange } from "./here.ts";
 import type { LngLat } from "./trail-types.ts";
 import { formatLive, type Strings } from "./strings.ts";
 import { inBox, toLocal, turn } from "./geo.ts";
+import { paintYou, repaintOnChange, type YouLook } from "./on-map.ts";
 
 export type Mode = "free" | "follow" | "heading";
 
@@ -43,6 +44,8 @@ export class Walking {
   private o: WalkingOptions;
   private you: Marker;
   private youEl: HTMLElement;
+  private youCanvas: HTMLCanvasElement;
+  private youLook: YouLook = { stale: false, coarse: false, heading: "", spread: 25 };
   private locate: HTMLButtonElement;
   private north: HTMLButtonElement;
   private edge: HTMLButtonElement;
@@ -69,8 +72,11 @@ export class Walking {
 
     this.youEl = document.createElement("div");
     this.youEl.className = "you";
-    this.youEl.innerHTML = `<div class="you-cone"></div><div class="you-dot"></div>`;
+    this.youCanvas = document.createElement("canvas");
+    this.youEl.append(this.youCanvas);
     this.you = new Marker({ element: this.youEl, rotationAlignment: "map", pitchAlignment: "map" });
+    this.paintYou({}, true);
+    repaintOnChange(() => this.paintYou({}, true));
 
     this.toastEl = document.createElement("div");
     this.toastEl.className = "map-toast";
@@ -213,16 +219,15 @@ export class Walking {
       return;
     }
     if (what === "stale") {
-      this.youEl.dataset.stale = String(h.stale); // the dot greys: where they were, not where they are
+      this.paintYou({ stale: h.stale }); // the dot greys: where they were, not where they are
       return;
     }
     if (what === "fix") {
       const fix = h.fix!; // Here reports "fix" only with one, and never clears it
-      this.youEl.dataset.stale = "false";
       if (this.toastEl.dataset.kind === "unavailable") this.toastEl.hidden = true; // it came after all
       if (!this.you.getElement().isConnected) this.you.setLngLat(fix.at).addTo(this.tm.map);
       this.you.setLngLat(fix.at);
-      this.youEl.dataset.coarse = String(fix.accuracy > 40);
+      this.paintYou({ stale: false, coarse: fix.accuracy > 40 });
       this.drawAccuracy();
       if (this.mode !== "free" && !this.pending && !inBox(fix.at, this.tm.limits.bounds)) {
         this.setMode(this.mode); // out of the map's reach: back to free, with the distance said
@@ -238,12 +243,18 @@ export class Walking {
       this.kick();
     }
     const hd = h.heading;
-    this.youEl.dataset.heading = hd ? hd.source : "";
-    if (hd) {
-      this.you.setRotation(hd.deg);
-      this.youEl.style.setProperty("--spread", `${hd.spread}deg`);
-    }
+    this.paintYou(hd ? { heading: hd.source, spread: hd.spread } : { heading: "" });
+    if (hd) this.you.setRotation(hd.deg);
     if (this.mode === "heading") this.kick();
+  }
+
+  /** The visitor's dot and cone, with what changed; painted when something did, or when asked (`again`). */
+  private paintYou(change: Partial<YouLook> = {}, again = false) {
+    const next = { ...this.youLook, ...change };
+    const same = (Object.keys(next) as (keyof YouLook)[]).every((k) => next[k] === this.youLook[k]);
+    if (same && !again) return;
+    this.youLook = next;
+    paintYou(this.youCanvas, next);
   }
 
   // --- the camera -------------------------------------------------------------

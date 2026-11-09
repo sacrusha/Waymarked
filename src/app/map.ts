@@ -10,6 +10,7 @@ import type { Strings } from "./strings.ts";
 import { store } from "./store.ts";
 import { textFor } from "./language.ts";
 import { distance, onLine, routeLines, toLocal } from "./geo.ts";
+import { markerElement, paintMarker, repaintOnChange } from "./on-map.ts";
 
 setWorkerUrl(workerUrl);
 
@@ -79,11 +80,7 @@ export class TrailMap {
     container.setAttribute("aria-label", s.map);
 
     for (const item of trail.items.slice(1)) {
-      const el = document.createElement("button");
-      el.type = "button";
-      el.className = "marker";
-      el.textContent = String(item.n);
-      el.setAttribute("aria-label", `${s.station} ${item.n}: ${this.tx(item.title)}`);
+      const el = markerElement(item.n, `${s.station} ${item.n}: ${this.tx(item.title)}`);
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         onSelect(item.n);
@@ -91,6 +88,9 @@ export class TrailMap {
       new Marker({ element: el, anchor: "center" }).setLngLat(item.position!).addTo(this.map);
       this.markers[item.n] = el;
     }
+    const repaint = () => this.markers.forEach(paintMarker);
+    repaint();
+    repaintOnChange(repaint);
 
     this.map.on("style.load", () => this.addTrailLayers());
     this.watchStyle(container);
@@ -134,28 +134,12 @@ export class TrailMap {
    * reach into the strip above a raised sheet; moving the sheet moves that
    * part, and the map follows where it would leave the bounds.
    */
-  setCovered(p: Padding, settleMs = 0) {
-    // A move that ends with the sheet elsewhere (walking on lowers it to peek) is
-    // judged by where the sheet will be: while it travels, its passing positions
-    // would clamp the pan to the old, larger cover. The latest position is applied after.
-    const now = performance.now();
-    if (settleMs) {
-      this.settleUntil = now + settleMs;
-      this.pending = undefined;
-    } else if (now < this.settleUntil) {
-      this.pending = p;
-      clearTimeout(this.settleTimer);
-      this.settleTimer = window.setTimeout(() => this.pending && this.setCovered(this.pending), this.settleUntil - now + 20);
-      return;
-    }
+  setCovered(p: Padding) {
     const was = this.covered;
     if (was && was.top === p.top && was.bottom === p.bottom && was.left === p.left && was.right === p.right) return;
     this.covered = p;
     this.keepInside();
   }
-  private settleUntil = 0;
-  private pending?: Padding;
-  private settleTimer?: number;
 
   /** Back inside the bounds, where a change of what is covered left the view outside them. */
   private keepInside() {
@@ -241,6 +225,7 @@ export class TrailMap {
       el.setAttribute("aria-current", i === n ? "true" : "false");
       // The marker's wrapper is positioned by MapLibre; raise the selection above its neighbours.
       el.style.zIndex = i === n ? "3" : state ? "2" : "1";
+      paintMarker(el);
     });
     this.updateLeg();
   }
@@ -252,7 +237,7 @@ export class TrailMap {
   frame(n: number, padding: Padding) {
     const leg = this.trail.legs.find((l) => l.from === n);
     const bounds = n === 0 ? this.trail.extent : boundsOf([this.trail.items[n].position!, ...(leg ? leg.coordinates : [])]);
-    this.map.fitBounds(bounds, { padding: this.fitPadding(padding), maxZoom: n === 0 ? 17 : 18, linear: true, duration: 0 });
+    this.fit(bounds, padding, n === 0 ? 17 : 18, 0);
   }
 
   /**
@@ -276,7 +261,7 @@ export class TrailMap {
 
     if (n === 0) {
       if (this.trail.items.slice(1).every((it) => inView(it.position!))) return;
-      this.map.fitBounds(this.trail.extent, { padding: this.fitPadding(padding), maxZoom: zoom, bearing: this.map.getBearing(), linear: true, duration });
+      this.fit(this.trail.extent, padding, zoom, duration);
       return;
     }
     const pos = this.trail.items[n].position!;
@@ -285,12 +270,37 @@ export class TrailMap {
     const mx = Math.min(80, (r.r - r.l) * 0.2), my = Math.min(80, (r.b - r.t) * 0.2);
     const dx = q.x < r.l + mx ? q.x - (r.l + mx) : q.x > r.r - mx ? q.x - (r.r - mx) : 0;
     const dy = q.y < r.t + my ? q.y - (r.t + my) : q.y > r.b - my ? q.y - (r.b - my) : 0;
-    if (Math.abs(dx) <= r.r - r.l && Math.abs(dy) <= r.b - r.t) {
-      this.map.panBy([dx, dy], { duration });
-      return;
-    }
+    const far = Math.abs(dx) > r.r - r.l || Math.abs(dy) > r.b - r.t;
     const here = this.map.unproject([(r.l + r.r) / 2, (r.t + r.b) / 2]);
-    this.map.fitBounds(boundsOf([[here.lng, here.lat], pos]), { padding: this.fitPadding(padding), maxZoom: zoom, bearing: this.map.getBearing(), linear: true, duration: duration * 1.5 });
+    const both = boundsOf([[here.lng, here.lat], pos]);
+    // Where no zoom shows both, the selection is what must show.
+    if (far && (this.camera(both, padding, zoom)?.zoom ?? -Infinity) >= this.map.getMinZoom()) this.fit(both, padding, zoom, duration * 1.5);
+    else this.map.panBy([dx, dy], { duration: far ? duration * 1.5 : duration });
+  }
+
+  private camera(bounds: [[number, number], [number, number]], padding: Padding, maxZoom: number) {
+    const cam = this.map.cameraForBounds(bounds, { padding: this.fitPadding(padding), maxZoom, bearing: this.map.getBearing() });
+    return cam?.zoom === undefined ? undefined : { zoom: cam.zoom };
+  }
+
+  /**
+   * Frames `bounds` in the view `padding` leaves. Not fitBounds: its centre
+   * is for the zoom that fits, and where the minimum zoom overrides that
+   * zoom, a view off the map's middle misses the area.
+   */
+  private fit(bounds: [[number, number], [number, number]], padding: Padding, maxZoom: number, duration: number) {
+    const m = this.map;
+    const bearing = m.getBearing();
+    const fp = this.fitPadding(padding);
+    const cam = this.camera(bounds, padding, maxZoom);
+    if (!cam) return;
+    const zoom = Math.min(m.getMaxZoom(), Math.max(m.getMinZoom(), cam.zoom));
+    const [[w, s], [e, n]] = bounds;
+    const nw = MercatorCoordinate.fromLngLat([w, n]), se = MercatorCoordinate.fromLngLat([e, s]);
+    const mid = new MercatorCoordinate((nw.x + se.x) / 2, (nw.y + se.y) / 2).toLngLat();
+    const c = m.getContainer();
+    const pt = { x: (fp.left + c.clientWidth - fp.right) / 2, y: (fp.top + c.clientHeight - fp.bottom) / 2 };
+    m.easeTo({ center: this.centreFor([mid.lng, mid.lat], pt, zoom, bearing), zoom, bearing, duration });
   }
 
   /**

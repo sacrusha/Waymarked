@@ -33,10 +33,27 @@ their departure is known.
 - Known departures from the specs, and where the site meets them:
   - Samsung Internet lays a fixed page out under its bottom toolbar
     (docs/design/surface.md, Situation).
-  - Samsung Internet and Chrome (auto dark) darken pages that do not
-    declare a dark scheme. The site declares both (`color-scheme: light
-    dark`, meta and CSS) and has a dark of its own (docs/design/brand.md,
-    Dark).
+  - Browsers can darken pages by their own rules. Chrome's auto dark leaves
+    a page alone once its declared scheme is dark. Samsung Internet names
+    three signals: the `color-scheme` meta tag, the CSS property, and dark
+    styles under `@media (prefers-color-scheme: dark)`; the site gives all
+    three in the built page and has a dark of its own (docs/design/brand.md,
+    Dark). Samsung Internet's dark mode shows it only when the visitor
+    turns on Labs, "Use website dark theme" (so on the test phone);
+    otherwise it repaints the light page all the same, as developer
+    reports up to version 30 (Chromium 143) say, and Samsung's staff say a
+    page can't opt out. The repaint darkens CSS backgrounds, borders and
+    gradients, lightens text, dims images without inverting them, and
+    leaves canvas and video alone. Warm colours shift most, and the
+    algorithm is undocumented and changes between versions. Through it the
+    sheet and the controls stay legible as a darkened light page; the map
+    and what sits on it are canvas and stay as they are
+    (docs/design/brand.md, Dark), on the test phone too; the footer logos
+    keep the white ground in their files (docs/design/trail-content.md,
+    trail.json). Headless Chromium with
+    `--blink-settings=forceDarkModeEnabled=true` and a light preference
+    approximates the repaint: its most noticeable effects are the test
+    phone's.
   - iOS asks for the compass only from a tap, and gives a heading of its
     own (`webkitCompassHeading`); Android gives absolute orientation that
     the site turns into one (docs/design/surface.md, Walking help).
@@ -79,9 +96,6 @@ their departure is known.
 
 ## Not known
 
-- Whether Samsung Internet's dark mode shows the site's own dark or
-  darkens it again: to be checked on the test phone with the browser's
-  dark mode on.
 - iOS as a whole: WebGL context restore after a long background, audio
   with the screen locked, the compass prompt, whether the compass reports
   an estimate of its error in ordinary use (a negative

@@ -20,9 +20,13 @@
   --accent-tint: var(--accent-tint-light, #c9e0f0);
   /* Text on an --accent fill. */
   --on-accent: var(--ink);
+  /* What sits on the map is painted in the map's colours (on-map.ts): these
+     tokens, down to --you-stale, are the same in both schemes, since the
+     map stays light. A station's marker: */
+  --marker: #ffffff;
+  --on-marker: #17231e;
   /* The previous and the next station: the map's markers and the card's prev
-     and next buttons, one colour per role so the two always match. The same
-     in both schemes, since the markers sit on the map, which stays light. */
+     and next buttons, one colour per role so the two always match. */
   --prev: var(--accent-tint-light, #c9e0f0);
   --on-prev: #17231e;
   --next: var(--accent);
@@ -52,7 +56,7 @@
   --radius: 18px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  /* Both declared: browsers that darken pages themselves (Chrome's auto dark, Samsung Internet) leave this one to its own dark. */
+  /* Both declared: browsers that darken pages themselves leave this one to its own dark where they honour it (docs/design/robustness.md). */
   color-scheme: light dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -76,12 +80,6 @@
     --glass: rgb(20 27 24 / 0.92);
     --glass-thin: rgb(20 27 24 / 0.78);
     --press: brightness(1.18);
-  }
-  /* Station markers sit on the map, which stays light. */
-  .marker {
-    --paper: #ffffff;
-    --ink: #17231e;
-    --accent-tint: var(--accent-tint-light, #c9e0f0);
   }
   /* Logos are drawn for paper: each sits on its own white plate, around its full height. */
   .trail-logos img {
@@ -909,51 +907,27 @@ button {
 
 /* --- map: markers and controls -------------------------------------------------------------- */
 
+/* A station marker: a button whose look is a canvas (on-map.ts paints it,
+   from the tokens above). Here only the button: its size for the focus ring,
+   and a larger touch target than the drawn circle. */
 .marker {
-  --size: 28px;
-  display: grid;
-  place-items: center;
-  width: var(--size);
-  height: var(--size);
+  width: var(--size, 28px);
+  height: var(--size, 28px);
   padding: 0;
+  border: 0;
   border-radius: 50%;
-  border: 2.5px solid var(--accent-dark);
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font);
-  font-weight: 800;
-  font-size: 13px;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
-  transition: width 0.18s, height 0.18s, background-color 0.18s;
-  /* A larger touch target than the drawn circle. */
+  background: none;
   position: relative;
+}
+.marker canvas {
+  position: absolute;
+  pointer-events: none;
 }
 .marker::after {
   content: "";
   position: absolute;
   inset: -8px;
   border-radius: 50%;
-}
-.marker[data-state="prev"] {
-  --size: 30px;
-  background: var(--prev);
-  color: var(--on-prev);
-}
-.marker[data-state="next"] {
-  --size: 34px;
-  background: var(--next);
-  color: var(--on-next);
-  font-size: 15px;
-}
-.marker[data-state="selected"] {
-  --size: 44px;
-  background: var(--accent-dark);
-  color: #fff;
-  border: 3px solid #fff;
-  font-size: 18px;
-  box-shadow: 0 0 0 3px var(--accent-dark), 0 3px 10px rgb(0 0 0 / 0.35);
 }
 
 .maplibregl-ctrl-top-left,
@@ -1003,10 +977,4 @@ button {
 }
 .basemap-switch button[aria-checked="false"]:hover {
   background: var(--wash);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marker {
-    transition: none;
-  }
 }

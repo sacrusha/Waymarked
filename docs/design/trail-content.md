@@ -76,7 +76,7 @@ walking order; the slug after it is only for people.
 | `signLabel` | text | How the trail's signs name a station, with `{n}` for its number and Markdown bold (Baden: `"Stadtnaturweg **Tafel {n}**"`). Opens each station card, so a visitor standing at a sign sees the card is the sign's. |
 | `mark` | logo | The trail's or its publisher's mark, as a footer logo below: beside the sign label on each station card, and on the cover (without one, at the top of item 0). |
 | `cover` | image | One photo, as in `images`, that opens item 0 edge to edge. |
-| `footer` | object | The end of item 0, who stands behind the trail: `logos`, a list of `{ "file": "navo.png", "alt": text, "url": "…" }` (`url` optional, the logo links there), and `text`, a text in Markdown. Below it the engine adds its own one line. |
+| `footer` | object | The end of item 0, who stands behind the trail: `logos`, a list of `{ "file": "navo.png", "alt": text, "url": "…" }` (`url` optional, the logo links there; a logo drawn for paper comes on its own opaque white ground, which a browser's own darkening dims but keeps, where a transparent one is lost on the darkened paper: docs/design/robustness.md), and `text`, a text in Markdown. Below it the engine adds its own one line. |
 | `map.basemaps` | list | The basemaps, first is the default; with more than one the map shows a toggle. Each is `{ "label": text, "style": "<MapLibre style URL>" }` for vector tiles, or `{ "label": text, "tiles": ["…/{z}/{x}/{y}.jpeg"], "tileSize": 256, "maxzoom": 19, "attribution": "<HTML>" }` for raster tiles. Without any, the engine uses an OSM-based vector map. |
 | `map.margin` | number | Metres the map may show beyond the trail's extent (stations and route). Default: the larger of 1.5 km and half the extent. The minimum zoom follows from it: the bounded area spans about a phone's width. |
 
@@ -131,11 +131,16 @@ stylesheet, and `url()`s in it resolve next to it. It sets the engine's
 tokens on `:root` (`--font`, `--heading` for titles and headings, `--ink`,
 `--muted`, `--paper`, `--wash`, `--line`, `--radius`; `--prev`, `--next`
 and their text colours `--on-prev`, `--on-next` for the previous and the
-next station, one colour each for the marker and the card's button) and may restyle the
-card's classes. The site follows the device into dark (docs/design/brand.md,
+next station, one colour each for the marker and the card's button;
+`--marker`, `--on-marker` for the other stations' markers) and may restyle the
+card's classes. What sits on the map is painted on canvas from these
+tokens (docs/design/brand.md, Dark), so its look is set through them, not
+through its classes. The site follows the device into dark (docs/design/brand.md,
 Dark), and a token set on `:root` holds in both: a colour the theme sets
 needs its dark value too, in `@media (prefers-color-scheme: dark)` after
-it (Baden's does so). The card body's classes are the content
+it (Baden's does so), except the map's (`--marker`, `--prev`, `--next`,
+their text colours, `--you` and its kin), which hold in both as the map
+does. The card body's classes are the content
 framework's (src/app/content/, docs/design/layers.md), its styles still in
 src/app/style.css, so an engine change can move them; photos carry `data-shape` (`square`,
 `portrait`, `landscape`) and the first is `.photo-lead`, the rest inside
