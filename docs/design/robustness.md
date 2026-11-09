@@ -41,15 +41,18 @@ their departure is known.
     (docs/design/brand.md, Dark). Developer reports up to Samsung Internet
     30 (Chromium 143) say its dark mode repaints the light page all the
     same, unless the visitor turns on Labs, "Use website dark theme";
-    Samsung's staff say a page can't opt out. The repaint darkens CSS backgrounds, borders and
-    gradients, lightens text, dims images without inverting them, and
+    Samsung's staff say a page can't opt out. The repaint darkens CSS
+    backgrounds, borders and gradients, lightens text, dims images without inverting them, and
     leaves canvas and video alone. Warm colours shift most, and the
     algorithm is undocumented and changes between versions. On this site
-    the map, a canvas, stays as it is; the markers over it turn dark;
-    the footer logos keep the white ground in their files
+    the map, a canvas, stays as it is; the markers over it paint
+    themselves into canvases of their own (src/app/map.ts), so they stay
+    as light as the map, as in the site's own dark, and keep a button's
+    focus and label; the footer logos keep the white ground in their files
     (docs/design/trail-content.md, trail.json). Headless Chromium with
     `--blink-settings=forceDarkModeEnabled=true` and a light preference
-    approximates the repaint, gentler than Samsung's.
+    approximates the repaint: its most noticeable effects are the test
+    phone's.
   - iOS asks for the compass only from a tap, and gives a heading of its
     own (`webkitCompassHeading`); Android gives absolute orientation that
     the site turns into one (docs/design/surface.md, Walking help).
@@ -92,11 +95,9 @@ their departure is known.
 
 ## Not known
 
-- How harsh Samsung Internet's repaint is on the test phone's version,
-  and whether its Labs setting "Use website dark theme" brings the site's
-  own dark there. Markers drawn into the map's canvas would keep their
-  colours through the repaint, at the cost of the DOM markers' focus and
-  labels; not worth it before the phone shows the dark markers fail.
+- Whether the markers' canvases stay light on the test phone, and
+  whether Samsung Internet's Labs setting "Use website dark theme" brings
+  the site's own dark there.
 - iOS as a whole: WebGL context restore after a long background, audio
   with the screen locked, the compass prompt, whether the compass reports
   an estimate of its error in ordinary use (a negative

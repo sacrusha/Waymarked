@@ -896,23 +896,34 @@ button {
 
 /* --- map: markers and controls -------------------------------------------------------------- */
 
+/* A marker's look is tokens: CSS paints them, and map.ts paints the same into
+   a canvas inside the marker, which a browser's own darkening leaves alone
+   (docs/design/robustness.md). Once drawn, the CSS paint steps aside. */
 .marker {
   --size: 28px;
+  --m-fill: var(--paper);
+  --m-text: var(--ink);
+  --m-edge: var(--accent-dark);
+  --m-edge-w: 2.5px;
+  /* A ring outside the edge, the selection's. */
+  --m-halo: transparent;
+  --m-halo-w: 0px;
+  --m-drop: 0 1px 3px rgb(0 0 0 / 0.3);
   display: grid;
   place-items: center;
   width: var(--size);
   height: var(--size);
   padding: 0;
   border-radius: 50%;
-  border: 2.5px solid var(--accent-dark);
-  background: var(--paper);
-  color: var(--ink);
+  border: var(--m-edge-w) solid var(--m-edge);
+  background: var(--m-fill);
+  color: var(--m-text);
   font-family: var(--font);
   font-weight: 800;
   font-size: 13px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  box-shadow: 0 0 0 var(--m-halo-w) var(--m-halo), var(--m-drop);
   transition: width 0.18s, height 0.18s, background-color 0.18s;
   /* A larger touch target than the drawn circle. */
   position: relative;
@@ -925,22 +936,39 @@ button {
 }
 .marker[data-state="prev"] {
   --size: 30px;
-  background: var(--prev);
-  color: var(--on-prev);
+  --m-fill: var(--prev);
+  --m-text: var(--on-prev);
 }
 .marker[data-state="next"] {
   --size: 34px;
-  background: var(--next);
-  color: var(--on-next);
+  --m-fill: var(--next);
+  --m-text: var(--on-next);
   font-size: 15px;
 }
 .marker[data-state="selected"] {
   --size: 44px;
-  background: var(--accent-dark);
-  color: #fff;
-  border: 3px solid #fff;
+  --m-fill: var(--accent-dark);
+  --m-text: #fff;
+  --m-edge: #fff;
+  --m-edge-w: 3px;
+  --m-halo: var(--accent-dark);
+  --m-halo-w: 3px;
+  --m-drop: 0 3px 10px rgb(0 0 0 / 0.35);
   font-size: 18px;
-  box-shadow: 0 0 0 3px var(--accent-dark), 0 3px 10px rgb(0 0 0 / 0.35);
+}
+.marker.drawn {
+  border-color: transparent;
+  background: none;
+  box-shadow: var(--m-drop);
+}
+.marker canvas {
+  position: absolute;
+  top: calc(-1 * (var(--m-edge-w) + var(--m-halo-w)));
+  left: calc(-1 * (var(--m-edge-w) + var(--m-halo-w)));
+  /* 100% is the box inside the edge. */
+  width: calc(100% + 2 * (var(--m-edge-w) + var(--m-halo-w)));
+  height: calc(100% + 2 * (var(--m-edge-w) + var(--m-halo-w)));
+  pointer-events: none;
 }
 
 .maplibregl-ctrl-top-left,

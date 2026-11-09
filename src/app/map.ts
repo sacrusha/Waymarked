@@ -28,6 +28,54 @@ export interface View {
   zoom: number;
 }
 
+const forcedColors = matchMedia("(forced-colors: active)");
+/**
+ * Paints a marker's tokens (style.css, .marker) into a canvas inside it. The
+ * map under the markers is a canvas and stays light whatever a browser does
+ * to the page; a browser that darkens pages by its own rules (Samsung
+ * Internet) repaints CSS backgrounds and text but leaves canvases alone, so
+ * markers painted the same way stay as light as the map
+ * (docs/design/robustness.md). Without a 2D context, or where the visitor's
+ * own forced colours apply, the CSS paint stays.
+ */
+function paintMarker(el: HTMLButtonElement) {
+  if (!el.isConnected || forcedColors.matches) return;
+  const canvas = el.querySelector("canvas") ?? document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  const css = getComputedStyle(el);
+  const px = (name: string) => parseFloat(css.getPropertyValue(name)) || 0;
+  const size = px("--size");
+  const edgeW = px("--m-edge-w");
+  const haloW = px("--m-halo-w");
+  if (!size) return;
+  const box = size + 2 * haloW;
+  const dpr = devicePixelRatio || 1;
+  canvas.width = canvas.height = Math.round(box * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const c = box / 2;
+  const disc = (r: number, colour: string) => {
+    ctx.beginPath();
+    ctx.arc(c, c, r, 0, 2 * Math.PI);
+    ctx.fillStyle = colour;
+    ctx.fill();
+  };
+  if (haloW) disc(size / 2 + haloW, css.getPropertyValue("--m-halo").trim());
+  disc(size / 2, css.getPropertyValue("--m-edge").trim());
+  disc(size / 2 - edgeW, css.getPropertyValue("--m-fill").trim());
+  const n = el.dataset.n ?? "";
+  ctx.font = `${css.fontWeight} ${css.fontSize} ${css.fontFamily}`;
+  ctx.fillStyle = css.getPropertyValue("--m-text").trim();
+  ctx.textAlign = "center";
+  const m = ctx.measureText(n);
+  ctx.fillText(n, c, c + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2);
+  if (!canvas.isConnected) {
+    canvas.setAttribute("aria-hidden", "true");
+    el.replaceChildren(canvas);
+    el.classList.add("drawn");
+  }
+}
+
 export class TrailMap {
   readonly map: MLMap;
   private markers: HTMLButtonElement[] = [];
@@ -82,7 +130,7 @@ export class TrailMap {
       const el = document.createElement("button");
       el.type = "button";
       el.className = "marker";
-      el.textContent = String(item.n);
+      el.textContent = el.dataset.n = String(item.n);
       el.setAttribute("aria-label", `${s.station} ${item.n}: ${this.tx(item.title)}`);
       el.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -91,6 +139,12 @@ export class TrailMap {
       new Marker({ element: el, anchor: "center" }).setLngLat(item.position!).addTo(this.map);
       this.markers[item.n] = el;
     }
+    const repaint = () => this.markers.forEach(paintMarker);
+    repaint();
+    document.fonts?.ready.then(repaint);
+    document.fonts?.addEventListener("loadingdone", repaint);
+    // A new pixel ratio (a window moved between screens, a page zoom) needs sharper or coarser canvases.
+    addEventListener("resize", repaint);
 
     this.map.on("style.load", () => this.addTrailLayers());
     this.watchStyle(container);
@@ -241,6 +295,7 @@ export class TrailMap {
       el.setAttribute("aria-current", i === n ? "true" : "false");
       // The marker's wrapper is positioned by MapLibre; raise the selection above its neighbours.
       el.style.zIndex = i === n ? "3" : state ? "2" : "1";
+      paintMarker(el);
     });
     this.updateLeg();
   }
