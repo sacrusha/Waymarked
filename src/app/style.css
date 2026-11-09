@@ -52,7 +52,7 @@
   --radius: 18px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  /* Both declared: browsers that darken pages themselves (Chrome's auto dark, Samsung Internet) leave this one to its own dark. */
+  /* Both declared: browsers that darken pages themselves leave this one to its own dark where they honour it (docs/design/robustness.md). */
   color-scheme: light dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
