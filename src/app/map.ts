@@ -270,12 +270,17 @@ export class TrailMap {
     const mx = Math.min(80, (r.r - r.l) * 0.2), my = Math.min(80, (r.b - r.t) * 0.2);
     const dx = q.x < r.l + mx ? q.x - (r.l + mx) : q.x > r.r - mx ? q.x - (r.r - mx) : 0;
     const dy = q.y < r.t + my ? q.y - (r.t + my) : q.y > r.b - my ? q.y - (r.b - my) : 0;
-    if (Math.abs(dx) <= r.r - r.l && Math.abs(dy) <= r.b - r.t) {
-      this.map.panBy([dx, dy], { duration });
-      return;
-    }
+    const far = Math.abs(dx) > r.r - r.l || Math.abs(dy) > r.b - r.t;
     const here = this.map.unproject([(r.l + r.r) / 2, (r.t + r.b) / 2]);
-    this.fit(boundsOf([[here.lng, here.lat], pos]), padding, zoom, duration * 1.5);
+    const both = boundsOf([[here.lng, here.lat], pos]);
+    // Where no zoom shows both, the selection is what must show.
+    if (far && (this.camera(both, padding, zoom)?.zoom ?? -Infinity) >= this.map.getMinZoom()) this.fit(both, padding, zoom, duration * 1.5);
+    else this.map.panBy([dx, dy], { duration: far ? duration * 1.5 : duration });
+  }
+
+  private camera(bounds: [[number, number], [number, number]], padding: Padding, maxZoom: number) {
+    const cam = this.map.cameraForBounds(bounds, { padding: this.fitPadding(padding), maxZoom, bearing: this.map.getBearing() });
+    return cam?.zoom === undefined ? undefined : { zoom: cam.zoom };
   }
 
   /**
@@ -287,8 +292,8 @@ export class TrailMap {
     const m = this.map;
     const bearing = m.getBearing();
     const fp = this.fitPadding(padding);
-    const cam = m.cameraForBounds(bounds, { padding: fp, maxZoom, bearing });
-    if (!cam || cam.zoom === undefined) return;
+    const cam = this.camera(bounds, padding, maxZoom);
+    if (!cam) return;
     const zoom = Math.min(m.getMaxZoom(), Math.max(m.getMinZoom(), cam.zoom));
     const [[w, s], [e, n]] = bounds;
     const nw = MercatorCoordinate.fromLngLat([w, n]), se = MercatorCoordinate.fromLngLat([e, s]);
