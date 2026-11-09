@@ -253,7 +253,7 @@ export class TrailMap {
   frame(n: number, padding: Padding) {
     const leg = this.trail.legs.find((l) => l.from === n);
     const bounds = n === 0 ? this.trail.extent : boundsOf([this.trail.items[n].position!, ...(leg ? leg.coordinates : [])]);
-    this.map.fitBounds(bounds, { padding: this.fitPadding(padding), maxZoom: n === 0 ? 17 : 18, linear: true, duration: 0 });
+    this.fit(bounds, padding, n === 0 ? 17 : 18, 0);
   }
 
   /**
@@ -277,7 +277,7 @@ export class TrailMap {
 
     if (n === 0) {
       if (this.trail.items.slice(1).every((it) => inView(it.position!))) return;
-      this.map.fitBounds(this.trail.extent, { padding: this.fitPadding(padding), maxZoom: zoom, bearing: this.map.getBearing(), linear: true, duration });
+      this.fit(this.trail.extent, padding, zoom, duration);
       return;
     }
     const pos = this.trail.items[n].position!;
@@ -291,7 +291,33 @@ export class TrailMap {
       return;
     }
     const here = this.map.unproject([(r.l + r.r) / 2, (r.t + r.b) / 2]);
-    this.map.fitBounds(boundsOf([[here.lng, here.lat], pos]), { padding: this.fitPadding(padding), maxZoom: zoom, bearing: this.map.getBearing(), linear: true, duration: duration * 1.5 });
+    this.fit(boundsOf([[here.lng, here.lat], pos]), padding, zoom, duration * 1.5);
+  }
+
+  /**
+   * A straight move that frames `bounds` in the view `padding` leaves, at most
+   * at `maxZoom`. MapLibre's fitBounds gives the centre for the zoom that
+   * fits, wherever that lies; the constraint then raises a zoom below the
+   * minimum and keeps that centre. With the view off the map's middle (the
+   * strip above a raised sheet) that centre is for another scale, and the
+   * framed area lands beside the view, south of it under the sheet. A small
+   * strip often asks for less than the minimum, so the zoom is held first and
+   * the centre is the one that puts the area's middle in the view's middle
+   * at the zoom the map will have.
+   */
+  private fit(bounds: [[number, number], [number, number]], padding: Padding, maxZoom: number, duration: number) {
+    const m = this.map;
+    const bearing = m.getBearing();
+    const fp = this.fitPadding(padding);
+    const cam = m.cameraForBounds(bounds, { padding: fp, maxZoom, bearing });
+    if (!cam || cam.zoom === undefined) return;
+    const zoom = Math.min(m.getMaxZoom(), Math.max(m.getMinZoom(), cam.zoom));
+    const [[w, s], [e, n]] = bounds;
+    const nw = MercatorCoordinate.fromLngLat([w, n]), se = MercatorCoordinate.fromLngLat([e, s]);
+    const mid = new MercatorCoordinate((nw.x + se.x) / 2, (nw.y + se.y) / 2).toLngLat();
+    const c = m.getContainer();
+    const pt = { x: (fp.left + c.clientWidth - fp.right) / 2, y: (fp.top + c.clientHeight - fp.bottom) / 2 };
+    m.easeTo({ center: this.centreFor([mid.lng, mid.lat], pt, zoom, bearing), zoom, bearing, duration });
   }
 
   /**
