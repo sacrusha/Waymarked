@@ -94,7 +94,14 @@ there is no switch, which would be one more thing to learn
 - The map stays the map, at full strength: outdoors, in sun, its contrast
   matters most, and the phone's brightness already follows the light
   around it. The route, the markers and the visitor's dot keep their light
-  colours on it.
+  colours on it. What sits on the map is the map's: it is painted on
+  canvas, as the map is, from colour tokens that are the same in both
+  schemes (`--marker`, `--prev`, `--next`, `--you` and their kin), and
+  the page elements over it carry only what a page element gives, a
+  button, its label, the focus ring, the touch target
+  (src/app/on-map.ts). So the site's own dark can't reach it, and
+  neither can a browser that darkens pages by its own rules
+  (docs/design/robustness.md).
 - The trail's two colours: `accentDark` carries white text on buttons in
   both. Where the accent is text or a line on paper (the sign label,
   links, focus), dark uses `accent` itself if it reads at 6:1 on the dark

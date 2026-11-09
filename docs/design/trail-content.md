@@ -131,8 +131,11 @@ stylesheet, and `url()`s in it resolve next to it. It sets the engine's
 tokens on `:root` (`--font`, `--heading` for titles and headings, `--ink`,
 `--muted`, `--paper`, `--wash`, `--line`, `--radius`; `--prev`, `--next`
 and their text colours `--on-prev`, `--on-next` for the previous and the
-next station, one colour each for the marker and the card's button) and may restyle the
-card's classes. The site follows the device into dark (docs/design/brand.md,
+next station, one colour each for the marker and the card's button;
+`--marker`, `--on-marker` for the other stations' markers) and may restyle the
+card's classes. What sits on the map is painted on canvas from these
+tokens (docs/design/brand.md, Dark), so its look is set through them, not
+through its classes. The site follows the device into dark (docs/design/brand.md,
 Dark), and a token set on `:root` holds in both: a colour the theme sets
 needs its dark value too, in `@media (prefers-color-scheme: dark)` after
 it (Baden's does so). The card body's classes are the content

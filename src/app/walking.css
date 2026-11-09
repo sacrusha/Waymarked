@@ -80,46 +80,15 @@
   }
 }
 
-/* The visitor: a dot in a white ring, and the cone of where they face. */
+/* The visitor: a dot in a white ring, and the cone of where they face,
+   painted on canvas (on-map.ts); MapLibre turns the box to the heading. */
 .you {
   width: 140px;
   height: 140px;
   pointer-events: none;
 }
-.you-dot {
+.you canvas {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 20px;
-  height: 20px;
-  margin: -10px 0 0 -10px;
-  border-radius: 50%;
-  background: var(--you);
-  border: 3px solid #fff;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
-}
-.you[data-coarse="true"] .you-dot {
-  opacity: 0.6;
-}
-.you[data-stale="true"] .you-dot {
-  background: var(--you-stale);
-}
-.you-cone {
-  --spread: 25deg;
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(from calc(var(--spread) * -1), var(--you-cone) 0 calc(var(--spread) * 2), transparent 0);
-  -webkit-mask: radial-gradient(circle closest-side, #000 12%, transparent 100%);
-  mask: radial-gradient(circle closest-side, #000 12%, transparent 100%);
-  display: none;
-}
-.you[data-heading="compass"] .you-cone,
-.you[data-heading="course"] .you-cone {
-  display: block;
-}
-.you[data-heading="course"] .you-cone {
-  opacity: 0.7;
 }
 
 /* The visitor out of view: at the map's edge, pointing toward them. */

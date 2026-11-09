@@ -20,9 +20,12 @@
   --accent-tint: var(--accent-tint-light, #c9e0f0);
   /* Text on an --accent fill. */
   --on-accent: var(--ink);
+  /* What sits on the map is painted in the map's colours, the same in both
+     schemes, since the map stays light (on-map.ts). A station's marker: */
+  --marker: #ffffff;
+  --on-marker: #17231e;
   /* The previous and the next station: the map's markers and the card's prev
-     and next buttons, one colour per role so the two always match. The same
-     in both schemes, since the markers sit on the map, which stays light. */
+     and next buttons, one colour per role so the two always match. */
   --prev: var(--accent-tint-light, #c9e0f0);
   --on-prev: #17231e;
   --next: var(--accent);
@@ -76,12 +79,6 @@
     --glass: rgb(20 27 24 / 0.92);
     --glass-thin: rgb(20 27 24 / 0.78);
     --press: brightness(1.18);
-  }
-  /* Station markers sit on the map, which stays light. */
-  .marker {
-    --paper: #ffffff;
-    --ink: #17231e;
-    --accent-tint: var(--accent-tint-light, #c9e0f0);
   }
   /* Logos are drawn for paper: each sits on its own white plate, around its full height. */
   .trail-logos img {
@@ -896,79 +893,27 @@ button {
 
 /* --- map: markers and controls -------------------------------------------------------------- */
 
-/* A marker's look is tokens: CSS paints them, and map.ts paints the same into
-   a canvas inside the marker, which a browser's own darkening leaves alone
-   (docs/design/robustness.md). Once drawn, the CSS paint steps aside. */
+/* A station marker: a button whose look is a canvas (on-map.ts paints it,
+   from the tokens above). Here only the button: its size for the focus ring,
+   and a larger touch target than the drawn circle. */
 .marker {
-  --size: 28px;
-  --m-fill: var(--paper);
-  --m-text: var(--ink);
-  --m-edge: var(--accent-dark);
-  --m-edge-w: 2.5px;
-  /* A ring outside the edge, the selection's. */
-  --m-halo: transparent;
-  --m-halo-w: 0px;
-  --m-drop: 0 1px 3px rgb(0 0 0 / 0.3);
-  display: grid;
-  place-items: center;
-  width: var(--size);
-  height: var(--size);
+  width: var(--size, 28px);
+  height: var(--size, 28px);
   padding: 0;
+  border: 0;
   border-radius: 50%;
-  border: var(--m-edge-w) solid var(--m-edge);
-  background: var(--m-fill);
-  color: var(--m-text);
-  font-family: var(--font);
-  font-weight: 800;
-  font-size: 13px;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  box-shadow: 0 0 0 var(--m-halo-w) var(--m-halo), var(--m-drop);
-  transition: width 0.18s, height 0.18s, background-color 0.18s;
-  /* A larger touch target than the drawn circle. */
+  background: none;
   position: relative;
+}
+.marker canvas {
+  position: absolute;
+  pointer-events: none;
 }
 .marker::after {
   content: "";
   position: absolute;
   inset: -8px;
   border-radius: 50%;
-}
-.marker[data-state="prev"] {
-  --size: 30px;
-  --m-fill: var(--prev);
-  --m-text: var(--on-prev);
-}
-.marker[data-state="next"] {
-  --size: 34px;
-  --m-fill: var(--next);
-  --m-text: var(--on-next);
-  font-size: 15px;
-}
-.marker[data-state="selected"] {
-  --size: 44px;
-  --m-fill: var(--accent-dark);
-  --m-text: #fff;
-  --m-edge: #fff;
-  --m-edge-w: 3px;
-  --m-halo: var(--accent-dark);
-  --m-halo-w: 3px;
-  --m-drop: 0 3px 10px rgb(0 0 0 / 0.35);
-  font-size: 18px;
-}
-.marker.drawn {
-  border-color: transparent;
-  background: none;
-  box-shadow: var(--m-drop);
-}
-.marker canvas {
-  position: absolute;
-  top: calc(-1 * (var(--m-edge-w) + var(--m-halo-w)));
-  left: calc(-1 * (var(--m-edge-w) + var(--m-halo-w)));
-  /* 100% is the box inside the edge. */
-  width: calc(100% + 2 * (var(--m-edge-w) + var(--m-halo-w)));
-  height: calc(100% + 2 * (var(--m-edge-w) + var(--m-halo-w)));
-  pointer-events: none;
 }
 
 .maplibregl-ctrl-top-left,
@@ -1018,10 +963,4 @@ button {
 }
 .basemap-switch button[aria-checked="false"]:hover {
   background: var(--wash);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marker {
-    transition: none;
-  }
 }

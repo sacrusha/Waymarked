@@ -45,11 +45,9 @@ their departure is known.
     backgrounds, borders and gradients, lightens text, dims images without inverting them, and
     leaves canvas and video alone. Warm colours shift most, and the
     algorithm is undocumented and changes between versions. On this site
-    the map, a canvas, stays as it is; the markers over it paint
-    themselves into canvases of their own (src/app/map.ts), so they stay
-    as light as the map, as in the site's own dark, and keep a button's
-    focus and label; the footer logos keep the white ground in their files
-    (docs/design/trail-content.md, trail.json). Headless Chromium with
+    the map and what sits on it are canvas and stay as they are
+    (docs/design/brand.md, Dark); the footer logos keep the white ground
+    in their files (docs/design/trail-content.md, trail.json). Headless Chromium with
     `--blink-settings=forceDarkModeEnabled=true` and a light preference
     approximates the repaint: its most noticeable effects are the test
     phone's.
@@ -95,8 +93,8 @@ their departure is known.
 
 ## Not known
 
-- Whether the markers' canvases stay light on the test phone, and
-  whether Samsung Internet's Labs setting "Use website dark theme" brings
+- Whether the markers and the visitor's dot stay light on the test
+  phone, and whether Samsung Internet's Labs setting "Use website dark theme" brings
   the site's own dark there.
 - iOS as a whole: WebGL context restore after a long background, audio
   with the screen locked, the compass prompt, whether the compass reports
