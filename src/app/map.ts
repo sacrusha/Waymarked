@@ -134,28 +134,12 @@ export class TrailMap {
    * reach into the strip above a raised sheet; moving the sheet moves that
    * part, and the map follows where it would leave the bounds.
    */
-  setCovered(p: Padding, settleMs = 0) {
-    // A move that ends with the sheet elsewhere (walking on lowers it to peek) is
-    // judged by where the sheet will be: while it travels, its passing positions
-    // would clamp the pan to the old, larger cover. The latest position is applied after.
-    const now = performance.now();
-    if (settleMs) {
-      this.settleUntil = now + settleMs;
-      this.pending = undefined;
-    } else if (now < this.settleUntil) {
-      this.pending = p;
-      clearTimeout(this.settleTimer);
-      this.settleTimer = window.setTimeout(() => this.pending && this.setCovered(this.pending), this.settleUntil - now + 20);
-      return;
-    }
+  setCovered(p: Padding) {
     const was = this.covered;
     if (was && was.top === p.top && was.bottom === p.bottom && was.left === p.left && was.right === p.right) return;
     this.covered = p;
     this.keepInside();
   }
-  private settleUntil = 0;
-  private pending?: Padding;
-  private settleTimer?: number;
 
   /** Back inside the bounds, where a change of what is covered left the view outside them. */
   private keepInside() {
@@ -295,15 +279,9 @@ export class TrailMap {
   }
 
   /**
-   * A straight move that frames `bounds` in the view `padding` leaves, at most
-   * at `maxZoom`. MapLibre's fitBounds gives the centre for the zoom that
-   * fits, wherever that lies; the constraint then raises a zoom below the
-   * minimum and keeps that centre. With the view off the map's middle (the
-   * strip above a raised sheet) that centre is for another scale, and the
-   * framed area lands beside the view, south of it under the sheet. A small
-   * strip often asks for less than the minimum, so the zoom is held first and
-   * the centre is the one that puts the area's middle in the view's middle
-   * at the zoom the map will have.
+   * Frames `bounds` in the view `padding` leaves. Not fitBounds: its centre
+   * is for the zoom that fits, and where the minimum zoom overrides that
+   * zoom, a view off the map's middle misses the area.
    */
   private fit(bounds: [[number, number], [number, number]], padding: Padding, maxZoom: number, duration: number) {
     const m = this.map;

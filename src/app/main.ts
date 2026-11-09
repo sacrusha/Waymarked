@@ -352,8 +352,6 @@ function select(n: number, opts: { walk?: boolean; from?: number; fromHistory?: 
   // Walking on, the sheet is on its way down: the view is the one above the peek.
   const padding = opts.walk && portrait() ? { ...mapPadding(), top: mapTop(), bottom: (peekHeight() || 120) + 16 } : mapPadding();
   tmap?.select(n);
-  // The bounds hold for the map the sheet will leave, not for the one it passes through on its way down.
-  if (opts.walk && portrait()) tmap?.setCovered({ top: 0, bottom: padding.bottom - 16, left: 0, right: 0 }, 800);
   // Following the visitor, the map keeps them in place and only zooms out to show the station too;
   // the overview is the whole trail, so it ends following.
   if (n === 0) walking?.setMode("free");
