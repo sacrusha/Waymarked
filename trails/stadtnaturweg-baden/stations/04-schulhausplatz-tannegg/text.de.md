@@ -1,0 +1,3 @@
+Diese **Blutbuche** wurde bei der Neugestaltung des Tannegg-Schulhausplatzes aufwendig geschützt. Sie ist botanisch eng mit der verbreiteten Rotbuche verwandt. Der einzige Unterschied liegt in einer natürlichen Mutation der Blattfarbe: Die Blutbuche treibt zunächst dunkelrote Blätter aus, die im Lauf des Sommers grünlicher werden. Die Blätter der Rotbuche sind dagegen anfangs grün und färben sich im Herbst goldbraun.
+
+Hinten auf dem Platz steht ein **Mammutbaum**. Seine wilden Verwandten wachsen in der Sierra Nevada in Kalifornien. Dort werden die Baumriesen über 2000 Jahre alt und mehr als 80 Meter hoch. Der Mammutbaum auf dem Pausenplatz ist «erst» etwa 200 Jahre alt. Mit 40 Metern Höhe und einem Stammdurchmesser von zwei Metern ist auch er schon beeindruckend.

@@ -1,0 +1,3 @@
+This **copper beech** was carefully protected, at great effort, when the Tannegg school square was redesigned. Botanically it is closely related to the widespread European beech. The only difference is a natural mutation in leaf colour: the copper beech first produces dark red leaves, which turn greener in the course of the summer. The leaves of the European beech, by contrast, are green at first and turn golden brown in autumn.
+
+At the back of the square stands a **giant sequoia**. Its wild relatives grow in the Sierra Nevada in California. There the giant trees live to be more than 2,000 years old and over 80 metres tall. The sequoia in the schoolyard is “only” about 200 years old. At 40 metres tall and with a trunk two metres across, it too is already impressive.

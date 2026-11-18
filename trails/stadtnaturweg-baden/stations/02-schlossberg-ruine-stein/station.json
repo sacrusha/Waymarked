@@ -1,0 +1,46 @@
+{
+  "title": {
+    "de": "Urtümliche Sonnenanbeter",
+    "en": "Primeval Sun Worshippers",
+    "fr": "Adorateurs du soleil d’un autre âge"
+  },
+  "shortTitle": {
+    "fr": "Adorateurs du soleil"
+  },
+  "position": [
+    8.306427,
+    47.473151
+  ],
+  "fields": {
+    "standort": {
+      "de": "Schlossberg, Ruine Stein",
+      "en": "Schlossberg, Stein castle ruins",
+      "fr": "Schlossberg, ruines du château de Stein"
+    },
+    "gegenstand": {
+      "de": "Eidechsen",
+      "en": "Lizards",
+      "fr": "Lézards"
+    }
+  },
+  "images": [
+    {
+      "file": "mauereidechse.jpg",
+      "caption": {
+        "de": "Mauereidechse",
+        "en": "Common wall lizard",
+        "fr": "Lézard des murailles"
+      },
+      "credit": "Heinz Häusler"
+    },
+    {
+      "file": "zauneidechse.jpg",
+      "caption": {
+        "de": "Zauneidechse",
+        "en": "Sand lizard",
+        "fr": "Lézard des souches"
+      },
+      "credit": "Goran Dusej"
+    }
+  ]
+}

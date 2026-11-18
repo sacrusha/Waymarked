@@ -1,0 +1,46 @@
+{
+  "title": {
+    "de": "Bäume mit Geschichte",
+    "en": "Trees with a History",
+    "fr": "Des arbres chargés d’histoire"
+  },
+  "shortTitle": {
+    "fr": "Arbres chargés d’histoire"
+  },
+  "position": [
+    8.308133,
+    47.471236
+  ],
+  "fields": {
+    "standort": {
+      "de": "Schulhausplatz, Tannegg",
+      "en": "Schulhausplatz, Tannegg (school square)",
+      "fr": "Schulhausplatz, Tannegg (place de l’école)"
+    },
+    "gegenstand": {
+      "de": "Blutbuche und Mammutbaum",
+      "en": "Copper beech and giant sequoia",
+      "fr": "Hêtre pourpre et séquoia géant"
+    }
+  },
+  "images": [
+    {
+      "file": "mammutbaum.jpg",
+      "caption": {
+        "de": "Mammutbaum",
+        "en": "Giant sequoia",
+        "fr": "Séquoia géant"
+      },
+      "credit": "Thomas Burger"
+    },
+    {
+      "file": "blutbuche.jpg",
+      "caption": {
+        "de": "Blutbuche",
+        "en": "Copper beech",
+        "fr": "Hêtre pourpre"
+      },
+      "credit": "Thomas Burger"
+    }
+  ]
+}

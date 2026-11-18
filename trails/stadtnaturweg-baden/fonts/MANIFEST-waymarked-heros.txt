@@ -1,0 +1,15 @@
+Waymarked Heros: the files of this Derived Work of TeX Gyre Heros 2.004.
+
+Fonts (family "Waymarked Heros"):
+  waymarked-heros-regular.woff2      from texgyreheros-regular.otf
+  waymarked-heros-italic.woff2       from texgyreheros-italic.otf
+  waymarked-heros-bold.woff2         from texgyreheros-bold.otf
+  waymarked-heros-bolditalic.woff2   from texgyreheros-bolditalic.otf
+
+Documentation and tools:
+  README-waymarked-heros.txt         origin, changes, support
+  MANIFEST-waymarked-heros.txt       this file
+  GUST-FONT-LICENSE.txt              the licence, unchanged
+  make-fonts.py                      makes the fonts from the originals
+
+No exceptions: every font and file has a name of its own.

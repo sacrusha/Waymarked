@@ -1,0 +1,3 @@
+Lors de la pose des conduites de chauffage à distance en 2025, le talus « Im Graben » a été réaménagé de façon plus naturelle. Il était auparavant envahi par des espèces exotiques comme le laurier-cerise ou la symphorine. Aujourd’hui, le talus abrite plus de 50 espèces de plantes indigènes adaptées à la sécheresse, comme la **vipérine commune**.
+
+Les rudes blocs de calcaire rappellent les rochers naturels que l’on trouve au Schartenfels ou aux ruines de Stein. Entre eux, le bois mort et les zones de sable ouvertes créent de petites niches abritées pour les abeilles sauvages et d’autres insectes. C’est ainsi qu’est né, en pleine ville, un morceau de paysage calcaire qui relie différents milieux.

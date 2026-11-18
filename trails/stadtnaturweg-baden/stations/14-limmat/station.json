@@ -1,0 +1,43 @@
+{
+  "title": {
+    "de": "Leben am und im Fluss",
+    "en": "Life Beside and in the River",
+    "fr": "La vie au bord et dans la rivière"
+  },
+  "position": [
+    8.313444,
+    47.479592
+  ],
+  "fields": {
+    "standort": {
+      "de": "Limmat",
+      "en": "Limmat",
+      "fr": "Limmat"
+    },
+    "gegenstand": {
+      "de": "Wasseramsel und Gebirgsstelze",
+      "en": "White-throated dipper and wagtails",
+      "fr": "Cincle plongeur et bergeronnettes"
+    }
+  },
+  "images": [
+    {
+      "file": "gebirgsstelze.jpg",
+      "caption": {
+        "de": "Gebirgsstelze",
+        "en": "Grey wagtail",
+        "fr": "Bergeronnette des ruisseaux"
+      },
+      "credit": "Michael Gerber, birds-online.ch"
+    },
+    {
+      "file": "wasseramsel.jpg",
+      "caption": {
+        "de": "Wasseramsel",
+        "en": "White-throated dipper",
+        "fr": "Cincle plongeur"
+      },
+      "credit": "Michael Gerber, birds-online.ch"
+    }
+  ]
+}
