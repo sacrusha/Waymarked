@@ -337,17 +337,12 @@ function select(n: number, opts: { walk?: boolean; from?: number; fromHistory?: 
   // Each station change is a history entry: Back steps back through the cards.
   if (changed && !opts.fromHistory) history.pushState(null, "", n === 0 ? location.pathname + location.search : `#${n}`);
 
-  if (opts.walk) {
-    // The one transition the site initiates: walk on, sheet down to peek.
-    if (portrait()) sheet.scrollTo({ top: 0, behavior: reduceMotion.matches ? "auto" : "smooth" });
-    else sheet.scrollTop = 0;
-  } else if (portrait()) {
-    // Keep the sheet where the visitor had it; if they were reading inside
-    // the previous card, start the new one at its top.
-    if (sheet.scrollTop > fullExtent()) sheet.scrollTop = fullExtent();
-  } else {
-    sheet.scrollTop = 0;
-  }
+  if (!portrait()) sheet.scrollTop = 0;
+  // The one transition the site initiates: walk on, sheet down to peek.
+  else if (opts.walk) sheet.scrollTo({ top: 0, behavior: reduceMotion.matches ? "auto" : "smooth" });
+  // Otherwise the sheet stays where the visitor had it; if they were reading
+  // inside the previous card, the new one starts at its top.
+  else if (sheet.scrollTop > fullExtent()) sheet.scrollTop = fullExtent();
 
   // Walking on, the sheet is on its way down: the view is the one above the peek.
   const padding = opts.walk && portrait() ? { ...mapPadding(), top: mapTop(), bottom: (peekHeight() || 120) + 16 } : mapPadding();
@@ -384,7 +379,7 @@ addEventListener("keydown", (e) => {
 // --- divider (side by side) ------------------------------------------------------
 
 {
-  const KEY = `side-width`;
+  const KEY = "side-width";
   let wanted = Number(store.get(KEY)) || 0; // 0: the default share
   const apply = () => {
     const width = surface.clientWidth;
@@ -546,15 +541,14 @@ requestAnimationFrame(() => {
       if (resume.inner > 0) sheet.scrollTop = fullExtent() + resume.inner;
       else setCardTop(resume.sheetTop * viewH());
     } else sheet.scrollTop = resume.inner;
-    tmap?.select(current); // the camera is where it was
   } else {
     // Arriving (QR code, link, first visit): the sheet at its peek, where the
     // cut-off line says it scrolls (docs/design/surface.md, Depth). Without a
     // map there is only the card to show: half open.
     if (tmap) sheet.scrollTop = 0;
     else setCardTop(viewH() * 0.5);
-    tmap?.select(current);
   }
+  tmap?.select(current);
   // The bounds once the sheet is in place: the saved view was inside them, and stays as it was.
   tmap?.setCovered(covered());
   if (!resume) tmap?.frame(current, mapPadding());

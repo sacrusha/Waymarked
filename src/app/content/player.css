@@ -63,6 +63,3 @@
   color: var(--ink);
   font-weight: 600;
 }
-.player-error[hidden] {
-  display: none;
-}

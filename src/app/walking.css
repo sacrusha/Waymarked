@@ -35,9 +35,6 @@
   color: var(--ink);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 2px 8px rgb(0 0 0 / 0.2);
 }
-.tool[hidden] {
-  display: none;
-}
 .tool svg {
   width: 26px;
   height: 26px;
@@ -109,9 +106,6 @@
   color: #fff;
   box-shadow: 0 1px 6px rgb(0 0 0 / 0.3);
 }
-.you-edge[hidden] {
-  display: none;
-}
 .you-edge-arrow {
   width: 22px;
   height: 22px;
@@ -134,9 +128,6 @@
   font-size: 0.92rem;
   line-height: 1.35;
   box-shadow: 0 2px 10px rgb(0 0 0 / 0.3);
-}
-.map-toast[hidden] {
-  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
