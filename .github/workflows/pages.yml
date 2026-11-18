@@ -34,7 +34,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          THEMENWEG_TRAIL: ${{ vars.THEMENWEG_TRAIL }}
+          THEMENWEG_TRAIL: ${{ vars.THEMENWEG_TRAIL || 'stadtnaturweg-baden' }}
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
