@@ -1,8 +1,10 @@
 # Waymarked: a trail repository on Themenweg
 
-Waymarked is the development repository for customer trails. The first is
-the Stadtnaturweg Baden; `main` publishes it at sacrusha.github.io/Waymarked,
-the address the society's members have.
+Waymarked is the repository for what isn't for the public: customer trails
+in development, and the business around Themenweg, assessments of trails
+that are no project included. The first customer trail is the Stadtnaturweg
+Baden; `main` publishes it at sacrusha.github.io/Waymarked, the address the
+society's members have.
 
 The repository is a clone of the framework, Themenweg
 (github.com/sacrusha/Themenweg, the remote `upstream`; its working copy sits
@@ -13,15 +15,29 @@ in Themenweg and arrives here with `git pull upstream main`; a change made
 to it here is missing from the framework and meets the next pull as a
 conflict.
 
-Themenweg is public and the user's portfolio piece. It names no customer,
-no customer's trail and not this repository, so `upstream` has no push
-address here.
+Themenweg is open, the user's portfolio piece, managed by Graculus.ch, which
+teaches AI proficiency; it would serve an English heritage trail as readily
+as one in Aargau. It names no customer, no customer's trail and not this
+repository, and holds no marketing, business strategy or assessment of
+others' trails, so `upstream` has no push address here.
+
+Waymarked is public on GitHub for now and is to be taken private. While it
+is public, `business/` is kept out of `main` (`.git/info/exclude`) and
+committed only to the local branch `business`, which is never pushed; the
+working copy in `business/` is the current one, the branch its last saved
+state.
 
 Waymarked's own:
 
 - `trails/stadtnaturweg-baden/`: the trail's content, and in its `docs/`
   what is known about the trail beyond the content (the partner and the
   rights, the look and the print it follows, what is open with the society).
+- `business/`: where further trails can come from: trails that exist and
+  their publishers (prospects.md), places where one could be made from
+  material that exists (seeds.md); what the region's offerings do that
+  Themenweg doesn't, with the regional examples of docs/catalogue.md
+  (market.md); and what publishers can buy instead and who pays
+  (vendors-and-funding.md).
 - This file.
 - One line in `.github/workflows/pages.yml`: it publishes Baden while the
   repository variable `THEMENWEG_TRAIL` is not set.

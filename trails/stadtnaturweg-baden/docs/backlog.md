@@ -63,6 +63,9 @@ trail does not.
 - The placards and leaflet print www.navobaden.ch/stadtnaturweg with a QR
   code and info/map/headphones icons: an existing offering, not yet looked
   at.
+- The trail is not listed on Aargau Tourismus's tour portal or on
+  deinbaden.ch (Nov 2026), where the region's other trails are found
+  (business/market.md, Being found).
 - iPhones are within reach only through NAVO members, so an iOS check is a
   request relayed to them, with what to look at (docs/design/robustness.md).
 - The look, and the print it follows: brand.md beside this file.
