@@ -65,7 +65,9 @@ try {
   fail(`Couldn't read the account's Pages projects:\n${list.stdout}${list.stderr}`);
 }
 if (!projects.some((p) => (p["Project Name"] ?? p.name) === project)) {
-  run("Creating it", process.execPath, [wrangler, "pages", "project", "create", project, "--production-branch", "main"]);
+  // Without --force (not in its --help), wrangler 4.158 hands the creation to
+  // Workers, which fails on a site without a Worker entry point.
+  run("Creating it", process.execPath, [wrangler, "pages", "project", "create", project, "--production-branch", "main", "--force"]);
 }
 run(`Deploying ${trailDir} at ${commit.slice(0, 7)}`, process.execPath, [
   wrangler, "pages", "deploy", "dist", "--project-name", project, "--branch", "main", "--commit-dirty=true",
