@@ -157,6 +157,8 @@ src/app/style.css, so an engine change can move them; photos carry `data-shape` 
 
 The long text of an item (a placard's text, the trail's introduction), one
 file per language, in Markdown. Bold carries what the sign prints bold.
+Raw HTML passes through into the card, so a `<details>` can keep an answer
+closed until the visitor taps it, or a table can set out figures.
 
 ### audio.&lt;lang&gt;.mp3
 
@@ -188,6 +190,12 @@ item 0 gets its title only)
 and the text with its Markdown removed, through Microsoft's neural voices via
 `edge-tts` (an unofficial endpoint, no key: right for a demonstration; the
 official Azure service has the same voices for production).
+
+The speech says what a reader of the card meets, and keeps closed what the
+card keeps closed. Of raw HTML the tags go and their text stays; a closed
+`<details>` is spoken as its `<summary>` only (an `open` one whole), so the
+hidden answer is not given away; comments, `<script>`, `<style>` and
+`<template>` are not spoken; a table is read cell by cell, a row to a sentence.
 
 German needs three provisions, all in `spoken()` and `synth()`, because a
 multilingual German voice (such as Seraphina) picks its
@@ -326,8 +334,9 @@ open (`Network: https://…:5443/`).
 
 The build uses the only folder under `trails/` that has a `trail.json`; with
 several, the environment variable `THEMENWEG_TRAIL` names one (a folder name
-under `trails/`, or a path, relative to the repository). The Pages workflow reads it from the repository
-variable of the same name.
+under `trails/`, or a path, relative to the repository). The GitHub Pages workflow reads it from the repository
+variable of the same name, `npm run deploy` from `secrets/cloudflare.env`
+(secrets/README.md).
 
 ## Not known
 

@@ -10,7 +10,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "check": "tsc --noEmit && node build/check-trail.ts && npm test",
-    "test": "node --test test/*.test.ts"
+    "test": "node --test test/*.test.ts",
+    "deploy": "node build/deploy.ts"
   },
   "engines": {
     "node": ">=22.18"
@@ -25,6 +26,7 @@
     "image-size": "2.0.4",
     "marked": "18.1.2",
     "typescript": "7.0.2",
-    "vite": "8.3.5"
+    "vite": "8.3.5",
+    "wrangler": "4.158.0"
   }
 }

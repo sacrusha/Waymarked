@@ -80,9 +80,82 @@ def source_hash(title: str, md: str) -> str:
     return hashlib.sha256(f"{title}\n{text}".encode("utf-8")).hexdigest()
 
 
+HTML_NAMES = (
+    "a abbr address article aside b bdi bdo blockquote body br caption cite code col colgroup dd del details dfn div "
+    "dl dt em fieldset figcaption figure footer form h1 h2 h3 h4 h5 h6 header hr i img ins kbd li main mark nav ol p "
+    "pre q s samp section small span strong sub summary sup table tbody td template tfoot th thead tr u ul var wbr "
+    "script style"
+).split()
+HTML_PIECE = re.compile(
+    r"<!--.*?-->"
+    r"|<(?P<end>/)?(?P<name>" + "|".join(HTML_NAMES) + r")\b(?P<attrs>(?:\"[^\"]*\"|'[^']*'|[^>\"'])*)>",
+    re.S | re.I,
+)
+HTML_BLOCKS = set("address article aside blockquote body dd details div dl dt fieldset figcaption figure footer form "
+                  "h1 h2 h3 h4 h5 h6 header hr main nav ol p pre section summary table tbody tfoot thead ul".split())
+CELL, ROW = "\x1f", "\x1e"  # placeholders while the text is assembled
+
+
+def html_spoken(t: str) -> str:
+    """Raw HTML in a text as a reader of the card meets it: tags dropped, their text kept.
+
+    A closed <details> shows only its <summary>, so only that is spoken (an
+    open one is spoken whole); comments, <script>, <style> and <template>
+    are not shown at all. Table cells are read as a list, a row to a sentence.
+    A text without any HTML is returned as it is.
+    """
+    if not HTML_PIECE.search(t):
+        return t
+    t = re.sub(r"<(script|style|template)\b.*?</\1\s*>", "", t, flags=re.S | re.I)
+    out: list[str] = []
+    stack: list[bool | None] = []  # per open <details>: is it open; None for the <summary> inside it
+
+    def shown() -> bool:
+        for i, is_open in enumerate(stack):
+            if is_open is False and not (i == len(stack) - 2 and stack[-1] is None):
+                return False
+        return True
+
+    pos = 0
+    for m in HTML_PIECE.finditer(t):
+        if shown():
+            out.append(t[pos:m.start()])
+        pos = m.end()
+        name = (m.group("name") or "").lower()
+        closing = bool(m.group("end"))
+        if name == "details":
+            if not closing:
+                stack.append(bool(re.search(r"(?:^|\s)open\b", m.group("attrs"), re.I)))
+            else:
+                while stack and stack.pop() is None:
+                    pass
+        elif name == "summary" and stack:
+            if not closing and stack[-1] is not None:
+                stack.append(None)
+            elif closing and stack[-1] is None:
+                stack.pop()
+        if not shown():
+            continue
+        if name in ("td", "th") and closing:
+            out.append(CELL)
+        elif name == "tr" and closing:
+            out.append(ROW)
+        elif name in HTML_BLOCKS:
+            out.append("\n\n")
+        elif name in ("br", "li", "caption"):
+            out.append("\n")
+    if shown():
+        out.append(t[pos:])
+    t = "".join(out)
+    t = re.sub(CELL + r"\s*(?=" + ROW + ")", "", t)
+    t = t.replace(CELL, ", ")
+    t = re.sub(r"([^.!?:\s])[ \t]*" + ROW, r"\1.\n", t).replace(ROW, "\n")
+    return re.sub(r"[ \t]*\n[ \t]*", "\n", t)
+
+
 def plain(md: str) -> str:
-    """The text as it is said: Markdown reduced to sentences."""
-    t = md.replace(BOM, "")
+    """The text as it is said: HTML and Markdown reduced to sentences."""
+    t = html_spoken(md.replace(BOM, ""))
     t = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", t)  # links: their text
     t = re.sub(r"(\*\*|__)(.+?)\1", r"\2", t)  # bold
     t = re.sub(r"(\*|_)(.+?)\1", r"\2", t)  # emphasis

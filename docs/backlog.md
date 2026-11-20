@@ -39,7 +39,9 @@ so another trail is a fork with its folder replaced.
   the engine uses an OSM-based basemap (docs/design/trail-content.md,
   trail.json).
 - Stack: Vite, TypeScript, MapLibre GL (needs WebGL2: iOS 15+), static
-  build, GitHub Pages via Actions; development mostly on local previews.
+  build, published to GitHub Pages by Actions on every push to main, or to
+  Cloudflare Pages by `npm run deploy`, run by hand on the maintainer's
+  computer (secrets/README.md); development mostly on local previews.
   UI framework is the implementer's call, within forkability.
 - Forkers have an environment like ours (Claude Code, Opus or better), so
   fork instructions address an AI with the person beside it. The
@@ -91,6 +93,9 @@ GitHub repository's main deploys the site through the Pages workflow.
   too slow. Real recordings would replace the files, same slot. The spoken
   "Station n" could become the sign's own label, a content call that
   remakes every file.
+- Who listens, in the user's experience: children not yet reading
+  confidently, pensioners, and in part groups, where one person tends to
+  read aloud to the others; a group hears it from the phone's speaker.
 
 ### 4. Walking help — the map-weak half can walk it
 
@@ -118,6 +123,9 @@ GitHub repository's main deploys the site through the Pages workflow.
 
 ### 8. QR codes — printable per-station codes for the signs
 
+- Placards get reprinted in time, so the codes go into the reprint's
+  design rather than onto stickers.
+
 ## Later, unordered
 
 - Report a problem: a link on the site that opens a report with what the
@@ -127,7 +135,17 @@ GitHub repository's main deploys the site through the Pages workflow.
   limits who reports and what a report may carry (no position).
 - Wildlife integration: bird watching, sightings, species information.
 - Seasonal content: what is to be seen now (a bird's arrival in spring, the
-  weeks a flower carpets a slope).
+  weeks a flower carpets a slope). Closures, keys, opening days and events
+  need the same validity in time (docs/catalogue.md, Opening hours, keys,
+  closures, events).
+- Route variants and stages: shorter loops, branches, a long trail walked
+  in stages; one route per trail so far (docs/catalogue.md, Route
+  variants).
+- Several trails of one publisher, and trails that share ground: one build
+  makes one trail's site, where such trails would show each other's
+  stations nearby.
+- The route as a GPX or KML file, so that the tour portals that list a
+  trail and its site share one track.
 - Walking time from where the visitor is — what is left to the next
   station or the trail's end, at the fixed pace of the precomputed times
   (docs/design/trail-content.md, route.geojson). It belongs near
@@ -138,7 +156,10 @@ GitHub repository's main deploys the site through the Pages workflow.
   extent, the route and numbered stations, attribution in the image): what
   the map's place shows where a device can't run the map
   (docs/design/robustness.md), the preview image of a shared link, the page
-  without JavaScript, a print view, perhaps a last resort offline.
+  without JavaScript, the printable view's map (below), perhaps a last
+  resort offline.
+- A printable view: the trail on paper, the fallback beside the phone that
+  trails commonly offer as a printable map or flyer.
 - Getting away: from the current location to the nearest way off the trail
   or to public transport; "the next train I can reasonably catch".
 
@@ -146,7 +167,10 @@ GitHub repository's main deploys the site through the Pages workflow.
 
 - A station's dot marks the object (what you look at) where it can be
   identified, else the printed map's pin; the sign (where you stand) is
-  what "arrived" wants. One position per station so far.
+  what "arrived" wants. One position per station so far. Sign and object as
+  two things is a feature to take further: the object isn't always a dot,
+  and sometimes the sign is all that remains of it, where a marker for the
+  object misleads.
 - Walking help, untested on the ground: compass steadiness, "Hier: n" at
   25 m where two stations stand closer than that, whether the locate
   button's first tap should only follow rather than also turn the map,
@@ -154,8 +178,18 @@ GitHub repository's main deploys the site through the Pages workflow.
   locate button (the controls slide out as the map strip shrinks), and
   whether 30 s is the right age for a fix to go stale (the dot grey, the
   way and "Hier" withdrawn until the next fix).
-- CLAUDE.md's layout names `docs/brand/`, `docs/user-flow.md` and
-  `secrets/`, none of which exist; the brand doc is docs/design/brand.md
-  and deploys need no local credentials. The user's file.
+- Whether the site counts use, without cookies: GitHub Pages gives no logs,
+  so whether a station's audio is played, or anything a card offers is
+  used, stays unknown without it.
+- CLAUDE.md's layout names `docs/brand/` and `docs/user-flow.md`, neither
+  of which exists; the brand doc is docs/design/brand.md. The user's file.
 - The basemap buttons over the map render in MapLibre's container font,
   not `--font`.
+- The Rheinfall trail lacks four pictures its stations were written
+  around, because Wikimedia Commons rate-limited the machine that built
+  it: Gyger's map of 1685 (station 3), Turner (station 4, whose text names
+  him), Bloch's salmon (station 7, which has one picture) and Herrliberger
+  (station 8). Titles and addresses: `.tmp/rheinfall-sources/img/meta.json`
+  on the machine the trail was built on.
+- README.md, the repository's public landing, does not link to the
+  published site.

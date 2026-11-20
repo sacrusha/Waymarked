@@ -1,8 +1,9 @@
 .tmp/
 node_modules/
 __pycache__/
-# build output
+# build output, and wrangler's local state
 src/dist/
+.wrangler/
 # agent worktrees
 .worktrees/
 

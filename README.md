@@ -14,4 +14,8 @@ newer, then in `src/` run `npm install` and `npm run dev`. `npm run dev:https`
 serves it to phones in your network for GPS; `npm run check` validates the
 trail folder.
 
+To publish it: the GitHub Pages workflow (`.github/workflows/pages.yml`)
+on every push to main, or `npm run deploy` in `src/`, run by hand, to
+Cloudflare Pages (`secrets/README.md`).
+
 What it is for, how it is built and why, and what is open: `docs/`.
