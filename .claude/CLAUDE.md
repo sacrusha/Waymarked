@@ -22,10 +22,10 @@ repository, and holds no marketing, business strategy or assessment of
 others' trails, so `upstream` has no push address here.
 
 Waymarked is public on GitHub for now and is to be taken private. While it
-is public, `business/` is kept out of `main` (`.git/info/exclude`) and
-committed only to the local branch `business`, which is never pushed; the
-working copy in `business/` is the current one, the branch its last saved
-state.
+is public, `business/` and `docs/Content/` are kept out of `main`
+(`.git/info/exclude`) and committed only to the local branch `business`,
+which is never pushed; the working copies are the current ones, the branch
+their last saved state.
 
 Waymarked's own:
 
@@ -38,6 +38,8 @@ Waymarked's own:
   Themenweg doesn't, with the regional examples of docs/catalogue.md
   (market.md); and what publishers can buy instead and who pays
   (vendors-and-funding.md).
+- `docs/Content/`: working papers on the Stadtnaturweg's printed panels and
+  leaflet (draft E7); its README says what they are.
 - This file.
 - One line in `.github/workflows/pages.yml`: it publishes Baden while the
   repository variable `THEMENWEG_TRAIL` is not set.
